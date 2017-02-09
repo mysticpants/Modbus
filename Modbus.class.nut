@@ -171,7 +171,6 @@ class Modbus {
                 reqLen  = function (n){ return 2 + n},
                 resLen  = null
             }
-
     }
 
     /*
@@ -188,6 +187,7 @@ class Modbus {
         PDU.writen(swap2(writeQuantity),'w');
         writeValue.swap2();
         PDU.writen(swap2(writeValue.len()),'w');
+        PDU.writeblob(writeValue);
         return PDU;
     }
 

@@ -1,5 +1,3 @@
-#require "CRC16.class.nut:1.0.0"
-#require "Modbus.class.nut:1.0.0"
 
 // Copyright (c) 2017 Electric Imp
 // This file is licensed under the MIT License

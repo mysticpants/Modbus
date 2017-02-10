@@ -87,7 +87,7 @@ This is the generic function to read values from a single coil, register or mult
 
 ```squirrel
 // read from a single coil
-modbus.read(0x01, MODBUS_TARGET_TYPE.DISCRETE_INPUT, 0x01, 1, function(error,address,result){
+modbus.read(0x01, MODBUS_TARGET_TYPE.DISCRETE_INPUT, 0x01, 1, function(error,result){
       if (error){
         server.error(error);
       } else {
@@ -97,7 +97,7 @@ modbus.read(0x01, MODBUS_TARGET_TYPE.DISCRETE_INPUT, 0x01, 1, function(error,add
 
 // read from multiple registers
 
-modbus.read(0x01, MODBUS_TARGET_TYPE.INPUT_REGISTER, 0x01 , 5, function(error,address,results){
+modbus.read(0x01, MODBUS_TARGET_TYPE.INPUT_REGISTER, 0x01 , 5, function(error,results){
       if (error) {
         server.error(error);
       } else {
@@ -131,7 +131,7 @@ This is the generic function to write values into coils or holding registers .
 
 ```squirrel
 // write to a single coil
-modbus.write(0x01, MODBUS_TARGET_TYPE.COIL, 0x01, 1, true, function(error,address,result){
+modbus.write(0x01, MODBUS_TARGET_TYPE.COIL, 0x01, 1, true, function(error,result){
       if (error){
         server.error(error);
       } else {
@@ -141,7 +141,7 @@ modbus.write(0x01, MODBUS_TARGET_TYPE.COIL, 0x01, 1, true, function(error,addres
 
 // write to multiple registers
 
-modbus.write(0x01, MODBUS_TARGET_TYPE.HOLDING_REGISTER, 0x01 , 5, [false, true, false, true , true], function(error,address,results){
+modbus.write(0x01, MODBUS_TARGET_TYPE.HOLDING_REGISTER, 0x01 , 5, [false, true, false, true , true], function(error,results){
       if (error) {
         server.error(error);
       } else {
@@ -167,7 +167,7 @@ This function reads the contents of eight Exception Status outputs in a remote d
 #### Example
 
 ```squirrel
-modbus.readExceptionStatus(0x01, function(error,addr,result){
+modbus.readExceptionStatus(0x01, function(error,result){
     if(error){
         server.error(error);
     }else {
@@ -222,7 +222,7 @@ local data = blob(2);
 data.writen(0xFF00,'w');
 data.swap2();
 
-modbus.diagnostics (0x01,MODBUS_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION,data, function(error,addr,result){
+modbus.diagnostics (0x01,MODBUS_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION,data, function(error,result){
     if (error){
         server.error(error);
     } else {
@@ -250,7 +250,7 @@ This function reads the description of the type, the current status, and other i
 #### Example
 
 ```squirrel
-modbus.reportSlaveID(0x01,function(error,addr,result){
+modbus.reportSlaveID(0x01,function(error,result){
     if(error){
         server.error(error);
     }else {
@@ -283,7 +283,7 @@ This function modifies the contents of a specified holding register using a comb
 #### Example
 
 ```squirrel
-modbus.maskWriteRegister(0x01, 0x10 , 0xFFFF, 0x0000 ,function(error,addr,result){
+modbus.maskWriteRegister(0x01, 0x10 , 0xFFFF, 0x0000 ,function(error,result){
     if(error){
         server.error(error);
     }else {
@@ -316,7 +316,7 @@ This function performs a combination of one read operation and one write operati
 #### Example
 
 ```squirrel
-modbus.readWriteMultipleRegisters(0x01, 0x10 , 0xFFFF, 0x0000 ,function(error,addr,result){
+modbus.readWriteMultipleRegisters(0x01, 0x10 , 0xFFFF, 0x0000 ,function(error,result){
     if(error){
         server.error(error);
     }else {
@@ -374,9 +374,9 @@ Define what information is fetched
 #### Example
 
 ```squirrel
-modbus.readDeviceIdentificaiton(0x01, MODBUS_READ_DEVICE_CODE.BASIC,MODBUS_OBJECT_ID.VENDOR_NAME,function(error, addr, objects) {
+modbus.readDeviceIdentificaiton(0x01, MODBUS_READ_DEVICE_CODE.BASIC,MODBUS_OBJECT_ID.VENDOR_NAME,function(error, objects) {
     if (error){
-        server.error("Error: " + error + ", Addr: " + addr + ", Objects: " + objects);
+        server.error("Error: " + error + " , " Objects: " + objects);
     } else {
         local dbg = "DeviceId: ";
         foreach (id,val in objects) {

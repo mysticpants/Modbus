@@ -29,21 +29,23 @@ The following instructions are applicable to Imp005 .
 
 This is the main library class. It implements most of the functions listed in the [Modbus specification](http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf).
 
-### Constructor: Modbus485Master(*uart, rts, [baudRate], [dataBits], [parity], [stopBits], [timeout]*)
+### Constructor: Modbus485Master(*uart, rts, [baudRate], [dataBits], [parity], [stopBits], [timeout], [debug]*)
 
 Instantiate a new Modbus485Master object and set the configuration of UART .
 
 #### Parameters
 
-| Key      | Default     | Notes                                                      |
-| ------   | ----------- | ---------------------------------------------------------- |
-| uart     | N/A         | The UART object connected to the modbus slave/s            |
-| rts      | N/A         | A pin to be used for flow control                          |
-| baudRate | 19200       | The baud rate of the UART connection                       |
-| dataBits | 8           | The word size on the UART connection in bits (7 or 8 bits) |
-| parity   | PARITY_NONE | Parity configuration of the UART connection                |
-| stopBits | 1           | Number of stop bits (1 or 2) on the UART connection        |
-| timeout  | 1.0         | The maximum time allowed for one request                   |
+| Key      | Default     | Notes                                                                           |
+| ------   | ----------- | ------------------------------------------------------------------------------- |
+| uart     | N/A         | The UART object connected to the modbus slave/s                                 |
+| rts      | N/A         | A pin to be used for flow control                                               |
+| baudRate | 19200       | The baud rate of the UART connection                                            |
+| dataBits | 8           | The word size on the UART connection in bits (7 or 8 bits)                      |
+| parity   | PARITY_NONE | Parity configuration of the UART connection                                     |
+| stopBits | 1           | Number of stop bits (1 or 2) on the UART connection                             |
+| timeout  | 1.0         | The maximum time allowed for one request                                        |
+| debug    | false       | If enabled, the outgoing and incoming ADU will be printed for debugging purpose |
+
 
 
 #### Example
@@ -53,7 +55,7 @@ modbus <- ModbusRTU.Master(hardware.uart2, hardware.pinL);
 
 ```
 
-### read(*deviceAddress, targetType, startingAddress, quantity, values[,callback]*)
+### read(*deviceAddress, targetType, startingAddress, quantity, values, [callback]*)
 
 Function Code : 01, 02, 03, 04
 
@@ -106,7 +108,7 @@ modbus.read(0x01, MODBUS_TARGET_TYPE.INPUT_REGISTER, 0x01 , 5, function(error, r
 ```
 
 
-### write(*deviceAddress, targetType, startingAddress, quantity, values[, callback]*)
+### write(*deviceAddress, targetType, startingAddress, quantity, values, [callback]*)
 
 Function Code : 05, 06, 15, 16
 
@@ -148,7 +150,7 @@ modbus.write(0x01, MODBUS_TARGET_TYPE.HOLDING_REGISTER, 0x01, 5, [false, true, f
 
 ```
 
-### readExceptionStatus(*deviceAddress[, callback]*)
+### readExceptionStatus(*deviceAddress, [callback]*)
 
 Function Code : 07
 
@@ -176,7 +178,7 @@ modbus.readExceptionStatus(0x01, function(error, result){
 
 
 
-### diagnostics(*deviceAddress, subFunctionCode, data[, callback]*)
+### diagnostics(*deviceAddress, subFunctionCode, data, [callback]*)
 
 Function Code : 08
 
@@ -232,7 +234,7 @@ modbus.diagnostics(0x01, MODBUS_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION, 
 ```
 
 
-### reportSlaveID(*deviceAddress[, callback]*)
+### reportSlaveID(*deviceAddress, [callback]*)
 
 Function Code : 17
 
@@ -262,7 +264,7 @@ modbus.reportSlaveID(0x01, function(error, result){
 
 
 
-### maskWriteRegister(*deviceAddress, referenceAddress, AND_Mask , OR_Mask[, callback]*)
+### maskWriteRegister(*deviceAddress, referenceAddress, AND_Mask , OR_Mask, [callback]*)
 
 Function Code : 22
 
@@ -293,7 +295,7 @@ modbus.maskWriteRegister(0x01, 0x10, 0xFFFF, 0x0000, function(error, result){
 ```
 
 
-### readWriteMultipleRegisters(*deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue[, callback]*)
+### readWriteMultipleRegisters(*deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, [callback]*)
 
 Function Code : 23
 
@@ -326,7 +328,7 @@ modbus.readWriteMultipleRegisters(0x01, 0x10, 0xFFFF, 0x0000, function(error, re
 
 
 
-### readDeviceIdentification(*deviceAddress, readDeviceIdCode, objectId[, callback]*)
+### readDeviceIdentification(*deviceAddress, readDeviceIdCode, objectId, [callback]*)
 
 Function Code : 43/14
 
@@ -344,8 +346,6 @@ This function allows reading the identification and additional information relat
 
 ##### Read Device ID Codes
 
-Define the access type
-
 | Value                              | Description                                                |
 | ---------------------------------- | ---------------------------------------------------------- |
 | MODBUS_READ_DEVICE_CODE.BASIC      | Get the basic device identification (stream access)        |
@@ -355,8 +355,6 @@ Define the access type
 
 
 ##### Object ID
-
-Define what information is fetched
 
 | Value                                  | Category  |
 | -------------------------------------- | --------- |

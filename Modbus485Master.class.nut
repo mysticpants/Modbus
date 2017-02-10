@@ -35,7 +35,7 @@ class Modbus485Master {
    * @param  {Constant} parity - PARITY_NONE by default
    * @param  {Int} stopBits - 1 bit by default
    * @param  {Float} timeout - 1.0 second by default
-   *
+   * @param  {Boolean} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
    *
    */
     constructor(uart, rts, baudRate = 19200, dataBits = 8, parity = PARITY_NONE, stopBits = 1, timeout = 1.0, debug = false) {

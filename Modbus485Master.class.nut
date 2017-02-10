@@ -320,10 +320,7 @@ class Modbus485Master {
             _expectedResLen = responseLength;
         }
         _callbackHandler = callback;
-        local frame = blob();
-        frame.writen(deviceAddress, 'b');
-        frame.writeblob(PDU);
-        frame.writen(CRC16.calculate(frame), 'w');
+        local frame = ModbusRTU.createADU(deviceAddress, PDU);
         local rw = _rts.write.bindenv(_rts);
         local uw = _uart.write.bindenv(_uart);
         local uf = _uart.flush.bindenv(_uart);

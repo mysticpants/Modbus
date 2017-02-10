@@ -170,6 +170,20 @@ class ModbusRTU {
     }
 
     /*
+     * function to create ADU
+     *
+     */
+    static function createADU (deviceAddress, PDU){
+        local ADU = blob();
+        ADU.writen(deviceAddress, 'b');
+        ADU.writeblob(PDU);
+        ADU.writen(CRC16.calculate(ADU), 'w');
+        return ADU;
+    }
+
+
+
+    /*
      * function to create PDU for readWriteMultipleRegisters
      *
      */
@@ -181,7 +195,6 @@ class ModbusRTU {
         PDU.writen(swap2(readQuantity),'w');
         PDU.writen(swap2(writeStartAddress),'w');
         PDU.writen(swap2(writeQuantity),'w');
-        writeValue.swap2();
         PDU.writen(swap2(writeValue.len()),'w');
         PDU.writeblob(writeValue);
         return PDU;

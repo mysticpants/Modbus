@@ -51,17 +51,15 @@ Instantiate a new Modbus485Master object and set the configuration of UART .
 ```squirrel
 modbus <- ModbusRTU.Master(hardware.uart2, hardware.pinL);
 
-
 ```
 
-### read(deviceAddress,targetType,startingAddress,quantity,values, [callback])
+### read(*deviceAddress, targetType, startingAddress, quantity, values[,callback]*)
 
 Function Code : 01, 02, 03, 04
 
 This is the generic function to read values from a single coil, register or multiple coils and registers .
 
 #### Parameters
-
 
 | Key               | Data Type | Required | Default Value | Description                                                               |
 | ----------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
@@ -70,7 +68,6 @@ This is the generic function to read values from a single coil, register or mult
 | *startingAddress* | Int       | Yes      | N/A           | The address from which it begins reading values                           |
 | *quantity*        | Int       | Yes      | N/A           | The number of consecutive addresses the values are read from              |
 | *callback*        | Function  | No       | Null          | The function to be fired when it receives response regarding this request |
-
 
 
 <h4 id='target-type'>Target Type</h4>
@@ -87,7 +84,7 @@ This is the generic function to read values from a single coil, register or mult
 
 ```squirrel
 // read from a single coil
-modbus.read(0x01, MODBUS_TARGET_TYPE.DISCRETE_INPUT, 0x01, 1, function(error,result){
+modbus.read(0x01, MODBUS_TARGET_TYPE.DISCRETE_INPUT, 0x01, 1, function(error, result){
       if (error){
         server.error(error);
       } else {
@@ -96,12 +93,11 @@ modbus.read(0x01, MODBUS_TARGET_TYPE.DISCRETE_INPUT, 0x01, 1, function(error,res
   });
 
 // read from multiple registers
-
-modbus.read(0x01, MODBUS_TARGET_TYPE.INPUT_REGISTER, 0x01 , 5, function(error,results){
+modbus.read(0x01, MODBUS_TARGET_TYPE.INPUT_REGISTER, 0x01 , 5, function(error, results){
       if (error) {
         server.error(error);
       } else {
-        foreach(key,value in results) {
+        foreach(key, value in results) {
           server.log(key + " : " + value);
         }
       }
@@ -110,7 +106,7 @@ modbus.read(0x01, MODBUS_TARGET_TYPE.INPUT_REGISTER, 0x01 , 5, function(error,re
 ```
 
 
-### write(deviceAddress,targetType,startingAddress,quantity,values, [callback])
+### write(*deviceAddress, targetType, startingAddress, quantity, values[, callback]*)
 
 Function Code : 05, 06, 15, 16
 
@@ -124,14 +120,14 @@ This is the generic function to write values into coils or holding registers .
 | *targetType*      | Enum                              | Yes      | N/A           | Refer to **<a href='#target-type'>Target Type</a>**                       |
 | *startingAddress* | Int                               | Yes      | N/A           | The address from which it begins writing values                           |
 | *quantity*        | Int                               | Yes      | N/A           | The number of consecutive addresses the values are written into           |
-| *values*          | Int, Array[Int,Bool], Bool, Blob  | Yes      | N/A           | The values written into Coils or Registers                                |
+| *values*          | Int, Array[Int, Bool], Bool, Blob | Yes      | N/A           | The values written into Coils or Registers                                |
 | *callback*        | Function                          | No       | Null          | The function to be fired when it receives response regarding this request |
 
 #### Example
 
 ```squirrel
 // write to a single coil
-modbus.write(0x01, MODBUS_TARGET_TYPE.COIL, 0x01, 1, true, function(error,result){
+modbus.write(0x01, MODBUS_TARGET_TYPE.COIL, 0x01, 1, true, function(error, result){
       if (error){
         server.error(error);
       } else {
@@ -140,12 +136,11 @@ modbus.write(0x01, MODBUS_TARGET_TYPE.COIL, 0x01, 1, true, function(error,result
   });
 
 // write to multiple registers
-
-modbus.write(0x01, MODBUS_TARGET_TYPE.HOLDING_REGISTER, 0x01 , 5, [false, true, false, true , true], function(error,results){
+modbus.write(0x01, MODBUS_TARGET_TYPE.HOLDING_REGISTER, 0x01, 5, [false, true, false, true, true], function(error, results){
       if (error) {
         server.error(error);
       } else {
-        foreach(key,value in results) {
+        foreach(key, value in results) {
           server.log(key + " : " + value);
         }
       }
@@ -153,7 +148,9 @@ modbus.write(0x01, MODBUS_TARGET_TYPE.HOLDING_REGISTER, 0x01 , 5, [false, true, 
 
 ```
 
-### readExceptionStatus(deviceAddress,[callback])
+### readExceptionStatus(*deviceAddress[, callback]*)
+
+Function Code : 07
 
 This function reads the contents of eight Exception Status outputs in a remote device
 
@@ -167,7 +164,7 @@ This function reads the contents of eight Exception Status outputs in a remote d
 #### Example
 
 ```squirrel
-modbus.readExceptionStatus(0x01, function(error,result){
+modbus.readExceptionStatus(0x01, function(error, result){
     if(error){
         server.error(error);
     }else {
@@ -175,12 +172,13 @@ modbus.readExceptionStatus(0x01, function(error,result){
     }
 });
 
-
 ```
 
 
 
-### diagnostics(deviceAddress,subFunctionCode,data,[callback])
+### diagnostics(*deviceAddress, subFunctionCode, data[, callback]*)
+
+Function Code : 08
 
 This function provides a series of tests for checking the communication system between a client ( Master) device and a server ( Slave), or for checking various internal error conditions within a server.
 
@@ -219,10 +217,10 @@ This function provides a series of tests for checking the communication system b
 
 ```squirrel
 local data = blob(2);
-data.writen(0xFF00,'w');
+data.writen(0xFF00, 'w');
 data.swap2();
 
-modbus.diagnostics (0x01,MODBUS_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION,data, function(error,result){
+modbus.diagnostics(0x01, MODBUS_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION, data, function(error, result){
     if (error){
         server.error(error);
     } else {
@@ -234,7 +232,7 @@ modbus.diagnostics (0x01,MODBUS_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION,d
 ```
 
 
-### reportSlaveID(deviceAddress,[callback])
+### reportSlaveID(*deviceAddress[, callback]*)
 
 Function Code : 17
 
@@ -250,7 +248,7 @@ This function reads the description of the type, the current status, and other i
 #### Example
 
 ```squirrel
-modbus.reportSlaveID(0x01,function(error,result){
+modbus.reportSlaveID(0x01, function(error, result){
     if(error){
         server.error(error);
     }else {
@@ -264,7 +262,7 @@ modbus.reportSlaveID(0x01,function(error,result){
 
 
 
-### maskWriteRegister(deviceAddress, referenceAddress, AND_Mask , OR_Mask,[callback])
+### maskWriteRegister(*deviceAddress, referenceAddress, AND_Mask , OR_Mask[, callback]*)
 
 Function Code : 22
 
@@ -283,7 +281,7 @@ This function modifies the contents of a specified holding register using a comb
 #### Example
 
 ```squirrel
-modbus.maskWriteRegister(0x01, 0x10 , 0xFFFF, 0x0000 ,function(error,result){
+modbus.maskWriteRegister(0x01, 0x10, 0xFFFF, 0x0000, function(error, result){
     if(error){
         server.error(error);
     }else {
@@ -295,7 +293,7 @@ modbus.maskWriteRegister(0x01, 0x10 , 0xFFFF, 0x0000 ,function(error,result){
 ```
 
 
-### readWriteMultipleRegisters(deviceAddress, readingStartAddress, readQuantity, writeStartAddress , writeQuantity , writeValue ,[callback])
+### readWriteMultipleRegisters(*deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue[, callback]*)
 
 Function Code : 23
 
@@ -316,7 +314,7 @@ This function performs a combination of one read operation and one write operati
 #### Example
 
 ```squirrel
-modbus.readWriteMultipleRegisters(0x01, 0x10 , 0xFFFF, 0x0000 ,function(error,result){
+modbus.readWriteMultipleRegisters(0x01, 0x10, 0xFFFF, 0x0000, function(error, result){
     if(error){
         server.error(error);
     }else {
@@ -324,12 +322,11 @@ modbus.readWriteMultipleRegisters(0x01, 0x10 , 0xFFFF, 0x0000 ,function(error,re
     }        
 });
 
-
 ```
 
 
 
-### readDeviceIdentification(deviceAddress, readDeviceIdCode , objectId ,[callback])
+### readDeviceIdentification(*deviceAddress, readDeviceIdCode, objectId[, callback]*)
 
 Function Code : 43/14
 
@@ -374,12 +371,12 @@ Define what information is fetched
 #### Example
 
 ```squirrel
-modbus.readDeviceIdentificaiton(0x01, MODBUS_READ_DEVICE_CODE.BASIC,MODBUS_OBJECT_ID.VENDOR_NAME,function(error, objects) {
+modbus.readDeviceIdentification(0x01, MODBUS_READ_DEVICE_CODE.BASIC, MODBUS_OBJECT_ID.VENDOR_NAME, function(error, objects) {
     if (error){
-        server.error("Error: " + error + " , " Objects: " + objects);
+        server.error("Error: " + error + ", " Objects: " + objects);
     } else {
         local dbg = "DeviceId: ";
-        foreach (id,val in objects) {
+        foreach (id, val in objects) {
             dbg += format("[%d] %s, ", id, val.tostring());
         }
         server.log(dbg);

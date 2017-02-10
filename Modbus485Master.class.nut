@@ -38,7 +38,7 @@ class Modbus485Master {
    *
    *
    */
-    constructor(uart, rts, baudRate = 19200, dataBits = 8, parity = PARITY_NONE, stopBits = 1, timeout = 1.0 , debug = false) {
+    constructor(uart, rts, baudRate = 19200, dataBits = 8, parity = PARITY_NONE, stopBits = 1, timeout = 1.0, debug = false) {
 
         if (!("CRC16" in getroottable())) throw "Must include CRC16 library v1.0.0+";
         if (!("ModbusRTU" in getroottable())) throw "Must include ModbusRTU library v1.0.0+";
@@ -65,7 +65,7 @@ class Modbus485Master {
    * @param {Blob} writeValue - The value written into the holding register
    * @param {Function} callback - The function to be fired when it receives response regarding this request
    */
-    function readWriteMultipleRegisters (deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue ,callback = null ){
+    function readWriteMultipleRegisters (deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, callback = null){
         _enqueue(function (){
             _quantity = readQuantity;
             local PDU = ModbusRTU.createReadWriteMultipleRegistersPDU(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue);
@@ -82,7 +82,7 @@ class Modbus485Master {
      * @param {Int} OR_mask - The OR mask
      * @param {Function} callback - The function to be fired when it receives response regarding this request
      */
-    function maskWriteRegister (deviceAddress,referenceAddress , AND_Mask , OR_Mask , callback = null ){
+    function maskWriteRegister (deviceAddress, referenceAddress, AND_Mask, OR_Mask, callback = null){
         _enqueue(function (){
             local PDU = ModbusRTU.createMaskWriteRegisterPDU(referenceAddress , AND_Mask , OR_Mask);
             _send(deviceAddress,PDU,ModbusRTU.FUNCTION_CODES.maskWriteRegister.resLen,callback);
@@ -95,7 +95,7 @@ class Modbus485Master {
      * @param {Int} deviceAddress - The unique address that identifies a device
      * @param {Function} callback - The function to be fired when it receives response regarding this request
      */
-    function reportSlaveID (deviceAddress,callback = null) {
+    function reportSlaveID (deviceAddress, callback = null) {
         _enqueue(function (){
             local PDU = ModbusRTU.createReportSlaveIdPDU();
             _send(deviceAddress,PDU,ModbusRTU.FUNCTION_CODES.reportSlaveID.resLen,callback);
@@ -110,7 +110,7 @@ class Modbus485Master {
      * @param {Enum} objectId - Object id
      * @param {Function} callback - The function to be fired when it receives response regarding this request
      */
-    function readDeviceIdentification (deviceAddress, readDeviceIdCode , objectId , callback = null ){
+    function readDeviceIdentification (deviceAddress, readDeviceIdCode, objectId, callback = null){
         _enqueue(function (){
             local PDU = ModbusRTU.createreadDeviceIdentificationPDU(readDeviceIdCode,objectId);
             _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.readDeviceIdentification.resLen, callback);
@@ -125,7 +125,7 @@ class Modbus485Master {
      * @param {Blob} data - The data field required by Modbus request
      * @param {Function} callback - The function to be fired when it receives response regarding this request
      */
-    function diagnostics (deviceAddress, subFunctionCode ,data,callback = null){
+    function diagnostics (deviceAddress, subFunctionCode, data, callback = null){
         _enqueue(function() {
             local wordCount = data.len() / 2;
             local PDU = ModbusRTU.createDiagnosticsPDU(subFunctionCode ,data);
@@ -141,7 +141,7 @@ class Modbus485Master {
      * @param {Int} deviceAddress - The unique address that identifies a device
      * @param {Function} callback - The function to be fired when it receives response regarding this request
      */
-    function readExceptionStatus (deviceAddress,callback = null){
+    function readExceptionStatus (deviceAddress, callback = null){
         _enqueue(function() {
             local PDU = ModbusRTU.createReadExceptionStatusPDU();
             _send(deviceAddress,PDU, ModbusRTU.FUNCTION_CODES.readExceptionStatus.resLen , callback);
@@ -270,9 +270,7 @@ class Modbus485Master {
      *
      */
     function _processBuffer() {
-
         try{
-
             local bufferLength = _receiveBuffer.len();
             if (bufferLength < MINIMUM_REQUEST_LENGTH) {
                 return _receiveBuffer.seek(bufferLength);
@@ -330,7 +328,6 @@ class Modbus485Master {
         rw(0);
         _log(frame);
         _responseTimer = _responseTimeoutFactory(_timeout);
-
     }
 
     /*
@@ -452,7 +449,6 @@ class Modbus485Master {
             local request = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleReg : ModbusRTU.FUNCTION_CODES.writeMultipleRegs;
             local PDU = ModbusRTU.createWritePDU(request,startingAddress,numBytes,quantity,values);
             _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.writeMultipleRegs.resLen, callback);
-
         } catch(error){
             _callbackHandler = callback;
             _errorCb(error);

@@ -6,7 +6,7 @@
 //------------------------------------------------------------------------------
 // Constants
 
-enum SUB_FUNCTION_CODE {
+enum MODBUS_SUB_FUNCTION_CODE {
     RETURN_QUERY_DATA = 0x0000,
     RESTART_COMMUNICATION_OPTION = 0x0001,
     RETURN_DIAGNOSTICS_REGISTER = 0x0002,
@@ -57,14 +57,14 @@ enum MODBUS_TARGET_TYPE {
     HOLDING_REGISTER,
 }
 
-enum READ_DEVICE_CODE {
+enum MODBUS_READ_DEVICE_CODE {
     BASIC = 0x01,
     REGULAR = 0x02,
     EXTENDED = 0x03,
     SPECIFIC = 0x04
 }
 
-enum OBJECT_ID {
+enum MODBUS_OBJECT_ID {
     VENDOR_NAME = 0x00,
     PRODUCT_CODE = 0x01,
     MAJOR_MINOR_REVISION = 0x02,
@@ -74,14 +74,11 @@ enum OBJECT_ID {
     USER_APPLICATION_NAME = 0x06,
 }
 
-enum MEI_TYPE {
-    DEVICE_IDENTIFICATION = 0x0E
-}
 
 
 //------------------------------------------------------------------------------
 
-class Modbus {
+class ModbusRTU {
 
     static VERSION = "1.0.0";
      // resLen and reqLen are the length of the PDU
@@ -221,10 +218,11 @@ class Modbus {
      *
      */
     static function createreadDeviceIdentificationPDU(readDeviceIdCode,objectId ){
+        const MEI_TYPE = 0x0E;
         local readDeviceIdentification = FUNCTION_CODES.readDeviceIdentification;
         local PDU = blob(readDeviceIdentification.reqLen);
         PDU.writen(readDeviceIdentification.fcode,'b');
-        PDU.writen(MEI_TYPE.DEVICE_IDENTIFICATION,'b');
+        PDU.writen(MEI_TYPE,'b');
         PDU.writen(readDeviceIdCode,'b');
         PDU.writen(objectId,'b');
         return PDU;
@@ -248,7 +246,7 @@ class Modbus {
      *
      */
     static function createReadExceptionStatusPDU (){
-        local readExceptionStatus = Modbus.FUNCTION_CODES.readExceptionStatus;
+        local readExceptionStatus = FUNCTION_CODES.readExceptionStatus;
         local PDU = blob(readExceptionStatus.reqLen);
         PDU.writen(readExceptionStatus.fcode,'b');
         return PDU;
@@ -288,28 +286,46 @@ class Modbus {
      *
      */
     static function parse(params){
-        switch (params.functionCode) {
+
+        local buffer = params.buffer;
+        buffer.seek(1); // skip the device address
+        local functionCode = buffer.readn('b');
+        local expectedResLen = params.expectedResLen;
+        local expectedResType = params.expectedResType;
+        if ((functionCode & 0x80) == 0x80){
+            throw buffer.readn('b'); // exception code
+        } else if (expectedResLen == null) {
+            expectedResLen = buffer.readn('b') + 2;
+        }
+
+        if (functionCode != expectedResType){
+            return -1;
+        }
+
+        switch (functionCode) {
             case FUNCTION_CODES.readExceptionStatus.fcode:
-                return _readExceptionStatus(params.buffer,params.expectedResLen);
+                return _readExceptionStatus(buffer,expectedResLen);
             case FUNCTION_CODES.readDeviceIdentification.fcode:
-                return _readDeviceIdentification(params.buffer);
+                return _readDeviceIdentification(buffer);
             case FUNCTION_CODES.reportSlaveID.fcode:
-                return _reportSlaveID(params.buffer);
+                return _reportSlaveID(buffer);
             case FUNCTION_CODES.diagnostics.fcode:
-                return _diagnostics(params.buffer,params.expectedResLen,params.quantity);
+                return _diagnostics(buffer,expectedResLen,params.quantity);
             case FUNCTION_CODES.readCoils.fcode:
             case FUNCTION_CODES.readInputs.fcode:
             case FUNCTION_CODES.readHoldingRegs.fcode:
             case FUNCTION_CODES.readInputRegs.fcode:
             case FUNCTION_CODES.readWriteMultipleRegisters.fcode:
-                return _readData(params.buffer,params.expectedResType ,params.expectedResLen,params.quantity);
+                return _readData(buffer,expectedResType ,expectedResLen,params.quantity);
             case FUNCTION_CODES.writeSingleCoil.fcode:
             case FUNCTION_CODES.writeSingleReg.fcode:
             case FUNCTION_CODES.writeMultipleCoils.fcode:
             case FUNCTION_CODES.writeMultipleRegs.fcode:
             case FUNCTION_CODES.maskWriteRegister.fcode:
-                return _writeData(params.buffer,params.expectedResLen);
+                return _writeData(buffer,expectedResLen);
         }
+
+
     }
 
 
@@ -530,5 +546,3 @@ class Modbus {
         return false;
     }
 }
-
-//------------------------------------------------------------------------------

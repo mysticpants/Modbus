@@ -1,9 +1,9 @@
-# Modbus485.Master
+# Modbus485Master
 
 This library allows an imp to communicate with other devices via the Modbus-RS485 protocol.
 
 **To add this library to your project, add `#require "CRC16.class.nut:1.0.0"
-` and `#require "Modbus485.Master.class.nut:1.0.0"` to the top of your device code.**
+` and `#require "ModbusRTU.class.nut:1.0.0"` to the top of your device code.**
 
 
 ## Hardware Setup
@@ -25,13 +25,13 @@ The following instructions are applicable to Imp005 .
 7. Blink up the Imp
 
 
-## Class Modbus485.Master
+## Class Modbus485Master
 
 This is the main library class. It implements most of the functions listed in the [Modbus specification](http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf).
 
-### Constructor: Modbus485.Master(*uart, rts, [baudRate], [dataBits], [parity], [stopBits], [timeout]*)
+### Constructor: Modbus485Master(*uart, rts, [baudRate], [dataBits], [parity], [stopBits], [timeout]*)
 
-Instantiate a new Modbus485.Master object and set the configuration of UART .
+Instantiate a new Modbus485Master object and set the configuration of UART .
 
 #### Parameters
 
@@ -188,7 +188,7 @@ This function provides a series of tests for checking the communication system b
 
 
 | Key               | Data Type | Required | Default Value | Description                                                               |
-| ----------------- | --------- | -------- | ------------- | -----------                                                               |
+| ----------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
 | *deviceAddress*   | Int       | Yes      | N/A           | The unique address that identifies a device                               |
 | *subFunctionCode* | Enum      | Yes      | N/A           | Refer to **Sub-function Code**                                            |
 | *data*            | Blob      | Yes      | N/A           | The data field required by Modbus request                                 |
@@ -197,23 +197,23 @@ This function provides a series of tests for checking the communication system b
 
 ### Sub-function Codes
 
-| Code (Hex)         | Value                                                      |
-| ------------------ | ---------------------------------------------------------- |
-| 00                 | SUB_FUNCTION_CODE.RETURN_QUERY_DATA                        |
-| 01                 | SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION             |
-| 02                 | SUB_FUNCTION_CODE.RETURN_DIAGNOSTICS_REGISTER              |
-| 03                 | SUB_FUNCTION_CODE.CHANGE_ASCII_INPUT_DELIMITER             |
-| 04                 | SUB_FUNCTION_CODE.FORCE_LISTEN_ONLY_MODE                   |
-| 0A                 | SUB_FUNCTION_CODE.CLEAR_COUNTERS_AND_DIAGNOSTICS_REGISTER  |
-| 0B                 | SUB_FUNCTION_CODE.RETURN_BUS_MESSAGE_COUNT                 |
-| 0C                 | SUB_FUNCTION_CODE.RETURN_BUS_COMMUNICATION_ERROR_COUNT     |
-| 0D                 | SUB_FUNCTION_CODE.RETURN_BUS_EXCEPTION_ERROR_COUNT         |
-| 0E                 | SUB_FUNCTION_CODE.RETURN_SLAVE_MESSAGE_COUNT               |
-| 0F                 | SUB_FUNCTION_CODE.RETURN_SLAVE_NO_RESPONSE_COUNT           |
-| 10                 | SUB_FUNCTION_CODE.RETURN_SLAVE_NAK_COUNT                   |
-| 11                 | SUB_FUNCTION_CODE.RETURN_SLAVE_BUSY_COUNT                  |
-| 12                 | SUB_FUNCTION_CODE.RETURN_BUS_CHARACTER_OVERRUN_COUNT       |
-| 14                 | SUB_FUNCTION_CODE.CLEAR_OVERRUN_COUNTER_AND_FLAG           |
+| Code (Hex)         | Value                                                             |
+| ------------------ | ----------------------------------------------------------------- |
+| 0x0000             | MODBUS_SUB_FUNCTION_CODE.RETURN_QUERY_DATA                        |
+| 0x0001             | MODBUS_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION             |
+| 0x0002             | MODBUS_SUB_FUNCTION_CODE.RETURN_DIAGNOSTICS_REGISTER              |
+| 0x0003             | MODBUS_SUB_FUNCTION_CODE.CHANGE_ASCII_INPUT_DELIMITER             |
+| 0x0004             | MODBUS_SUB_FUNCTION_CODE.FORCE_LISTEN_ONLY_MODE                   |
+| 0x000A             | MODBUS_SUB_FUNCTION_CODE.CLEAR_COUNTERS_AND_DIAGNOSTICS_REGISTER  |
+| 0x000B             | MODBUS_SUB_FUNCTION_CODE.RETURN_BUS_MESSAGE_COUNT                 |
+| 0x000C             | MODBUS_SUB_FUNCTION_CODE.RETURN_BUS_COMMUNICATION_ERROR_COUNT     |
+| 0x000D             | MODBUS_SUB_FUNCTION_CODE.RETURN_BUS_EXCEPTION_ERROR_COUNT         |
+| 0x000E             | MODBUS_SUB_FUNCTION_CODE.RETURN_SLAVE_MESSAGE_COUNT               |
+| 0x000F             | MODBUS_SUB_FUNCTION_CODE.RETURN_SLAVE_NO_RESPONSE_COUNT           |
+| 0x0010             | MODBUS_SUB_FUNCTION_CODE.RETURN_SLAVE_NAK_COUNT                   |
+| 0x0011             | MODBUS_SUB_FUNCTION_CODE.RETURN_SLAVE_BUSY_COUNT                  |
+| 0x0012             | MODBUS_SUB_FUNCTION_CODE.RETURN_BUS_CHARACTER_OVERRUN_COUNT       |
+| 0x0014             | MODBUS_SUB_FUNCTION_CODE.CLEAR_OVERRUN_COUNTER_AND_FLAG           |
 
 #### Example
 
@@ -222,7 +222,7 @@ local data = blob(2);
 data.writen(0xFF00,'w');
 data.swap2();
 
-modbus.diagnostics (0x01,SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION,data, function(error,addr,result){
+modbus.diagnostics (0x01,MODBUS_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION,data, function(error,addr,result){
     if (error){
         server.error(error);
     } else {
@@ -349,32 +349,32 @@ This function allows reading the identification and additional information relat
 
 Define the access type
 
-| Value                       | Description                                                |
-| --------------------------- | ---------------------------------------------------------- |
-| READ_DEVICE_CODE.BASIC      | Get the basic device identification (stream access)        |
-| READ_DEVICE_CODE.REGULAR    | Get the regular device identification (stream access)      |
-| READ_DEVICE_CODE.EXTENDED   | Get the extended device identification (stream access)     |
-| READ_DEVICE_CODE.SPECIFIC   | Get one specific identification object (individual access) |
+| Value                              | Description                                                |
+| ---------------------------------- | ---------------------------------------------------------- |
+| MODBUS_READ_DEVICE_CODE.BASIC      | Get the basic device identification (stream access)        |
+| MODBUS_READ_DEVICE_CODE.REGULAR    | Get the regular device identification (stream access)      |
+| MODBUS_READ_DEVICE_CODE.EXTENDED   | Get the extended device identification (stream access)     |
+| MODBUS_READ_DEVICE_CODE.SPECIFIC   | Get one specific identification object (individual access) |
 
 
 ##### Object ID
 
 Define what information is fetched
 
-| Value                           | Category  |
-| ------------------------------- | --------- |
-| OBJECT_ID.VENDOR_NAME           | Basic     |
-| OBJECT_ID.PRODUCT_CODE          | Basic     |
-| OBJECT_ID.MAJOR_MINOR_REVISION  | Basic     |
-| OBJECT_ID.VENDOR_URL            | Regular   |
-| OBJECT_ID.PRODUCT_NAME          | Regular   |
-| OBJECT_ID.MODEL_NAME            | Regular   |
-| OBJECT_ID.USER_APPLICATION_NAME | Regular   |
+| Value                                  | Category  |
+| -------------------------------------- | --------- |
+| MODBUS_OBJECT_ID.VENDOR_NAME           | Basic     |
+| MODBUS_OBJECT_ID.PRODUCT_CODE          | Basic     |
+| MODBUS_OBJECT_ID.MAJOR_MINOR_REVISION  | Basic     |
+| MODBUS_OBJECT_ID.VENDOR_URL            | Regular   |
+| MODBUS_OBJECT_ID.PRODUCT_NAME          | Regular   |
+| MODBUS_OBJECT_ID.MODEL_NAME            | Regular   |
+| MODBUS_OBJECT_ID.USER_APPLICATION_NAME | Regular   |
 
 #### Example
 
 ```squirrel
-modbus.readDeviceIdentificaiton(0x01, READ_DEVICE_CODE.BASIC,OBJECT_ID.VENDOR_NAME,function(error, addr, objects) {
+modbus.readDeviceIdentificaiton(0x01, MODBUS_READ_DEVICE_CODE.BASIC,MODBUS_OBJECT_ID.VENDOR_NAME,function(error, addr, objects) {
     if (error){
         server.error("Error: " + error + ", Addr: " + addr + ", Objects: " + objects);
     } else {

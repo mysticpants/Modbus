@@ -4,13 +4,10 @@
 // http://opensource.org/licenses/MIT
 
 
-class Modbus485 {
-    static VERSION = "1.0.0";
-}
-
 //------------------------------------------------------------------------------
 
-class Modbus485.Master {
+class Modbus485Master {
+    static VERSION = "1.0.0";
     static MINIMUM_REQUEST_LENGTH = 5;
     _uart               = null;
     _rts                = null;
@@ -27,9 +24,10 @@ class Modbus485.Master {
     _quantity           = null;
     _callbackHandler    = null;
     _queue              = null;
+    _debug              = null;
 
   /*
-   * Constructor for Modbus485.Master
+   * Constructor for Modbus485Master
    *
    * @param  {Object} uart - The UART object
    * @param  {Object} rts - The pin used as RTS
@@ -41,15 +39,17 @@ class Modbus485.Master {
    *
    *
    */
-    constructor(uart, rts, baudRate = 19200, dataBits = 8, parity = PARITY_NONE, stopBits = 1, timeout = 1.0) {
+    constructor(uart, rts, baudRate = 19200, dataBits = 8, parity = PARITY_NONE, stopBits = 1, timeout = 1.0 , debug = true) {
 
-        if (!("CRC16" in getroottable())) throw "Include CRC16 library v1.0.0+";
+        if (!("CRC16" in getroottable())) throw "Must include CRC16 library v1.0.0+";
+        if (!("ModbusRTU" in getroottable())) throw "Must include ModbusRTU library v1.0.0+";
         _uart          = uart;
         _rts           = rts
         _charTime      = 1.0 / baudRate;
         _timeout       = timeout;
         _receiveBuffer = blob();
         _queue         = [];
+        _debug         = debug;
         _uart.configure(baudRate, dataBits, parity, stopBits, NO_CTSRTS, _uartCallback.bindenv(this));
         _rts.configure(DIGITAL_OUT, 0);
     }
@@ -69,8 +69,8 @@ class Modbus485.Master {
     function readWriteMultipleRegisters (deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue ,callback = null ){
         _enqueue(function (){
             _quantity = readQuantity;
-            local PDU = Modbus.createReadWriteMultipleRegistersPDU(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue);
-            _send(deviceAddress,PDU, Modbus.FUNCTION_CODES.readWriteMultipleRegisters.resLen(readQuantity),callback);
+            local PDU = ModbusRTU.createReadWriteMultipleRegistersPDU(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue);
+            _send(deviceAddress,PDU, ModbusRTU.FUNCTION_CODES.readWriteMultipleRegisters.resLen(readQuantity),callback);
         }.bindenv(this));
     }
 
@@ -85,8 +85,8 @@ class Modbus485.Master {
      */
     function maskWriteRegister (deviceAddress,referenceAddress , AND_Mask , OR_Mask , callback = null ){
         _enqueue(function (){
-            local PDU = Modbus.createMaskWriteRegisterPDU(referenceAddress , AND_Mask , OR_Mask);
-            _send(deviceAddress,PDU,Modbus.FUNCTION_CODES.maskWriteRegister.resLen,callback);
+            local PDU = ModbusRTU.createMaskWriteRegisterPDU(referenceAddress , AND_Mask , OR_Mask);
+            _send(deviceAddress,PDU,ModbusRTU.FUNCTION_CODES.maskWriteRegister.resLen,callback);
         }.bindenv(this));
     }
 
@@ -98,8 +98,8 @@ class Modbus485.Master {
      */
     function reportSlaveID (deviceAddress,callback = null) {
         _enqueue(function (){
-            local PDU = Modbus.createReportSlaveIdPDU();
-            _send(deviceAddress,PDU,Modbus.FUNCTION_CODES.reportSlaveID.resLen,callback);
+            local PDU = ModbusRTU.createReportSlaveIdPDU();
+            _send(deviceAddress,PDU,ModbusRTU.FUNCTION_CODES.reportSlaveID.resLen,callback);
         }.bindenv(this));
     }
 
@@ -113,8 +113,8 @@ class Modbus485.Master {
      */
     function readDeviceIdentification (deviceAddress, readDeviceIdCode , objectId , callback = null ){
         _enqueue(function (){
-            local PDU = Modbus.createreadDeviceIdentificationPDU(readDeviceIdCode,objectId);
-            _send(deviceAddress, PDU, Modbus.FUNCTION_CODES.readDeviceIdentification.resLen, callback);
+            local PDU = ModbusRTU.createreadDeviceIdentificationPDU(readDeviceIdCode,objectId);
+            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.readDeviceIdentification.resLen, callback);
         }.bindenv(this));
     }
 
@@ -129,9 +129,9 @@ class Modbus485.Master {
     function diagnostics (deviceAddress, subFunctionCode ,data,callback = null){
         _enqueue(function() {
             local wordCount = data.len() / 2;
-            local PDU = Modbus.createDiagnosticsPDU(subFunctionCode ,data);
+            local PDU = ModbusRTU.createDiagnosticsPDU(subFunctionCode ,data);
             _quantity = wordCount ;
-            _send(deviceAddress,PDU,Modbus.FUNCTION_CODES.diagnostics.resLen(wordCount),callback);
+            _send(deviceAddress,PDU,ModbusRTU.FUNCTION_CODES.diagnostics.resLen(wordCount),callback);
         }.bindenv(this));
 
     }
@@ -144,8 +144,8 @@ class Modbus485.Master {
      */
     function readExceptionStatus (deviceAddress,callback = null){
         _enqueue(function() {
-            local PDU = Modbus.createReadExceptionStatusPDU();
-            _send(deviceAddress,PDU, Modbus.FUNCTION_CODES.readExceptionStatus.resLen , callback);
+            local PDU = ModbusRTU.createReadExceptionStatusPDU();
+            _send(deviceAddress,PDU, ModbusRTU.FUNCTION_CODES.readExceptionStatus.resLen , callback);
         }.bindenv(this));
     }
 
@@ -168,20 +168,20 @@ class Modbus485.Master {
             local resLen = null;
             switch (targetType) {
                 case MODBUS_TARGET_TYPE.COIL:
-                    PDU = Modbus.createReadPDU(Modbus.FUNCTION_CODES.readCoils, startingAddress, quantity);
-                    resLen = Modbus.FUNCTION_CODES.readCoils.resLen;
+                    PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readCoils, startingAddress, quantity);
+                    resLen = ModbusRTU.FUNCTION_CODES.readCoils.resLen;
                     break;
                 case MODBUS_TARGET_TYPE.DISCRETE_INPUT:
-                    PDU = Modbus.createReadPDU(Modbus.FUNCTION_CODES.readInputs, startingAddress, quantity);
-                    resLen = Modbus.FUNCTION_CODES.readInputs.resLen;
+                    PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readInputs, startingAddress, quantity);
+                    resLen = ModbusRTU.FUNCTION_CODES.readInputs.resLen;
                     break;
                 case MODBUS_TARGET_TYPE.HOLDING_REGISTER:
-                    PDU = Modbus.createReadPDU(Modbus.FUNCTION_CODES.readHoldingRegs, startingAddress, quantity);
-                    resLen = Modbus.FUNCTION_CODES.readHoldingRegs.resLen;
+                    PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readHoldingRegs, startingAddress, quantity);
+                    resLen = ModbusRTU.FUNCTION_CODES.readHoldingRegs.resLen;
                     break;
                 case MODBUS_TARGET_TYPE.INPUT_REGISTER:
-                    PDU = Modbus.createReadPDU(Modbus.FUNCTION_CODES.readInputRegs, startingAddress, quantity);
-                    resLen = Modbus.FUNCTION_CODES.readInputRegs.resLen;
+                    PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readInputRegs, startingAddress, quantity);
+                    resLen = ModbusRTU.FUNCTION_CODES.readInputRegs.resLen;
                     break;
                 default:
                     throw "read() with invalid targetType: " + targetType;
@@ -220,9 +220,9 @@ class Modbus485.Master {
      * It determines if the ADU is valid
      *
      * @param {Blob} frame - ADU
-     * @param {Int} length - The length of the frame
      */
-    function _hasValidCRC(frame, length) {
+    function _hasValidCRC(frame) {
+        local length = frame.len();
         frame.seek(0);
         local expectedCRC = CRC16.calculate(frame.readblob(length - 2));
         local receivedCRC = frame.readn('w');
@@ -283,80 +283,74 @@ class Modbus485.Master {
      *
      */
     function _processBuffer() {
-        local bufferLength = _receiveBuffer.len();
-        if (bufferLength < MINIMUM_REQUEST_LENGTH) {
-            return _receiveBuffer.seek(bufferLength);
-        }
-        _receiveBuffer.seek(0);
-        local address = _receiveBuffer.readn('b');
-        local functionCode = _receiveBuffer.readn('b');
-        server.log(_receiveBuffer);
-        if ((functionCode & 0x80) == 0x80) {
-            local exceptionCode = _receiveBuffer.readn('b');
-            if (_hasValidCRC(_receiveBuffer, bufferLength)) {
-                _errorCb(exceptionCode);
+
+        try{
+
+            local bufferLength = _receiveBuffer.len();
+            if (bufferLength < MINIMUM_REQUEST_LENGTH) {
+                return _receiveBuffer.seek(bufferLength);
+            }
+            // Parse and handle variable length responses
+            local params = {
+                buffer           = _receiveBuffer,
+                expectedResType  = _expectedResType,
+                expectedResLen   = _expectedResLen,
+                quantity         = _quantity
+            };
+            local result = ModbusRTU.parse(params);
+            if (result == false) {
+                // Keep waiting for more data
+                return _receiveBuffer.seek(bufferLength);
+            } else if (result == -1) {
+                // Not the expected function code response. Shuffle forward and wait for more data.
+                return _receiveBuffer.seek(1);
+            }
+            _log(_receiveBuffer);
+            // Check the CRC
+            if (_hasValidCRC(_receiveBuffer)) {
+                // Got a valid packet!
+                _clearPreviousCommand();
+                imp.wakeup(0, function() {
+                    if (_callbackHandler) {
+                        _callbackHandler(null, result);
+                    }
+                    _dequeue();
+                }.bindenv(this))
+            } else {
+                /*
+                // We are failing the CRC check
+                _receiveBuffer.seek(0)
+                local address = _receiveBuffer.readn('b');
+                local type = _receiveBuffer.readn('b');
+                local length  = _receiveBuffer.readn('b');
+                local nullByte = _receiveBuffer.readn('b');
+                local expectedLength = _receiveBuffer.len() - 6;
+                if (address == _expectedResAddr && type == _expectedResType && length == expectedLength && nullByte == 0x00) {
+                */
+                   _errorCb(MODBUS_EXCEPTION.INVALID_CRC);
+
+                /*
+                    return;
+                }
+                // Hack the data buffer???
+                _receiveBuffer.seek(0);
+                _receiveBuffer.writen(_expectedResAddr, 'b');
+                _receiveBuffer.writen(_expectedResType, 'b');
+                _receiveBuffer.writen(expectedLength, 'w');
+                _receiveBuffer.seek(0, 'e');
+                _processBuffer();
+                */
+            }
+
+        } catch(error){
+            if (_hasValidCRC(_receiveBuffer)){
+                _errorCb(error);
             } else {
                 _errorCb(MODBUS_EXCEPTION.INVALID_CRC);
             }
-            return;
-        } else if (_expectedResLen == null) {
-            _expectedResLen = _receiveBuffer.readn('b') + 2;
         }
-        // Parse and handle variable length responses
-        local params = {
-            functionCode     = functionCode,
-            buffer           = _receiveBuffer,
-            expectedResType  = _expectedResType,
-            expectedResLen   = _expectedResLen,
-            quantity         = _quantity
-
-        };
-        local result = Modbus.parse(params);
-        if (result == false) {
-            // Keep waiting for more data
-            return _receiveBuffer.seek(bufferLength);
-        } else if (functionCode != _expectedResType) {
-            // Not the expected function code response. Shuffle forward and wait for more data.
-            return _receiveBuffer.seek(1);
-        }
-        // Check the CRC
-        if (_hasValidCRC(_receiveBuffer, bufferLength)) {
-            // Got a valid packet!
-            _clearPreviousCommand();
-            imp.wakeup(0, function() {
-                if (_callbackHandler) {
-                    _callbackHandler(null, address, result);
-                }
-                _dequeue();
-            }.bindenv(this))
-        } else {
-            /*
-            // We are failing the CRC check
-            _receiveBuffer.seek(0)
-            local address = _receiveBuffer.readn('b');
-            local type = _receiveBuffer.readn('b');
-            local length  = _receiveBuffer.readn('b');
-            local nullByte = _receiveBuffer.readn('b');
-
-            local expectedLength = _receiveBuffer.len() - 6;
-            if (address == _expectedResAddr && type == _expectedResType && length == expectedLength && nullByte == 0x00) {
-            */
-               _errorCb(MODBUS_EXCEPTION.INVALID_CRC);
-            /*
-                return;
-            }
 
 
-            // Hack the data buffer???
-            _receiveBuffer.seek(0);
-            _receiveBuffer.writen(_expectedResAddr, 'b');
-            _receiveBuffer.writen(_expectedResType, 'b');
-            _receiveBuffer.writen(expectedLength, 'w');
-            _receiveBuffer.seek(0, 'e');
-
-            _processBuffer();
-            */
-        }
 
     }
 
@@ -384,7 +378,7 @@ class Modbus485.Master {
         uw(frame);
         uf();
         rw(0);
-        server.log(frame);
+        _log(frame);
         _responseTimer = _responseTimeoutFactory(_timeout);
 
     }
@@ -418,6 +412,16 @@ class Modbus485.Master {
     function _dequeue() {
         _queue.remove(0);
         if (_queue.len() > 0) _queue[0]();
+    }
+
+    /*
+     * remove the function from a queue
+     *
+     */
+    function _log(message) {
+        if(_debug){
+          server.log(message);
+        }
     }
 
 
@@ -457,9 +461,9 @@ class Modbus485.Master {
                     server.error(format("values wrong type: %s", typeof values));
                     throw MODBUS_EXCEPTION.INVALID_VALUES;
             }
-            local request = (quantity == 1) ? Modbus.FUNCTION_CODES.writeSingleCoil : Modbus.FUNCTION_CODES.writeMultipleCoils;
-            local PDU = Modbus.createWritePDU(request,startingAddress,numBytes,quantity,values);
-            _send(deviceAddress, PDU, Modbus.FUNCTION_CODES.writeMultipleCoils.resLen, callback);
+            local request = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleCoil : ModbusRTU.FUNCTION_CODES.writeMultipleCoils;
+            local PDU = ModbusRTU.createWritePDU(request,startingAddress,numBytes,quantity,values);
+            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.writeMultipleCoils.resLen, callback);
         }
         catch(error){
            _callbackHandler = callback;
@@ -496,9 +500,9 @@ class Modbus485.Master {
                     server.error(format("values wrong type: %s", typeof values));
                     throw MODBUS_EXCEPTION.INVALID_VALUES;
             }
-            local request = (quantity == 1) ? Modbus.FUNCTION_CODES.writeSingleReg : Modbus.FUNCTION_CODES.writeMultipleRegs;
-            local PDU = Modbus.createWritePDU(request,startingAddress,numBytes,quantity,values);
-            _send(deviceAddress, PDU, Modbus.FUNCTION_CODES.writeMultipleRegs.resLen, callback);
+            local request = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleReg : ModbusRTU.FUNCTION_CODES.writeMultipleRegs;
+            local PDU = ModbusRTU.createWritePDU(request,startingAddress,numBytes,quantity,values);
+            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.writeMultipleRegs.resLen, callback);
 
         } catch(error){
             _callbackHandler = callback;
@@ -506,6 +510,3 @@ class Modbus485.Master {
         }
     }
 }
-
-
-//------------------------------------------------------------------------------

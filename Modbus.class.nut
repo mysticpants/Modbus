@@ -1,4 +1,3 @@
-
 // Copyright (c) 2017 Electric Imp
 // This file is licensed under the MIT License
 // http://opensource.org/licenses/MIT
@@ -292,8 +291,13 @@ class ModbusRTU {
         local functionCode = buffer.readn('b');
         local expectedResLen = params.expectedResLen;
         local expectedResType = params.expectedResType;
+        local result = false;
         if ((functionCode & 0x80) == 0x80){
-            throw buffer.readn('b'); // exception code
+            if (_hasValidCRC(buffer)){
+                throw buffer.readn('b'); // exception code
+            } else {
+                throw MODBUS_EXCEPTION.INVALID_CRC;
+            }
         } else if (expectedResLen == null) {
             expectedResLen = buffer.readn('b') + 2;
         }
@@ -304,28 +308,37 @@ class ModbusRTU {
 
         switch (functionCode) {
             case FUNCTION_CODES.readExceptionStatus.fcode:
-                return _readExceptionStatus(buffer,expectedResLen);
+                result = _readExceptionStatus(buffer,expectedResLen);
+                break;
             case FUNCTION_CODES.readDeviceIdentification.fcode:
-                return _readDeviceIdentification(buffer);
+                result = _readDeviceIdentification(buffer);
+                break;
             case FUNCTION_CODES.reportSlaveID.fcode:
-                return _reportSlaveID(buffer);
+                result = _reportSlaveID(buffer);
+                break;
             case FUNCTION_CODES.diagnostics.fcode:
-                return _diagnostics(buffer,expectedResLen,params.quantity);
+                result = _diagnostics(buffer,expectedResLen,params.quantity);
+                break;
             case FUNCTION_CODES.readCoils.fcode:
             case FUNCTION_CODES.readInputs.fcode:
             case FUNCTION_CODES.readHoldingRegs.fcode:
             case FUNCTION_CODES.readInputRegs.fcode:
             case FUNCTION_CODES.readWriteMultipleRegisters.fcode:
-                return _readData(buffer,expectedResType ,expectedResLen,params.quantity);
+                result = _readData(buffer,expectedResType ,expectedResLen,params.quantity);
+                break;
             case FUNCTION_CODES.writeSingleCoil.fcode:
             case FUNCTION_CODES.writeSingleReg.fcode:
             case FUNCTION_CODES.writeMultipleCoils.fcode:
             case FUNCTION_CODES.writeMultipleRegs.fcode:
             case FUNCTION_CODES.maskWriteRegister.fcode:
-                return _writeData(buffer,expectedResLen);
+                result = _writeData(buffer,expectedResLen);
+                break;
         }
 
-
+        if ((result != false) && (!_hasValidCRC(buffer))){
+            throw MODBUS_EXCEPTION.INVALID_CRC;
+        }
+        return result;
     }
 
 
@@ -545,4 +558,23 @@ class ModbusRTU {
         }
         return false;
     }
+
+
+    /*
+     * It determines if the ADU is valid
+     *
+     * @param {Blob} frame - ADU
+     */
+    function _hasValidCRC(frame) {
+        local length = frame.len();
+        local currentPosition = frame.tell();
+        frame.seek(0);
+        local expectedCRC = CRC16.calculate(frame.readblob(length - 2));
+        local receivedCRC = frame.readn('w');
+        frame.seek(currentPosition);
+        return (receivedCRC == expectedCRC);
+    }
+
+
+
 }

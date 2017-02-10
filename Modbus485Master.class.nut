@@ -1,4 +1,3 @@
-
 // Copyright (c) 2017 Electric Imp
 // This file is licensed under the MIT License
 // http://opensource.org/licenses/MIT
@@ -216,18 +215,6 @@ class Modbus485Master {
         }.bindenv(this));
     }
 
-    /*
-     * It determines if the ADU is valid
-     *
-     * @param {Blob} frame - ADU
-     */
-    function _hasValidCRC(frame) {
-        local length = frame.len();
-        frame.seek(0);
-        local expectedCRC = CRC16.calculate(frame.readblob(length - 2));
-        local receivedCRC = frame.readn('w');
-        return (receivedCRC == expectedCRC);
-    }
 
     /*
      * Invoke RESPONSE_TIMEOUT exception in certain seconds
@@ -304,11 +291,9 @@ class Modbus485Master {
             } else if (result == -1) {
                 // Not the expected function code response. Shuffle forward and wait for more data.
                 return _receiveBuffer.seek(1);
-            }
-            _log(_receiveBuffer);
-            // Check the CRC
-            if (_hasValidCRC(_receiveBuffer)) {
-                // Got a valid packet!
+            } else {
+                //  got a valid packet
+                _log(_receiveBuffer);
                 _clearPreviousCommand();
                 imp.wakeup(0, function() {
                     if (_callbackHandler) {
@@ -316,42 +301,10 @@ class Modbus485Master {
                     }
                     _dequeue();
                 }.bindenv(this))
-            } else {
-                /*
-                // We are failing the CRC check
-                _receiveBuffer.seek(0)
-                local address = _receiveBuffer.readn('b');
-                local type = _receiveBuffer.readn('b');
-                local length  = _receiveBuffer.readn('b');
-                local nullByte = _receiveBuffer.readn('b');
-                local expectedLength = _receiveBuffer.len() - 6;
-                if (address == _expectedResAddr && type == _expectedResType && length == expectedLength && nullByte == 0x00) {
-                */
-                   _errorCb(MODBUS_EXCEPTION.INVALID_CRC);
-
-                /*
-                    return;
-                }
-                // Hack the data buffer???
-                _receiveBuffer.seek(0);
-                _receiveBuffer.writen(_expectedResAddr, 'b');
-                _receiveBuffer.writen(_expectedResType, 'b');
-                _receiveBuffer.writen(expectedLength, 'w');
-                _receiveBuffer.seek(0, 'e');
-                _processBuffer();
-                */
             }
-
         } catch(error){
-            if (_hasValidCRC(_receiveBuffer)){
-                _errorCb(error);
-            } else {
-                _errorCb(MODBUS_EXCEPTION.INVALID_CRC);
-            }
+            _errorCb(error);
         }
-
-
-
     }
 
 
@@ -388,10 +341,9 @@ class Modbus485Master {
      *
      */
     function _errorCb(err) {
-        local addr = _startingAddress;
         _clearPreviousCommand();
         imp.wakeup(0, function() {
-            if (_callbackHandler) _callbackHandler(err, addr, false);
+            if (_callbackHandler) _callbackHandler(err, false);
             _dequeue();
         }.bindenv(this))
     }
@@ -510,3 +462,6 @@ class Modbus485Master {
         }
     }
 }
+
+
+//------------------------------------------------------------------------------

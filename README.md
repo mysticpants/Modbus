@@ -371,13 +371,13 @@ This function allows reading the identification and additional information relat
 ```squirrel
 modbus.readDeviceIdentification(0x01, MODBUS_READ_DEVICE_CODE.BASIC, MODBUS_OBJECT_ID.VENDOR_NAME, function(error, objects) {
     if (error){
-        server.error("Error: " + error + ", " Objects: " + objects);
+        server.error("Error: " + error + ", Objects: " + objects);
     } else {
-        local dbg = "DeviceId: ";
+        local info = "DeviceId: ";
         foreach (id, val in objects) {
-            dbg += format("[%d] %s, ", id, val.tostring());
+            info += format("[%d] %s, ", id, val.tostring());
         }
-        server.log(dbg);
+        server.log(info);
     }
 });
 

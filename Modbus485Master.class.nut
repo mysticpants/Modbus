@@ -38,7 +38,7 @@ class Modbus485Master {
    *
    *
    */
-    constructor(uart, rts, baudRate = 19200, dataBits = 8, parity = PARITY_NONE, stopBits = 1, timeout = 1.0 , debug = true) {
+    constructor(uart, rts, baudRate = 19200, dataBits = 8, parity = PARITY_NONE, stopBits = 1, timeout = 1.0 , debug = false) {
 
         if (!("CRC16" in getroottable())) throw "Must include CRC16 library v1.0.0+";
         if (!("ModbusRTU" in getroottable())) throw "Must include ModbusRTU library v1.0.0+";

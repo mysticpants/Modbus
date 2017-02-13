@@ -33,6 +33,71 @@ class CRC16 {
 }
 
 
+function parseReadExceptionStatus (fakeBuffer){
+    local length = fakeBuffer.len();
+    local params = {
+        functionCode = ModbusRTU.FUNCTION_CODES.readExceptionStatus.fcode,
+        buffer = fakeBuffer,
+        expectedResLen = ModbusRTU.FUNCTION_CODES.readExceptionStatus.resLen,
+        expectedResType = ModbusRTU.FUNCTION_CODES.readExceptionStatus.fcode
+    };
+    local result = ModbusRTU.parse(params);
+    if (result == false) {
+        return fakeBuffer.seek(length);
+    }
+    return result;
+}
+
+
+function parseMaskWriteRegister(fakeBuffer){
+    local length = fakeBuffer.len();
+    local params = {
+        functionCode = ModbusRTU.FUNCTION_CODES.maskWriteRegister.fcode,
+        buffer = fakeBuffer,
+        expectedResLen = ModbusRTU.FUNCTION_CODES.maskWriteRegister.resLen,
+        expectedResType = ModbusRTU.FUNCTION_CODES.maskWriteRegister.fcode
+    };
+    local result = ModbusRTU.parse(params);
+    if (result == false) {
+        return fakeBuffer.seek(length);
+    }
+    return result;
+}
+
+
+function parseReadWriteMultipleRegisters (fakeBuffer){
+    local length = fakeBuffer.len();
+    local params = {
+        functionCode = ModbusRTU.FUNCTION_CODES.readWriteMultipleRegisters.fcode,
+        expectedResType = ModbusRTU.FUNCTION_CODES.readWriteMultipleRegisters.fcode,
+        buffer = fakeBuffer,
+        expectedResLen = ModbusRTU.FUNCTION_CODES.readWriteMultipleRegisters.resLen(1),
+        quantity = 1
+    };
+    local result = ModbusRTU.parse(params);
+    if (result == false) {
+        return fakeBuffer.seek(length);
+    }
+    return result ;
+}
+
+function parseDiagnostics (fakeBuffer){
+    local result = null;
+    local length = fakeBuffer.len();
+    local params = {
+        functionCode = ModbusRTU.FUNCTION_CODES.diagnostics.fcode,
+        expectedResType = ModbusRTU.FUNCTION_CODES.diagnostics.fcode,
+        buffer = fakeBuffer,
+        expectedResLen = ModbusRTU.FUNCTION_CODES.diagnostics.resLen(1),
+        quantity = 1
+    };
+    local result = ModbusRTU.parse(params);
+    if (result == false) {
+        return fakeBuffer.seek(length);
+    }
+    return result;
+}
+
 
 class DeviceTestCase extends ImpTestCase {
 
@@ -204,7 +269,96 @@ class DeviceTestCase extends ImpTestCase {
     this.assertTrue(expectedADU.tostring() == ADU.tostring());
   }
 
-  function testParse(){
+  function testParseReadExceptionStatus(){
+    local result = null;
+    local fakeBuffer = blob();
+    local outputData = 0x03;
+    fakeBuffer.writen(0x01,'b');
+    fakeBuffer.writen(0x07,'b');
+    fakeBuffer.writen(outputData,'b');
+    fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
+    fakeBuffer.seek(0);
+    local mockBuffer = blob();
+    while(true){
+        if (!fakeBuffer.eos()){
+            local byte = fakeBuffer.readn('b');
+            mockBuffer.writen(byte,'b');
+            result = parseReadExceptionStatus(mockBuffer);
+        } else {
+            break;
+        }
+    }
+    this.assertTrue(outputData == result);
+  }
+
+  function testParseMarkWriteRegister(){
+    local result = null;
+    local fakeBuffer = blob();
+    fakeBuffer.writen(0x01,'b');
+    fakeBuffer.writen(0x016,'b');
+    fakeBuffer.writen(0x0009,'w');
+    fakeBuffer.writen(0x0000,'w');
+    fakeBuffer.writen(0x1111,'w');
+    fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
+    fakeBuffer.seek(0);
+    local mockBuffer = blob();
+    while(true){
+        if (!fakeBuffer.eos()){
+            local byte = fakeBuffer.readn('b');
+            mockBuffer.writen(byte,'b');
+            result = parseMaskWriteRegister(mockBuffer);
+        } else {
+            break;
+        }
+    }
+    this.assertTrue(result);
+  }
+
+
+  function testParseReadWriteMultipleRegisters(){
+    local result = null;
+    local fakeBuffer = blob();
+    local readValue = 0x0808;
+    fakeBuffer.writen(0x01,'b');
+    fakeBuffer.writen(0x017,'b');
+    fakeBuffer.writen(0x02,'b');
+    fakeBuffer.writen(swap2(readValue),'w'); // read value
+    fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
+    fakeBuffer.seek(0);
+    local mockBuffer = blob();
+    while(true){
+        if (!fakeBuffer.eos()){
+            local byte = fakeBuffer.readn('b');
+            mockBuffer.writen(byte,'b');
+            result = parseReadWriteMultipleRegisters(mockBuffer);
+        } else {
+            break;
+        }
+    }
+    this.assertTrue(result.pop() == readValue);
+  }
+
+  function testParseDiagnostics(){
+    local fakeBuffer = blob();
+    local result = null;
+    local data = 0xFF00;
+    fakeBuffer.writen(0x01,'b');
+    fakeBuffer.writen(0x08,'b');
+    fakeBuffer.writen(swap2(0x0001),'w');
+    fakeBuffer.writen(swap2(data),'w');
+    fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
+    fakeBuffer.seek(0);
+    local mockBuffer = blob();
+    while(true){
+        if (!fakeBuffer.eos()){
+            local byte = fakeBuffer.readn('b');
+            mockBuffer.writen(byte,'b');
+            result = parseDiagnostics(mockBuffer);
+        } else {
+            break;
+        }
+    }
+    this.assertTrue(data == result.pop());
 
   }
 

@@ -2,8 +2,8 @@
 
 This library allows an imp to communicate with other devices via the Modbus-RS485 protocol.
 
-**To add this library to your project, add `#require "CRC16.class.nut:1.0.0"
-` and `#require "ModbusRTU.class.nut:1.0.0"` to the top of your device code.**
+**To use this library, add `#require "CRC16.class.nut:1.0.0"
+` , `#require "Modbus485Master.class.nut:1.0.0"` and `#require "ModbusRTU.class.nut:1.0.0"` to the top of your device code.**
 
 
 ## Hardware Setup

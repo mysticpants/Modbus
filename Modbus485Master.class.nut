@@ -7,7 +7,6 @@
 
 class Modbus485Master {
     static VERSION = "1.0.0";
-    static MINIMUM_REQUEST_LENGTH = 5;
     _uart               = null;
     _rts                = null;
     _charTime           = null;
@@ -260,7 +259,7 @@ class Modbus485Master {
             }
             byte = _uart.read();
         }
-        if (_expectedResType != null && _receiveBuffer.len() >= MINIMUM_REQUEST_LENGTH) {
+        if (_expectedResType != null) {
             _processBuffer();
         }
     }
@@ -272,9 +271,7 @@ class Modbus485Master {
     function _processBuffer() {
         try{
             local bufferLength = _receiveBuffer.len();
-            if (bufferLength < MINIMUM_REQUEST_LENGTH) {
-                return _receiveBuffer.seek(bufferLength);
-            }
+
             // Parse and handle variable length responses
             local params = {
                 buffer           = _receiveBuffer,

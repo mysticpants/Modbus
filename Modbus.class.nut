@@ -79,6 +79,7 @@ enum MODBUS_OBJECT_ID {
 
 class ModbusRTU {
     static VERSION = "1.0.0";
+    static MINIMUM_REQUEST_LENGTH = 5;
      // resLen and reqLen are the length of the PDU
     static FUNCTION_CODES = {
             readCoils = {
@@ -298,6 +299,9 @@ class ModbusRTU {
      */
     static function parse(params) {
         local buffer = params.buffer;
+        if (buffer.len() < MINIMUM_REQUEST_LENGTH) {
+            return false;
+        }
         buffer.seek(1); // skip the device address
         local functionCode = buffer.readn('b');
         local expectedResLen = params.expectedResLen;

@@ -512,6 +512,55 @@ class DeviceTestCase extends ImpTestCase {
 
   }
 
+  function testModbusException (){
+     local result = null;
+     local fakeBuffer = blob();
+     fakeBuffer.writen(0x01,'b');
+     fakeBuffer.writen(0x81,'b');
+     fakeBuffer.writen(0x01,'b');// ILLEGAL_FUNCTION
+     fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
+     fakeBuffer.seek(0);
+     local mockBuffer = blob();
+     try {
+         while(true){
+             if (!fakeBuffer.eos()){
+                 local byte = fakeBuffer.readn('b');
+                 mockBuffer.writen(byte,'b');
+                 result = parseReadCoils(mockBuffer, 8);
+             } else {
+                 break;
+             }
+         }
+     } catch(error){
+        this.assertTrue(error == MODBUS_EXCEPTION.ILLEGAL_FUNCTION);
+     }
+  }
+
+  function testInvalidCRC(){
+    local result = null;
+    local fakeBuffer = blob();
+    local outputData = 0x03;
+    fakeBuffer.writen(0x01,'b');
+    fakeBuffer.writen(0x07,'b');
+    fakeBuffer.writen(outputData,'b');
+    fakeBuffer.writen(0xabcd,'w'); // invalid crc
+    fakeBuffer.seek(0);
+    local mockBuffer = blob();
+    try{
+        while(true){
+            if (!fakeBuffer.eos()){
+                local byte = fakeBuffer.readn('b');
+                mockBuffer.writen(byte,'b');
+                result = parseReadExceptionStatus(mockBuffer);
+            } else {
+                break;
+            }
+        }
+    }catch(error){
+        this.assertTrue(error == MODBUS_EXCEPTION.INVALID_CRC);
+    }
+  }
+
   function tearDown() {
     return "Test finished";
   }

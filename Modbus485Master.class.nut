@@ -271,7 +271,6 @@ class Modbus485Master {
     function _processBuffer() {
         try{
             local bufferLength = _receiveBuffer.len();
-
             // Parse and handle variable length responses
             local params = {
                 buffer           = _receiveBuffer,

@@ -99,6 +99,60 @@ function parseDiagnostics (fakeBuffer){
 }
 
 
+function parseReadDeviceIdentification (fakeBuffer){
+    local result = null;
+    local length = fakeBuffer.len();
+    local params = {
+        functionCode = ModbusRTU.FUNCTION_CODES.readDeviceIdentification.fcode,
+        expectedResType = ModbusRTU.FUNCTION_CODES.readDeviceIdentification.fcode,
+        buffer = fakeBuffer,
+        expectedResLen = null,
+    };
+    local result = ModbusRTU.parse(params);
+    if (result == false) {
+        return fakeBuffer.seek(length);
+    }
+    return result;
+}
+
+
+function parseReadCoils(fakeBuffer, quantity){
+    local result = null;
+    local length = fakeBuffer.len();
+    local params = {
+        functionCode = ModbusRTU.FUNCTION_CODES.readCoils.fcode,
+        expectedResType = ModbusRTU.FUNCTION_CODES.readCoils.fcode,
+        buffer = fakeBuffer,
+        expectedResLen = ModbusRTU.FUNCTION_CODES.readCoils.resLen,
+        quantity = quantity
+    };
+    local result = ModbusRTU.parse(params);
+    if (result == false) {
+        return fakeBuffer.seek(length);
+    }
+    return result;
+
+}
+
+
+function parseReadRegisters(fakeBuffer, quantity){
+    local result = null;
+    local length = fakeBuffer.len();
+    local params = {
+        functionCode = ModbusRTU.FUNCTION_CODES.readHoldingRegs.fcode,
+        expectedResType = ModbusRTU.FUNCTION_CODES.readHoldingRegs.fcode,
+        buffer = fakeBuffer,
+        expectedResLen = ModbusRTU.FUNCTION_CODES.readHoldingRegs.resLen,
+        quantity = quantity
+    };
+    local result = ModbusRTU.parse(params);
+    if (result == false) {
+        return fakeBuffer.seek(length);
+    }
+    return result;
+}
+
+
 class DeviceTestCase extends ImpTestCase {
 
   function setUp() {
@@ -359,6 +413,102 @@ class DeviceTestCase extends ImpTestCase {
         }
     }
     this.assertTrue(data == result.pop());
+  }
+
+  function testParseReadDeviceIdentification(){
+    local fakeBuffer = blob();
+    local result = null;
+    local data = 0xFF00;
+    local vendorName = "MysticPants";
+    local produceCode = "CONCTOR";
+    fakeBuffer.writen(0x01,'b');
+    fakeBuffer.writen(0x2B,'b');
+    fakeBuffer.writen(0x0E,'b');
+    fakeBuffer.writen(0x01,'b');
+    fakeBuffer.writen(0x01,'b');
+    fakeBuffer.writen(0xFF,'b');
+    fakeBuffer.writen(0x00,'b');
+    fakeBuffer.writen(0x02,'b');// number of objects
+    // first object
+    fakeBuffer.writen(0x00,'b');
+    fakeBuffer.writen(11,'b');
+    fakeBuffer.writestring(vendorName);
+    // second object
+    fakeBuffer.writen(0x01,'b');
+    fakeBuffer.writen(7,'b');
+    fakeBuffer.writestring(produceCode);
+    fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
+    fakeBuffer.seek(0);
+    local mockBuffer = blob();
+    while(true){
+        if (!fakeBuffer.eos()){
+            local byte = fakeBuffer.readn('b');
+            mockBuffer.writen(byte,'b');
+            result = parseReadDeviceIdentification(mockBuffer);
+        } else {
+            break;
+        }
+    }
+    this.assertEqual(result[0x00] ,vendorName);
+    this.assertEqual(result[0x01] ,produceCode);
+  }
+
+
+  function testParseReadCoils(){
+    local fakeBuffer = blob();
+    local result = null;
+    local coilStatus = 0xAA; // 10101010
+    fakeBuffer.writen(0x01,'b');
+    fakeBuffer.writen(0x01,'b');
+    fakeBuffer.writen(0x01,'b'); // byte count
+    fakeBuffer.writen(coilStatus,'b'); // coil status
+    fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
+    fakeBuffer.seek(0);
+    local mockBuffer = blob();
+    while(true){
+        if (!fakeBuffer.eos()){
+            local byte = fakeBuffer.readn('b');
+            mockBuffer.writen(byte,'b');
+            result = parseReadCoils(mockBuffer, 8);
+        } else {
+            break;
+        }
+    }
+    for(local position = 0; position < 8 ; position++){
+        local bit = (coilStatus >> position) & 1;
+        local status = (bit == 1)? true : false;
+        this.assertTrue(status == result[position]);
+    }
+  }
+
+
+  function testParseReadRegisters(){
+    local fakeBuffer = blob();
+    local result = null;
+    local values = blob();
+    values.writen(swap2(18),'w');
+    values.writen(swap2(28),'w');
+    fakeBuffer.writen(0x01,'b');
+    fakeBuffer.writen(0x03,'b');
+    fakeBuffer.writen(4,'b'); // byte count
+    fakeBuffer.writeblob(values); // registers value
+    fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
+    fakeBuffer.seek(0);
+    local mockBuffer = blob();
+    while(true){
+        if (!fakeBuffer.eos()){
+            local byte = fakeBuffer.readn('b');
+            mockBuffer.writen(byte,'b');
+            result = parseReadRegisters(mockBuffer, values.len()/2);
+        } else {
+            break;
+        }
+    }
+    values.seek(0);
+    foreach (value in result) {
+        local expectedValue = swap2(values.readn('w'));
+        this.assertTrue(expectedValue == value);
+    }
 
   }
 

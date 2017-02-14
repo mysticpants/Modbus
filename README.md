@@ -122,10 +122,10 @@ This is the generic function to write values into coils or holding registers .
 | *targetType*      | Enum                              | Yes      | N/A           | Refer to **<a href='#target-type'>Target Type</a>**                       |
 | *startingAddress* | Int                               | Yes      | N/A           | The address from which it begins writing values                           |
 | *quantity*        | Int                               | Yes      | N/A           | The number of consecutive addresses the values are written into           |
-| *values*          | Int, Array[Int, Bool], Bool, Blob | Yes      | N/A           | The values written into Coils or Registers                                |
+| *values*          | Int, Array[Int, Bool], Bool, Blob | Yes      | N/A           | The values written into Coils or Registers. Please view Notes below       |
 | *callback*        | Function                          | No       | Null          | The function to be fired when it receives response regarding this request |
 
-Note :
+###### Notes :
 
 1.  Int, Blob, Array[Int] are applicable to MODBUS_TARGET_TYPE.HOLDING_REGISTER. Array[Int] is only applicable when quantity is greater than 1.
 

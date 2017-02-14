@@ -399,7 +399,6 @@ class Modbus485Master {
                 case "blob":
                     break;
                 default:
-                    server.error(format("values wrong type: %s", typeof values));
                     throw MODBUS_EXCEPTION.INVALID_VALUES;
             }
             local request = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleCoil : ModbusRTU.FUNCTION_CODES.writeMultipleCoils;
@@ -437,7 +436,6 @@ class Modbus485Master {
                 case "blob":
                     break;
                 default:
-                    server.error(format("values wrong type: %s", typeof values));
                     throw MODBUS_EXCEPTION.INVALID_VALUES;
             }
             local request = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleReg : ModbusRTU.FUNCTION_CODES.writeMultipleRegs;

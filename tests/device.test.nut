@@ -18,8 +18,8 @@ function errorMessage (error, reject){
 
 class DeviceTestCase extends ImpTestCase {
 
+  static _PASS_MESSAGE = "Pass";
   _modbus = null;
-  _PASS_MESSAGE = "Pass";
 
   function setUp() {
       _modbus = Modbus485Master(hardware.uart2, hardware.pinL);
@@ -503,7 +503,7 @@ class DeviceTestCase extends ImpTestCase {
         }.bindenv(this));
   }
 
-  function testIllegalArgumentLengthExceptionWriteCoils(){
+  function testInvalidArgumentLengthExceptionWriteCoils(){
       local targetType = MODBUS_TARGET_TYPE.COIL;
       local startingAddress = 0x01;
       local values = [true, false];
@@ -521,9 +521,9 @@ class DeviceTestCase extends ImpTestCase {
   }
 
 
-  function testIllegalArgumentLengthExceptionWriteRegisters(){
+  function testInvalidArgumentLengthExceptionWriteRegisters(){
       local targetType = MODBUS_TARGET_TYPE.HOLDING_REGISTER;
-      local startingAddress = 0x01;
+      local startingAddress = 0x0A;
       local values = [8, 80];
       local quantity = values.len() + 1;
       return Promise(function(resolve, reject){
@@ -538,6 +538,40 @@ class DeviceTestCase extends ImpTestCase {
         }.bindenv(this));
   }
 
+  function testInvalidValuesWriteCoils(){
+      local targetType = MODBUS_TARGET_TYPE.COIL;
+      local startingAddress = 0x01;
+      local values = {"1":false , "2":true};
+      local quantity = values.len();
+      return Promise(function(resolve, reject){
+            _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
+                  if(error){
+                      this.assertTrue(error == MODBUS_EXCEPTION.INVALID_VALUES);
+                      resolve(_PASS_MESSAGE);
+                  }else{
+                      reject("Exception is not thrown");
+                  }
+              }.bindenv(this))
+        }.bindenv(this));
+  }
+
+
+  function testInvalidValuesWriteRegisters(){
+      local targetType = MODBUS_TARGET_TYPE.HOLDING_REGISTER;
+      local startingAddress = 0x0A;
+      local values = {"1":88 , "2":880};
+      local quantity = values.len();
+      return Promise(function(resolve, reject){
+            _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
+                  if(error){
+                      this.assertTrue(error == MODBUS_EXCEPTION.INVALID_VALUES);
+                      resolve(_PASS_MESSAGE);
+                  }else{
+                      reject("Exception is not thrown");
+                  }
+              }.bindenv(this))
+        }.bindenv(this));
+  }
 
   function tearDown() {
     return "Test finished";

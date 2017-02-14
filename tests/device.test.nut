@@ -503,6 +503,41 @@ class DeviceTestCase extends ImpTestCase {
         }.bindenv(this));
   }
 
+  function testIllegalArgumentLengthExceptionWriteCoils(){
+      local targetType = MODBUS_TARGET_TYPE.COIL;
+      local startingAddress = 0x01;
+      local values = [true, false];
+      local quantity = values.len() + 1;
+      return Promise(function(resolve, reject){
+            _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
+                  if(error){
+                      this.assertTrue(error == MODBUS_EXCEPTION.INVALID_ARG_LENGTH);
+                      resolve(_PASS_MESSAGE);
+                  }else{
+                      reject("Exception is not thrown");
+                  }
+              }.bindenv(this))
+        }.bindenv(this));
+  }
+
+
+  function testIllegalArgumentLengthExceptionWriteRegisters(){
+      local targetType = MODBUS_TARGET_TYPE.HOLDING_REGISTER;
+      local startingAddress = 0x01;
+      local values = [8, 80];
+      local quantity = values.len() + 1;
+      return Promise(function(resolve, reject){
+            _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
+                  if(error){
+                      this.assertTrue(error == MODBUS_EXCEPTION.INVALID_ARG_LENGTH);
+                      resolve(_PASS_MESSAGE);
+                  }else{
+                      reject("Exception is not thrown");
+                  }
+              }.bindenv(this))
+        }.bindenv(this));
+  }
+
 
   function tearDown() {
     return "Test finished";

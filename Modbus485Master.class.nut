@@ -378,7 +378,6 @@ class Modbus485Master {
             switch (typeof values) {
                 case "array":
                     if (quantity != values.len()){
-                        server.error(format("values wrong length: %d != %d", values.len(), quantity));
                         throw MODBUS_EXCEPTION.INVALID_ARG_LENGTH;
                     }
                     local byte, bitshift;
@@ -424,7 +423,6 @@ class Modbus485Master {
             switch (typeof values) {
                 case "array":
                     if (quantity != values.len()) {
-                        server.error(format("values wrong length: %d != %d", values.len(), quantity));
                         throw MODBUS_EXCEPTION.INVALID_ARG_LENGTH;
                     }
                     foreach (val in values) {

@@ -111,7 +111,7 @@ class Modbus485Master {
      */
     function readDeviceIdentification (deviceAddress, readDeviceIdCode, objectId, callback = null){
         _enqueue(function (){
-            local PDU = ModbusRTU.createreadDeviceIdentificationPDU(readDeviceIdCode,objectId);
+            local PDU = ModbusRTU.createReadDeviceIdentificationPDU(readDeviceIdCode,objectId);
             _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.readDeviceIdentification.resLen, callback);
         }.bindenv(this));
     }

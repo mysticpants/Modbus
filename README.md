@@ -125,7 +125,7 @@ This is the generic function to write values into coils or holding registers .
 | *values*          | Int, Array[Int, Bool], Bool, Blob | Yes      | N/A           | The values written into Coils or Registers. Please view Notes below       |
 | *callback*        | Function                          | No       | Null          | The function to be fired when it receives response regarding this request |
 
-###### Notes :
+##### Notes :
 
 1.  Int, Blob, Array[Int] are applicable to MODBUS_TARGET_TYPE.HOLDING_REGISTER. Array[Int] is only applicable when quantity is greater than 1.
 

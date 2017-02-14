@@ -125,6 +125,12 @@ This is the generic function to write values into coils or holding registers .
 | *values*          | Int, Array[Int, Bool], Bool, Blob | Yes      | N/A           | The values written into Coils or Registers                                |
 | *callback*        | Function                          | No       | Null          | The function to be fired when it receives response regarding this request |
 
+Note :
+
+1.  Int, Blob, Array[Int] are applicable to MODBUS_TARGET_TYPE.HOLDING_REGISTER. Array[Int] is only applicable when quantity is greater than 1.
+
+2.  Int, Bool, Blob, Array[Int, Bool] are applicable to MODBUS_TARGET_TYPE.COIL. Array[Int, Bool] is only applicable when quantity is greater than 1. Int value set to coils can be either 0x0000 or 0xFF00. Other values would be ignored.
+
 #### Example
 
 ```squirrel

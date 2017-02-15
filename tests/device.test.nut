@@ -2,12 +2,12 @@
 const DEVICE_ADDRESS = 1;
 
 
-function errorMessage (error, reject){
+function errorMessage (error, resolve,reject){
     switch(error){
         case MODBUS_EXCEPTION.ILLEGAL_FUNCTION :
-          return reject("This function is not supported by the device");
+          return resolve("This function is not supported by the device");
         case MODBUS_EXCEPTION.ILLEGAL_DATA_ADDR :
-          return reject("Illegal data address, please try a different address");
+          return resolve("Illegal data address, please try a different address");
         case MODBUS_EXCEPTION.RESPONSE_TIMEOUT :
           return reject("Timeout. No response from the device");
         default :
@@ -18,7 +18,7 @@ function errorMessage (error, reject){
 
 class DeviceTestCase extends ImpTestCase {
 
-  static _PASS_MESSAGE = "Pass";
+  _PASS_MESSAGE = "Pass";
   _modbus = null;
 
   function setUp() {
@@ -34,7 +34,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
           _modbus.read(DEVICE_ADDRESS, targetType, startingAddress, quantity, function(error,result){
                 if(error){
-                    errorMessage(error, reject);
+                    errorMessage(error, resolve ,reject);
                 } else{
                     this.assertTrue(result.len() == quantity);
                     local message = "Index : Coil Status \n";
@@ -56,7 +56,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
           _modbus.read(DEVICE_ADDRESS, targetType, startingAddress, quantity, function(error,result){
                 if(error){
-                    errorMessage(error, reject);
+                    errorMessage(error, resolve ,reject);
                 } else{
                     this.assertTrue(result.len() == quantity);
                     local message = "Index : Discrete Input Status \n";
@@ -76,7 +76,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
           _modbus.read(DEVICE_ADDRESS, targetType, startingAddress, quantity, function(error,result){
                 if(error){
-                    errorMessage(error, reject);
+                    errorMessage(error, resolve ,reject);
                 } else{
                     this.assertTrue(result.len() == quantity);
                     local message = "Index : Input Register Value \n";
@@ -97,7 +97,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
           _modbus.read(DEVICE_ADDRESS, targetType, startingAddress, quantity, function(error,result){
                 if(error){
-                    errorMessage(error, reject);
+                    errorMessage(error, resolve ,reject);
                 } else{
                     this.assertTrue(result.len() == quantity);
                     local message = "Index : Holding Register Value \n";
@@ -114,7 +114,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.reportSlaveID(DEVICE_ADDRESS, function(error, result){
                 if(error){
-                    errorMessage(error, reject);
+                    errorMessage(error, resolve ,reject);
                 } else{
                     this.assertTrue(result.len() == 2);
                     local message = "Key : Content \n";
@@ -137,7 +137,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.readWriteMultipleRegisters(DEVICE_ADDRESS, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result.len() == readQuantity);
                       local message = "Index : Holding Register Value \n";
@@ -157,7 +157,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.maskWriteRegister(DEVICE_ADDRESS, referenceAddress, AND_Mask, OR_Mask, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result);
                       resolve(_PASS_MESSAGE);
@@ -173,7 +173,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.readDeviceIdentification(DEVICE_ADDRESS, readDeviceIdCode, objectId, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result.len() == 3);
                       local message = "Object ID : Content \n";
@@ -194,7 +194,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.diagnostics(DEVICE_ADDRESS, subFunctionCode, data, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result.tostring() == data.tostring());
                       resolve(_PASS_MESSAGE);
@@ -207,7 +207,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.readExceptionStatus(DEVICE_ADDRESS, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       resolve(result);
                   }
@@ -223,7 +223,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result);
                       resolve(result);
@@ -241,7 +241,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result);
                       resolve(result);
@@ -259,7 +259,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result);
                       resolve(result);
@@ -277,7 +277,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result);
                       resolve(result);
@@ -295,7 +295,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result);
                       resolve(result);
@@ -313,7 +313,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result);
                       resolve(result);
@@ -333,7 +333,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result);
                       resolve(result);
@@ -351,7 +351,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result);
                       resolve(result);
@@ -371,7 +371,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result);
                       resolve(result);
@@ -390,7 +390,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      errorMessage(error, reject);
+                      errorMessage(error, resolve ,reject);
                   } else{
                       this.assertTrue(result);
                       resolve(result);
@@ -400,108 +400,6 @@ class DeviceTestCase extends ImpTestCase {
   }
 
 
-  function testWriteReadCoilsBoolean(){
-      local targetType = MODBUS_TARGET_TYPE.COIL;
-      local startingAddress = 0x01;
-      local values = [true,false, false,true];
-      local quantity = values.len();
-      return Promise(function(resolve, reject){
-            _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
-                  if(error){
-                      errorMessage(error, reject);
-                  } else{
-                      _modbus.read(DEVICE_ADDRESS, targetType, startingAddress, quantity, function(error, result){
-                            local message = "Index : Coil Status\n";
-                            foreach(key,value in result){
-                                this.assertTrue(result[key] == values[key]);
-                                message += key + " : " + value + "\n";
-                            }
-                            this.assertTrue(result);
-                            resolve(message);
-                        }.bindenv(this))
-                  }
-              }.bindenv(this))
-        }.bindenv(this));
-  }
-
-
-  function testWriteReadCoilsInt(){
-      local targetType = MODBUS_TARGET_TYPE.COIL;
-      local startingAddress = 0x01;
-      local values = [0xFF00,0x0000];
-      local quantity = values.len();
-      return Promise(function(resolve, reject){
-            _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
-                  if(error){
-                      errorMessage(error, reject);
-                  } else{
-                      _modbus.read(DEVICE_ADDRESS, targetType, startingAddress, quantity, function(error, result){
-                            local message = "Index : Coil Status\n";
-                            foreach(key,value in result){
-                                this.assertTrue(result[key] == (values[key] == 0xFF00 ? true : false));
-                                message += key + " : " + value + "\n";
-                            }
-                            this.assertTrue(result);
-                            resolve(message);
-                        }.bindenv(this))
-                  }
-              }.bindenv(this))
-        }.bindenv(this));
-  }
-
-
-  function testWriteReadRegistersInt(){
-      local targetType = MODBUS_TARGET_TYPE.HOLDING_REGISTER;
-      local startingAddress = 0x0A;
-      local values = [18,180];
-      local quantity = values.len();
-      return Promise(function(resolve, reject){
-            _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
-                  if(error){
-                      errorMessage(error, reject);
-                  } else{
-                      _modbus.read(DEVICE_ADDRESS, targetType, startingAddress, quantity, function(error, result){
-                            local message = "Index : Holding Register Value\n";
-                            foreach(key,value in result){
-                                this.assertTrue(result[key] == values[key]);
-                                message += key + " : " + value + "\n";
-                            }
-                            this.assertTrue(result);
-                            resolve(message);
-                        }.bindenv(this))
-                  }
-              }.bindenv(this))
-        }.bindenv(this));
-  }
-
-
-
-  function testWriteReadRegistersBlob(){
-      local targetType = MODBUS_TARGET_TYPE.HOLDING_REGISTER;
-      local startingAddress = 0x0A;
-      local values = blob();
-      values.writen(swap2(28),'w');
-      values.writen(swap2(280),'w');
-      values.seek(0);
-      local quantity = values.len() / 2;
-      return Promise(function(resolve, reject){
-            _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
-                  if(error){
-                      errorMessage(error, reject);
-                  } else{
-                      _modbus.read(DEVICE_ADDRESS, targetType, startingAddress, quantity, function(error, result){
-                            local message = "Index : Holding Register Value\n";
-                            foreach(key,value in result){
-                                this.assertTrue(result[key] == swap2(values.readn('w')));
-                                message += key + " : " + value + "\n";
-                            }
-                            this.assertTrue(result);
-                            resolve(message);
-                        }.bindenv(this))
-                  }
-              }.bindenv(this))
-        }.bindenv(this));
-  }
 
   function testInvalidArgumentLengthExceptionWriteCoils(){
       local targetType = MODBUS_TARGET_TYPE.COIL;

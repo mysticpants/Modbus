@@ -8,7 +8,6 @@ modbus.write(0x01,MODBUS_TARGET_TYPE.HOLDING_REGISTER,9,3,[188,80,18],function(e
     if (error){
         server.error(error);
     } else {
-        server.log(res);
         modbus.read(0x01,MODBUS_TARGET_TYPE.HOLDING_REGISTER,9,3,function(error,res){
             if (error){
                 server.error(error);

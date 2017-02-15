@@ -159,32 +159,37 @@ class Modbus485Master {
      */
     function read(deviceAddress, targetType, startingAddress, quantity, callback = null) {
         _enqueue(function() {
-            _startingAddress = startingAddress;
-            _targetType = targetType;
-            _quantity = quantity;
-            local PDU = null;
-            local resLen = null;
-            switch (targetType) {
-                case MODBUS_TARGET_TYPE.COIL:
-                    PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readCoils, startingAddress, quantity);
-                    resLen = ModbusRTU.FUNCTION_CODES.readCoils.resLen;
-                    break;
-                case MODBUS_TARGET_TYPE.DISCRETE_INPUT:
-                    PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readInputs, startingAddress, quantity);
-                    resLen = ModbusRTU.FUNCTION_CODES.readInputs.resLen;
-                    break;
-                case MODBUS_TARGET_TYPE.HOLDING_REGISTER:
-                    PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readHoldingRegs, startingAddress, quantity);
-                    resLen = ModbusRTU.FUNCTION_CODES.readHoldingRegs.resLen;
-                    break;
-                case MODBUS_TARGET_TYPE.INPUT_REGISTER:
-                    PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readInputRegs, startingAddress, quantity);
-                    resLen = ModbusRTU.FUNCTION_CODES.readInputRegs.resLen;
-                    break;
-                default:
-                    throw "read() with invalid targetType: " + targetType;
+            try{
+                _startingAddress = startingAddress;
+                _targetType = targetType;
+                _quantity = quantity;
+                local PDU = null;
+                local resLen = null;
+                switch (targetType) {
+                    case MODBUS_TARGET_TYPE.COIL:
+                        PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readCoils, startingAddress, quantity);
+                        resLen = ModbusRTU.FUNCTION_CODES.readCoils.resLen;
+                        break;
+                    case MODBUS_TARGET_TYPE.DISCRETE_INPUT:
+                        PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readInputs, startingAddress, quantity);
+                        resLen = ModbusRTU.FUNCTION_CODES.readInputs.resLen;
+                        break;
+                    case MODBUS_TARGET_TYPE.HOLDING_REGISTER:
+                        PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readHoldingRegs, startingAddress, quantity);
+                        resLen = ModbusRTU.FUNCTION_CODES.readHoldingRegs.resLen;
+                        break;
+                    case MODBUS_TARGET_TYPE.INPUT_REGISTER:
+                        PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readInputRegs, startingAddress, quantity);
+                        resLen = ModbusRTU.FUNCTION_CODES.readInputRegs.resLen;
+                        break;
+                    default:
+                        throw MODBUS_EXCEPTION.INVALID_TARGET_TYPE;
+                }
+                _send(deviceAddress, PDU, resLen, callback);
+            }catch(error){
+                _callbackHandler = callback;
+                _errorCb(error);
             }
-        _send(deviceAddress, PDU, resLen, callback);
         }.bindenv(this))
     }
 
@@ -200,16 +205,21 @@ class Modbus485Master {
      */
     function write(deviceAddress, targetType, startingAddress, quantity, values, callback = null) {
         _enqueue(function() {
-            _startingAddress = startingAddress;
-            _targetType = targetType;
-            _quantity = quantity;
-            switch (targetType) {
-                case MODBUS_TARGET_TYPE.COIL:
-                    return _writeCoils(deviceAddress, startingAddress, quantity, values, callback);
-                case MODBUS_TARGET_TYPE.HOLDING_REGISTER:
-                    return _writeRegs(deviceAddress, startingAddress, quantity, values, callback);
-                default:
-                    throw "write() with invalid targetType: " + targetType;
+            try{
+                _startingAddress = startingAddress;
+                _targetType = targetType;
+                _quantity = quantity;
+                switch (targetType) {
+                    case MODBUS_TARGET_TYPE.COIL:
+                        return _writeCoils(deviceAddress, startingAddress, quantity, values, callback);
+                    case MODBUS_TARGET_TYPE.HOLDING_REGISTER:
+                        return _writeRegs(deviceAddress, startingAddress, quantity, values, callback);
+                    default:
+                        throw MODBUS_EXCEPTION.INVALID_TARGET_TYPE;
+                }
+            }catch(error){
+                _callbackHandler = callback;
+                _errorCb(error);
             }
         }.bindenv(this));
     }
@@ -372,43 +382,37 @@ class Modbus485Master {
      *
      */
     function _writeCoils(deviceAddress, startingAddress, quantity, values, callback = null) {
-        try{
-            local numBytes = math.ceil(quantity/8.0);
-            local newvalues = blob(numBytes);
-            switch (typeof values) {
-                case "array":
-                    if (quantity != values.len()){
-                        throw MODBUS_EXCEPTION.INVALID_ARG_LENGTH;
-                    }
-                    local byte, bitshift;
-                    foreach (bit,val in values) {
-                        byte = bit / 8;
-                        bitshift = bit % 8;
-                        newvalues[byte] = newvalues[byte] | ((val ? 1 : 0) << bitshift);
-                    }
-                    values = newvalues;
-                    break;
-                case "integer":
-                    newvalues.writen(swap2(values), 'w');
-                    values = newvalues;
-                    break;
-                case "bool":
-                    newvalues.writen(swap2(values ? 0xFF00 : 0x0000), 'w');
-                    values = newvalues;
-                    break;
-                case "blob":
-                    break;
-                default:
-                    throw MODBUS_EXCEPTION.INVALID_VALUES;
-            }
-            local request = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleCoil : ModbusRTU.FUNCTION_CODES.writeMultipleCoils;
-            local PDU = ModbusRTU.createWritePDU(request,startingAddress,numBytes,quantity,values);
-            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.writeMultipleCoils.resLen, callback);
+        local numBytes = math.ceil(quantity/8.0);
+        local newvalues = blob(numBytes);
+        switch (typeof values) {
+            case "array":
+                if (quantity != values.len()){
+                    throw MODBUS_EXCEPTION.INVALID_ARG_LENGTH;
+                }
+                local byte, bitshift;
+                foreach (bit,val in values) {
+                    byte = bit / 8;
+                    bitshift = bit % 8;
+                    newvalues[byte] = newvalues[byte] | ((val ? 1 : 0) << bitshift);
+                }
+                values = newvalues;
+                break;
+            case "integer":
+                newvalues.writen(swap2(values), 'w');
+                values = newvalues;
+                break;
+            case "bool":
+                newvalues.writen(swap2(values ? 0xFF00 : 0x0000), 'w');
+                values = newvalues;
+                break;
+            case "blob":
+                break;
+            default:
+                throw MODBUS_EXCEPTION.INVALID_VALUES;
         }
-        catch(error){
-           _callbackHandler = callback;
-           _errorCb(error);
-        }
+        local request = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleCoil : ModbusRTU.FUNCTION_CODES.writeMultipleCoils;
+        local PDU = ModbusRTU.createWritePDU(request,startingAddress,numBytes,quantity,values);
+        _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.writeMultipleCoils.resLen, callback);
     }
 
     /*
@@ -416,35 +420,30 @@ class Modbus485Master {
      *
      */
     function _writeRegs(deviceAddress, startingAddress, quantity, values, callback = null) {
-        try{
-            local numBytes = quantity * 2;
-            local newvalues = blob(numBytes);
-            switch (typeof values) {
-                case "array":
-                    if (quantity != values.len()) {
-                        throw MODBUS_EXCEPTION.INVALID_ARG_LENGTH;
-                    }
-                    foreach (val in values) {
-                        newvalues.writen(swap2(val), 'w');
-                    }
-                    values = newvalues;
-                    break;
-                case "integer":
-                    newvalues.writen(swap2(values), 'w');
-                    values = newvalues;
-                    break;
-                case "blob":
-                    break;
-                default:
-                    throw MODBUS_EXCEPTION.INVALID_VALUES;
-            }
-            local request = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleReg : ModbusRTU.FUNCTION_CODES.writeMultipleRegs;
-            local PDU = ModbusRTU.createWritePDU(request,startingAddress,numBytes,quantity,values);
-            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.writeMultipleRegs.resLen, callback);
-        } catch(error){
-            _callbackHandler = callback;
-            _errorCb(error);
+        local numBytes = quantity * 2;
+        local newvalues = blob(numBytes);
+        switch (typeof values) {
+            case "array":
+                if (quantity != values.len()) {
+                    throw MODBUS_EXCEPTION.INVALID_ARG_LENGTH;
+                }
+                foreach (val in values) {
+                    newvalues.writen(swap2(val), 'w');
+                }
+                values = newvalues;
+                break;
+            case "integer":
+                newvalues.writen(swap2(values), 'w');
+                values = newvalues;
+                break;
+            case "blob":
+                break;
+            default:
+                throw MODBUS_EXCEPTION.INVALID_VALUES;
         }
+        local request = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleReg : ModbusRTU.FUNCTION_CODES.writeMultipleRegs;
+        local PDU = ModbusRTU.createWritePDU(request,startingAddress,numBytes,quantity,values);
+        _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.writeMultipleRegs.resLen, callback);
     }
 }
 

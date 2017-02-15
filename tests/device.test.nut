@@ -573,6 +573,40 @@ class DeviceTestCase extends ImpTestCase {
         }.bindenv(this));
   }
 
+  function testInvalidTargetTypeWrite(){
+      local targetType = MODBUS_TARGET_TYPE.DISCRETE_INPUT;
+      local startingAddress = 0x01;
+      local values = [true, false];
+      local quantity = values.len();
+      return Promise(function(resolve, reject){
+            _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
+                  if(error){
+                      this.assertTrue(error == MODBUS_EXCEPTION.INVALID_TARGET_TYPE);
+                      resolve(_PASS_MESSAGE);
+                  }else{
+                      reject("Exception is not thrown");
+                  }
+              }.bindenv(this))
+        }.bindenv(this));
+  }
+
+
+  function testInvalidTargetTypeRead(){
+      local targetType = "2";
+      local startingAddress = 0x01;
+      local quantity = 5;
+      return Promise(function(resolve, reject){
+            _modbus.read(DEVICE_ADDRESS, targetType, startingAddress, quantity, function(error, result){
+                  if(error){
+                      this.assertTrue(error == MODBUS_EXCEPTION.INVALID_TARGET_TYPE);
+                      resolve(_PASS_MESSAGE);
+                  }else{
+                      reject("Exception is not thrown");
+                  }
+              }.bindenv(this))
+        }.bindenv(this));
+  }
+
   function tearDown() {
     return "Test finished";
   }

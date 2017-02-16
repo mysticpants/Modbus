@@ -7,6 +7,7 @@
 
 class Modbus485Master {
     static VERSION = "1.0.0";
+    static MINIMUM_RESPONSE_LENGTH = 5;
     _uart               = null;
     _rts                = null;
     _charTime           = null;
@@ -168,19 +169,19 @@ class Modbus485Master {
                 switch (targetType) {
                     case MODBUS_TARGET_TYPE.COIL:
                         PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readCoils, startingAddress, quantity);
-                        resLen = ModbusRTU.FUNCTION_CODES.readCoils.resLen;
+                        resLen = ModbusRTU.FUNCTION_CODES.readCoils.resLen(quantity);
                         break;
                     case MODBUS_TARGET_TYPE.DISCRETE_INPUT:
                         PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readInputs, startingAddress, quantity);
-                        resLen = ModbusRTU.FUNCTION_CODES.readInputs.resLen;
+                        resLen = ModbusRTU.FUNCTION_CODES.readInputs.resLen(quantity);
                         break;
                     case MODBUS_TARGET_TYPE.HOLDING_REGISTER:
                         PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readHoldingRegs, startingAddress, quantity);
-                        resLen = ModbusRTU.FUNCTION_CODES.readHoldingRegs.resLen;
+                        resLen = ModbusRTU.FUNCTION_CODES.readHoldingRegs.resLen(quantity);
                         break;
                     case MODBUS_TARGET_TYPE.INPUT_REGISTER:
                         PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readInputRegs, startingAddress, quantity);
-                        resLen = ModbusRTU.FUNCTION_CODES.readInputRegs.resLen;
+                        resLen = ModbusRTU.FUNCTION_CODES.readInputRegs.resLen(quantity);
                         break;
                     default:
                         throw MODBUS_EXCEPTION.INVALID_TARGET_TYPE;
@@ -281,12 +282,16 @@ class Modbus485Master {
     function _processBuffer() {
         try{
             local bufferLength = _receiveBuffer.len();
+            if (bufferLength < MINIMUM_RESPONSE_LENGTH) {
+                return ;
+            }
+            _receiveBuffer.seek(1); // skip the device address
             // Parse and handle variable length responses
             local params = {
-                buffer           = _receiveBuffer,
+                PDU              = _receiveBuffer.readblob(bufferLength - 1),
                 expectedResType  = _expectedResType,
-                expectedResLen   = _expectedResLen,
-                quantity         = _quantity
+                quantity         = _quantity,
+                expectedResLen   = _expectedResLen
             };
             local result = ModbusRTU.parse(params);
             if (result == false) {
@@ -296,19 +301,63 @@ class Modbus485Master {
                 // Not the expected function code response. Shuffle forward and wait for more data.
                 return _receiveBuffer.seek(1);
             } else {
+                if (_expectedResLen == null){
+                    _expectedResLen = _calculateResponseLen(_expectedResType, result);
+                    return _receiveBuffer.seek(bufferLength); // waiting for more data
+                }
+                if (bufferLength < _expectedResLen + 3){
+                    return _receiveBuffer.seek(bufferLength); // waiting for more data
+                }
                 //  got a valid packet
-                _log(_receiveBuffer);
-                _clearPreviousCommand();
-                imp.wakeup(0, function() {
-                    if (_callbackHandler) {
-                        _callbackHandler(null, result);
-                    }
-                    _dequeue();
-                }.bindenv(this))
+                if(_hasValidCRC(_receiveBuffer)){
+                    _log(_receiveBuffer);
+                    _clearPreviousCommand();
+                    imp.wakeup(0, function() {
+                        if (_callbackHandler) {
+                            _callbackHandler(null, result);
+                        }
+                        _dequeue();
+                    }.bindenv(this));
+                } else{
+                    throw MODBUS_EXCEPTION.INVALID_CRC;
+                }
             }
         } catch(error){
-            _errorCb(error);
+              _errorCb(error);
         }
+    }
+
+    /*
+     * calculate the length of the response from based on the result
+     *
+     */
+    function _calculateResponseLen(expectedResType, result){
+        switch(_expectedResType){
+            case ModbusRTU.FUNCTION_CODES.readDeviceIdentification.fcode :
+                local resLen = 7;
+                foreach (value in result) {
+                    resLen += result.len() + 2;
+                }
+                return resLen;
+            case ModbusRTU.FUNCTION_CODES.reportSlaveID.fcode :
+                local resLen = 2;
+                foreach (value in result) {
+                    resLen += result.len();
+                }
+                return resLen;
+        }
+    }
+
+    /*
+     * function to create ADU
+     *
+     */
+    function _createADU(deviceAddress, PDU) {
+        local ADU = blob();
+        ADU.writen(deviceAddress, 'b');
+        ADU.writeblob(PDU);
+        ADU.writen(CRC16.calculate(ADU), 'w');
+        return ADU;
     }
 
 
@@ -324,7 +373,7 @@ class Modbus485Master {
             _expectedResLen = responseLength;
         }
         _callbackHandler = callback;
-        local frame = ModbusRTU.createADU(deviceAddress, PDU);
+        local frame = _createADU(deviceAddress, PDU);
         local rw = _rts.write.bindenv(_rts);
         local uw = _uart.write.bindenv(_uart);
         local uf = _uart.flush.bindenv(_uart);
@@ -335,6 +384,22 @@ class Modbus485Master {
         _log(frame);
         _responseTimer = _responseTimeoutFactory(_timeout);
     }
+
+
+
+    /*
+     * It determines if the ADU is valid
+     *
+     * @param {Blob} frame - ADU
+     */
+    function _hasValidCRC(ADU) {
+        local length = ADU.len();
+        ADU.seek(0);
+        local expectedCRC = CRC16.calculate(ADU.readblob(length - 2));
+        local receivedCRC = ADU.readn('w');
+        return (receivedCRC == expectedCRC);
+    }
+
 
     /*
      * fire the callback function provided by the user when there is an error

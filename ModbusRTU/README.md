@@ -1,6 +1,6 @@
 # ModbusRTU
 
-This library creates and parses Modbus packets.
+This library creates and parses Modbus Protocol Data Unit (PDU).
 
 **To use this library, add `#require "CRC16.class.nut:1.0.0"` and `#require "ModbusRTU.class.nut:1.0.0"` to the top of your device code.**
 

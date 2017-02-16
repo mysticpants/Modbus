@@ -302,7 +302,10 @@ class Modbus485Master {
                 return _receiveBuffer.seek(1);
             } else {
                 if (_expectedResLen == null){
-                    _expectedResLen = bufferLength - 1 ;
+                    _expectedResLen = _calculateResponseLen(_expectedResType, result);
+                    return _receiveBuffer.seek(bufferLength); // waiting for more data
+                }
+                if (bufferLength < _expectedResLen + 3){
                     return _receiveBuffer.seek(bufferLength); // waiting for more data
                 }
                 //  got a valid packet
@@ -320,14 +323,30 @@ class Modbus485Master {
                 }
             }
         } catch(error){
-             if(_hasValidCRC(_receiveBuffer)){
-                _errorCb(error);
-             } else {
-                _errorCb(MODBUS_EXCEPTION.INVALID_CRC);
-             }
+              _errorCb(error);
         }
     }
 
+    /*
+     * calculate the length of the response from based on the result
+     *
+     */
+    function _calculateResponseLen(expectedResType, result){
+        switch(_expectedResType){
+            case ModbusRTU.FUNCTION_CODES.readDeviceIdentification.fcode :
+                local resLen = 7;
+                foreach (value in result) {
+                    resLen += result.len() + 2;
+                }
+                return resLen;
+            case ModbusRTU.FUNCTION_CODES.reportSlaveID.fcode :
+                local resLen = 2;
+                foreach (value in result) {
+                    resLen += result.len();
+                }
+                return resLen;
+        }
+    }
 
     /*
      * function to create ADU

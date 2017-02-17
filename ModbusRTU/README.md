@@ -20,25 +20,25 @@ The function creates a <a href="#PDU">PDU</a> for readData.
 
 | Key               | Data Type | Required | Default Value | Description                                                               |
 | ----------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *targetType*      | Enum      | Yes      | N/A           | Refer to **<a href='#target-type'>Target Type</a>**                       |
-| *startingAddress* | Int       | Yes      | N/A           | The address from which it begins reading values                           |
-| *quantity*        | Int       | Yes      | N/A           | The number of consecutive addresses the values are read from              |
+| *targetType*      | `enum`    | Yes      | N/A           | Refer to **<a href='#target-type'>Target Type</a>**                       |
+| *startingAddress* | `integer` | Yes      | N/A           | The address from which it begins reading values                           |
+| *quantity*        | `integer` | Yes      | N/A           | The number of consecutive addresses the values are read from              |
 
 
 <h4 id='target-type'>Target Type</h4>
 
-| Type               | Value                               | Access        |
-| ------------------ | ----------------------------------- | ------------- |
-| Coil               | MODBUS_TARGET_TYPE.COIL             | Read-Write    |
-| Discrete Input     | MODBUS_TARGET_TYPE.DISCRETE_INPUT   | Read-Only     |
-| Input Register     | MODBUS_TARGET_TYPE.INPUT_REGISTER   | Read-Only     |
-| Holding Register   | MODBUS_TARGET_TYPE.HOLDING_REGISTER | Read-Write    |
+| Type               | Value                                  | Access        |
+| ------------------ | -------------------------------------- | ------------- |
+| Coil               | MODBUSRTU_TARGET_TYPE.COIL             | Read-Write    |
+| Discrete Input     | MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT   | Read-Only     |
+| Input Register     | MODBUSRTU_TARGET_TYPE.INPUT_REGISTER   | Read-Only     |
+| Holding Register   | MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER | Read-Write    |
 
 
 #### Example
 
 ```squirrel
-local targetType = MODBUS_TARGET_TYPE.COIL;
+local targetType = MODBUSRTU_TARGET_TYPE.COIL;
 local startingAddress = 0x01;
 local quantity = 1;
 
@@ -56,16 +56,16 @@ The function creates a <a href="#PDU">PDU</a> for writeData.
 
 | Key               | Data Type                         | Required | Default Value | Description                                                               |
 | ----------------- | --------------------------------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *targetType*      | Enum                              | Yes      | N/A           | Refer to **<a href='#target-type'>Target Type</a>**                       |
-| *startingAddress* | Int                               | Yes      | N/A           | The address from which it begins writing values                           |
-| *quantity*        | Int                               | Yes      | N/A           | The number of consecutive addresses the values are written into           |
-| *values*          | Int, Array[Int, Bool], Bool, Blob | Yes      | N/A           | The values written into Coils or Registers                                |
+| *targetType*      | `enum`                            | Yes      | N/A           | Refer to **<a href='#target-type'>Target Type</a>**                       |
+| *startingAddress* | `integer`                         | Yes      | N/A           | The address from which it begins writing values                           |
+| *quantity*        | `integer`                         | Yes      | N/A           | The number of consecutive addresses the values are written into           |
+| *values*          | `integer`, `array[integer, boolean]`, `boolean`, `blob` | Yes      | N/A           | The values written into Coils or Registers                                |
 
 
 #### Example
 
 ```squirrel
-local targetType = MODBUS_TARGET_TYPE.COIL;
+local targetType = MODBUSRTU_TARGET_TYPE.COIL;
 local startingAddress = 0x01;
 local values = false;
 local quantity = 1;
@@ -103,31 +103,31 @@ The function creates a <a href="#PDU">PDU</a> for diagnostics.
 
 | Key               | Data Type | Required | Default Value | Description                                                               |
 | ----------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *deviceAddress*   | Int       | Yes      | N/A           | The unique address that identifies a device                               |
-| *subFunctionCode* | Enum      | Yes      | N/A           | Refer to **Sub-function Code**                                            |
-| *data*            | Blob      | Yes      | N/A           | The data field required by Modbus request                                 |
+| *deviceAddress*   | `integer` | Yes      | N/A           | The unique address that identifies a device                               |
+| *subFunctionCode* | `enum`    | Yes      | N/A           | Refer to **Sub-function Code**                                            |
+| *data*            | `blob`    | Yes      | N/A           | The data field required by Modbus request                                 |
 | *callback*        | Function  | No       | Null          | The function to be fired when it receives response regarding this request |
 
 
 ### Sub-function Codes
 
-| Code (Hex)         | Value                                                             |
-| ------------------ | ----------------------------------------------------------------- |
-| 0x0000             | MODBUS_SUB_FUNCTION_CODE.RETURN_QUERY_DATA                        |
-| 0x0001             | MODBUS_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION             |
-| 0x0002             | MODBUS_SUB_FUNCTION_CODE.RETURN_DIAGNOSTICS_REGISTER              |
-| 0x0003             | MODBUS_SUB_FUNCTION_CODE.CHANGE_ASCII_INPUT_DELIMITER             |
-| 0x0004             | MODBUS_SUB_FUNCTION_CODE.FORCE_LISTEN_ONLY_MODE                   |
-| 0x000A             | MODBUS_SUB_FUNCTION_CODE.CLEAR_COUNTERS_AND_DIAGNOSTICS_REGISTER  |
-| 0x000B             | MODBUS_SUB_FUNCTION_CODE.RETURN_BUS_MESSAGE_COUNT                 |
-| 0x000C             | MODBUS_SUB_FUNCTION_CODE.RETURN_BUS_COMMUNICATION_ERROR_COUNT     |
-| 0x000D             | MODBUS_SUB_FUNCTION_CODE.RETURN_BUS_EXCEPTION_ERROR_COUNT         |
-| 0x000E             | MODBUS_SUB_FUNCTION_CODE.RETURN_SLAVE_MESSAGE_COUNT               |
-| 0x000F             | MODBUS_SUB_FUNCTION_CODE.RETURN_SLAVE_NO_RESPONSE_COUNT           |
-| 0x0010             | MODBUS_SUB_FUNCTION_CODE.RETURN_SLAVE_NAK_COUNT                   |
-| 0x0011             | MODBUS_SUB_FUNCTION_CODE.RETURN_SLAVE_BUSY_COUNT                  |
-| 0x0012             | MODBUS_SUB_FUNCTION_CODE.RETURN_BUS_CHARACTER_OVERRUN_COUNT       |
-| 0x0014             | MODBUS_SUB_FUNCTION_CODE.CLEAR_OVERRUN_COUNTER_AND_FLAG           |
+| Code (Hex)         | Value                                                                |
+| ------------------ | -------------------------------------------------------------------- |
+| 0x0000             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_QUERY_DATA                        |
+| 0x0001             | MODBUSRTU_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION             |
+| 0x0002             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_DIAGNOSTICS_REGISTER              |
+| 0x0003             | MODBUSRTU_SUB_FUNCTION_CODE.CHANGE_ASCII_INPUT_DELIMITER             |
+| 0x0004             | MODBUSRTU_SUB_FUNCTION_CODE.FORCE_LISTEN_ONLY_MODE                   |
+| 0x000A             | MODBUSRTU_SUB_FUNCTION_CODE.CLEAR_COUNTERS_AND_DIAGNOSTICS_REGISTER  |
+| 0x000B             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_MESSAGE_COUNT                 |
+| 0x000C             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_COMMUNICATION_ERROR_COUNT     |
+| 0x000D             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_EXCEPTION_ERROR_COUNT         |
+| 0x000E             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_MESSAGE_COUNT               |
+| 0x000F             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_NO_RESPONSE_COUNT           |
+| 0x0010             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_NAK_COUNT                   |
+| 0x0011             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_BUSY_COUNT                  |
+| 0x0012             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_CHARACTER_OVERRUN_COUNT       |
+| 0x0014             | MODBUSRTU_SUB_FUNCTION_CODE.CLEAR_OVERRUN_COUNTER_AND_FLAG           |
 
 
 #### Example
@@ -135,7 +135,7 @@ The function creates a <a href="#PDU">PDU</a> for diagnostics.
 ```squirrel
 local data = blob();
 data.writen(swap2(0xFF00),'w');
-local PDU = ModbusRTU.createDiagnosticsPDU(MODBUS_SUB_FUNCTION_CODE.RETURN_QUERY_DATA, data);
+local PDU = ModbusRTU.createDiagnosticsPDU(MODBUSRTU_SUB_FUNCTION_CODE.RETURN_QUERY_DATA, data);
 server.log(PDU);
 
 ```
@@ -170,9 +170,9 @@ The function creates a <a href="#PDU">PDU</a> for maskWriteRegister.
 
 | Key                | Data Type | Required | Default Value | Description                                                               |
 | ------------------ | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *referenceAddress* | Int       | Yes      | N/A           | The address of the holding register the value is written into             |
-| *AND_mask*         | Int       | Yes      | N/A           | The AND mask                                                              |
-| *OR_mask*          | Int       | Yes      | N/A           | The OR mask                                                               |
+| *referenceAddress* | `integer` | Yes      | N/A           | The address of the holding register the value is written into             |
+| *AND_mask*         | `integer` | Yes      | N/A           | The AND mask                                                              |
+| *OR_mask*          | `integer` | Yes      | N/A           | The OR mask                                                               |
 
 #### Example
 
@@ -191,13 +191,13 @@ The function creates a <a href="#PDU">PDU</a> for readWriteMultipleRegisters.
 
 #### Parameters
 
-| Key                   | Data Type | Required | Default Value | Description |
+| Key                   | Data Type | Required | Default Value | Description                                                               |
 | --------------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *readingStartAddress* | Int       | Yes      | N/A           | The address from which it begins reading values                           |
-| *readQuantity*        | Int       | Yes      | N/A           | The number of consecutive addresses values are read from                  |
-| *writeStartAddress*   | Int       | Yes      | N/A           | The address from which it begins writing values                           |
-| *writeQuantity*       | Int       | Yes      | N/A           | The number of consecutive addresses values are written into               |
-| *writeValue*          | Blob      | Yes      | N/A           | The value written into the holding register                               |
+| *readingStartAddress* | `integer` | Yes      | N/A           | The address from which it begins reading values                           |
+| *readQuantity*        | `integer` | Yes      | N/A           | The number of consecutive addresses values are read from                  |
+| *writeStartAddress*   | `integer` | Yes      | N/A           | The address from which it begins writing values                           |
+| *writeQuantity*       | `integer` | Yes      | N/A           | The number of consecutive addresses values are written into               |
+| *writeValue*          | `blob`    | Yes      | N/A           | The value written into the holding register                               |
 
 #### Example
 
@@ -215,6 +215,37 @@ server.log(PDU);
 
 
 
+
+### parse(*params*)
+
+The function parses the Modbus PDU and returns the result.
+
+#### params Properties
+
+| Key                   | Data Type | Required | Default Value | Description                                                   |
+| --------------------- | --------- | -------- | ------------- | ------------------------------------------------------------- |
+| *quantity*            | `integer` | No       | N/A           | The number of coils/register to read from or write into       |
+| *PDU*                 | `blob`    | Yes      | N/A           | The PDU to be parsed                                          |
+| *expectedResType*     | `enum`    | Yes      | N/A           | The expected response type                                    |
+| *expectedResLen*      | `integer` | Yes      | N/A           | The expected response length                                  |
+
+#### Example
+
+```squirrel
+local quantity = 1;
+local PDU = blob();
+local expectedResType = ModbusRTU.FUNCTION_CODES.readCoils.fcode;
+local expectedResLen = ModbusRTU.FUNCTION_CODES.readCoils.resLen(quantity);
+local result = parse({
+    quantity        = quantity,
+    PDU             = PDU,
+    expectedResLen  = expectedResLen,
+    expectedResType = expectedResType
+  });
+```
+
+
+
 ### createReadDeviceIdentificationPDU(*readDeviceIdCode, objectId*)
 
 The function creates a <a href="#PDU">PDU</a> for readDeviceIdentificationPDU.
@@ -224,37 +255,37 @@ The function creates a <a href="#PDU">PDU</a> for readDeviceIdentificationPDU.
 
 | Key                | Data Type | Required | Default Value | Description                                                               |
 | ------------------ | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *readDeviceIdCode* | Enum      | Yes      | N/A           | Refer to **Read Device ID Code**                                          |
-| *objectId*         | Enum      | Yes      | N/A           | Refer to **Object ID**                                                    |
+| *readDeviceIdCode* | `enum`    | Yes      | N/A           | Refer to **Read Device ID Code**                                          |
+| *objectId*         | `enum`    | Yes      | N/A           | Refer to **Object ID**                                                    |
 
 
 ##### Read Device ID Codes
 
-| Value                              | Description                                                |
-| ---------------------------------- | ---------------------------------------------------------- |
-| MODBUS_READ_DEVICE_CODE.BASIC      | Get the basic device identification (stream access)        |
-| MODBUS_READ_DEVICE_CODE.REGULAR    | Get the regular device identification (stream access)      |
-| MODBUS_READ_DEVICE_CODE.EXTENDED   | Get the extended device identification (stream access)     |
-| MODBUS_READ_DEVICE_CODE.SPECIFIC   | Get one specific identification object (individual access) |
+| Value                                 | Description                                                |
+| ------------------------------------- | ---------------------------------------------------------- |
+| MODBUSRTU_READ_DEVICE_CODE.BASIC      | Get the basic device identification (stream access)        |
+| MODBUSRTU_READ_DEVICE_CODE.REGULAR    | Get the regular device identification (stream access)      |
+| MODBUSRTU_READ_DEVICE_CODE.EXTENDED   | Get the extended device identification (stream access)     |
+| MODBUSRTU_READ_DEVICE_CODE.SPECIFIC   | Get one specific identification object (individual access) |
 
 
 ##### Object ID
 
-| Value                                  | Category  |
-| -------------------------------------- | --------- |
-| MODBUS_OBJECT_ID.VENDOR_NAME           | Basic     |
-| MODBUS_OBJECT_ID.PRODUCT_CODE          | Basic     |
-| MODBUS_OBJECT_ID.MAJOR_MINOR_REVISION  | Basic     |
-| MODBUS_OBJECT_ID.VENDOR_URL            | Regular   |
-| MODBUS_OBJECT_ID.PRODUCT_NAME          | Regular   |
-| MODBUS_OBJECT_ID.MODEL_NAME            | Regular   |
-| MODBUS_OBJECT_ID.USER_APPLICATION_NAME | Regular   |
+| Value                                     | Category  |
+| ----------------------------------------- | --------- |
+| MODBUSRTU_OBJECT_ID.VENDOR_NAME           | Basic     |
+| MODBUSRTU_OBJECT_ID.PRODUCT_CODE          | Basic     |
+| MODBUSRTU_OBJECT_ID.MAJOR_MINOR_REVISION  | Basic     |
+| MODBUSRTU_OBJECT_ID.VENDOR_URL            | Regular   |
+| MODBUSRTU_OBJECT_ID.PRODUCT_NAME          | Regular   |
+| MODBUSRTU_OBJECT_ID.MODEL_NAME            | Regular   |
+| MODBUSRTU_OBJECT_ID.USER_APPLICATION_NAME | Regular   |
 
 #### Example
 
 ```squirrel
-local readDeviceIdCode = MODBUS_READ_DEVICE_CODE.BASIC;
-local objectId = MODBUS_OBJECT_ID.VENDOR_NAME;
+local readDeviceIdCode = MODBUSRTU_READ_DEVICE_CODE.BASIC;
+local objectId = MODBUSRTU_OBJECT_ID.VENDOR_NAME;
 local PDU = ModbusRTU.createReadDeviceIdentificationPDU(readDeviceIdCode, objectId);
 server.log(PDU);
 

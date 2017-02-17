@@ -4,11 +4,11 @@ const DEVICE_ADDRESS = 1;
 
 function errorMessage (error, resolve,reject){
     switch(error){
-        case MODBUS_EXCEPTION.ILLEGAL_FUNCTION :
+        case MODBUSRTU_EXCEPTION.ILLEGAL_FUNCTION :
           return resolve("This function is not supported by the device");
-        case MODBUS_EXCEPTION.ILLEGAL_DATA_ADDR :
+        case MODBUSRTU_EXCEPTION.ILLEGAL_DATA_ADDR :
           return resolve("Illegal data address, please try a different address");
-        case MODBUS_EXCEPTION.RESPONSE_TIMEOUT :
+        case MODBUSRTU_EXCEPTION.RESPONSE_TIMEOUT :
           return resolve("Timeout. No response from the device");
         default :
           return reject("Error code : " + error);
@@ -28,7 +28,7 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testReadCoils(){
-      local targetType = MODBUS_TARGET_TYPE.COIL;
+      local targetType = MODBUSRTU_TARGET_TYPE.COIL;
       local startingAddress = 1;
       local quantity = 5;
       return Promise(function(resolve, reject){
@@ -50,7 +50,7 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testReadDiscreteInput(){
-      local targetType = MODBUS_TARGET_TYPE.DISCRETE_INPUT;
+      local targetType = MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT;
       local startingAddress = 1;
       local quantity = 6;
       return Promise(function(resolve, reject){
@@ -70,7 +70,7 @@ class DeviceTestCase extends ImpTestCase {
   }
 
   function testReadInputRegisters(){
-      local targetType = MODBUS_TARGET_TYPE.INPUT_REGISTER;
+      local targetType = MODBUSRTU_TARGET_TYPE.INPUT_REGISTER;
       local startingAddress = 1;
       local quantity = 7;
       return Promise(function(resolve, reject){
@@ -91,7 +91,7 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testReadRegisters(){
-      local targetType = MODBUS_TARGET_TYPE.HOLDING_REGISTER;
+      local targetType = MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER;
       local startingAddress = 1;
       local quantity = 8;
       return Promise(function(resolve, reject){
@@ -168,8 +168,8 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testReadDeviceIdentification(){
-      local readDeviceIdCode = MODBUS_READ_DEVICE_CODE.BASIC;
-      local objectId = MODBUS_OBJECT_ID.VENDOR_NAME;
+      local readDeviceIdCode = MODBUSRTU_READ_DEVICE_CODE.BASIC;
+      local objectId = MODBUSRTU_OBJECT_ID.VENDOR_NAME;
       return Promise(function(resolve, reject){
             _modbus.readDeviceIdentification(DEVICE_ADDRESS, readDeviceIdCode, objectId, function(error, result){
                   if(error){
@@ -188,7 +188,7 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testDiagnostics(){
-      local subFunctionCode = MODBUS_SUB_FUNCTION_CODE.RETURN_QUERY_DATA;
+      local subFunctionCode = MODBUSRTU_SUB_FUNCTION_CODE.RETURN_QUERY_DATA;
       local data = blob();
       data.writen(swap2(0xFF00),'w');
       return Promise(function(resolve, reject){
@@ -216,7 +216,7 @@ class DeviceTestCase extends ImpTestCase {
   }
 
   function testWriteSingleCoilBoolean(){
-      local targetType = MODBUS_TARGET_TYPE.COIL;
+      local targetType = MODBUSRTU_TARGET_TYPE.COIL;
       local startingAddress = 0x0A;
       local quantity = 1;
       local values = true;
@@ -234,7 +234,7 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testWriteSingleCoilInt(){
-      local targetType = MODBUS_TARGET_TYPE.COIL;
+      local targetType = MODBUSRTU_TARGET_TYPE.COIL;
       local startingAddress = 0x0A;
       local quantity = 1;
       local values = 0x0000;
@@ -251,7 +251,7 @@ class DeviceTestCase extends ImpTestCase {
   }
 
   function testWriteSingleCoilBlob(){
-      local targetType = MODBUS_TARGET_TYPE.COIL;
+      local targetType = MODBUSRTU_TARGET_TYPE.COIL;
       local startingAddress = 0x0A;
       local quantity = 1;
       local values = blob();
@@ -270,7 +270,7 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testWriteMultipleCoilsBoolean(){
-      local targetType = MODBUS_TARGET_TYPE.COIL;
+      local targetType = MODBUSRTU_TARGET_TYPE.COIL;
       local startingAddress = 0x0A;
       local values = [true,false];
       local quantity = values.len();
@@ -288,7 +288,7 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testWriteMutipleCoilsInt(){
-      local targetType = MODBUS_TARGET_TYPE.COIL;
+      local targetType = MODBUSRTU_TARGET_TYPE.COIL;
       local startingAddress = 0x0A;
       local values = [0x0000,0xFF00];
       local quantity = values.len();
@@ -305,7 +305,7 @@ class DeviceTestCase extends ImpTestCase {
   }
 
   function testWriteMutipleCoilsBlob(){
-      local targetType = MODBUS_TARGET_TYPE.COIL;
+      local targetType = MODBUSRTU_TARGET_TYPE.COIL;
       local startingAddress = 0x01;
       local values = blob();
       local quantity = 8;
@@ -326,7 +326,7 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testWriteSingleRegisterInt(){
-      local targetType = MODBUS_TARGET_TYPE.HOLDING_REGISTER;
+      local targetType = MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER;
       local startingAddress = 0x0A;
       local quantity = 1;
       local values = 1828;
@@ -343,7 +343,7 @@ class DeviceTestCase extends ImpTestCase {
   }
 
   function testWriteSingleRegisterBlob(){
-      local targetType = MODBUS_TARGET_TYPE.HOLDING_REGISTER;
+      local targetType = MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER;
       local startingAddress = 0x0A;
       local quantity = 1;
       local values = blob();
@@ -364,7 +364,7 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testWriteMutipleRegistersInt(){
-      local targetType = MODBUS_TARGET_TYPE.HOLDING_REGISTER;
+      local targetType = MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER;
       local startingAddress = 0x0A;
       local values = [18,28];
       local quantity = values.len();
@@ -381,7 +381,7 @@ class DeviceTestCase extends ImpTestCase {
   }
 
   function testWriteMutipleRegistersBlob(){
-      local targetType = MODBUS_TARGET_TYPE.HOLDING_REGISTER;
+      local targetType = MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER;
       local startingAddress = 0x01;
       local values = blob();
       local quantity = 2;
@@ -402,14 +402,14 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testInvalidArgumentLengthExceptionWriteCoils(){
-      local targetType = MODBUS_TARGET_TYPE.COIL;
+      local targetType = MODBUSRTU_TARGET_TYPE.COIL;
       local startingAddress = 0x01;
       local values = [true, false];
       local quantity = values.len() + 1;
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      this.assertTrue(error == MODBUS_EXCEPTION.INVALID_ARG_LENGTH);
+                      this.assertTrue(error == MODBUSRTU_EXCEPTION.INVALID_ARG_LENGTH);
                       resolve(_PASS_MESSAGE);
                   }else{
                       reject("Exception is not thrown");
@@ -420,14 +420,14 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testInvalidArgumentLengthExceptionWriteRegisters(){
-      local targetType = MODBUS_TARGET_TYPE.HOLDING_REGISTER;
+      local targetType = MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER;
       local startingAddress = 0x0A;
       local values = [8, 80];
       local quantity = values.len() + 1;
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      this.assertTrue(error == MODBUS_EXCEPTION.INVALID_ARG_LENGTH);
+                      this.assertTrue(error == MODBUSRTU_EXCEPTION.INVALID_ARG_LENGTH);
                       resolve(_PASS_MESSAGE);
                   }else{
                       reject("Exception is not thrown");
@@ -437,14 +437,14 @@ class DeviceTestCase extends ImpTestCase {
   }
 
   function testInvalidValuesWriteCoils(){
-      local targetType = MODBUS_TARGET_TYPE.COIL;
+      local targetType = MODBUSRTU_TARGET_TYPE.COIL;
       local startingAddress = 0x01;
       local values = {"1":false , "2":true};
       local quantity = values.len();
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      this.assertTrue(error == MODBUS_EXCEPTION.INVALID_VALUES);
+                      this.assertTrue(error == MODBUSRTU_EXCEPTION.INVALID_VALUES);
                       resolve(_PASS_MESSAGE);
                   }else{
                       reject("Exception is not thrown");
@@ -455,14 +455,14 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testInvalidValuesWriteRegisters(){
-      local targetType = MODBUS_TARGET_TYPE.HOLDING_REGISTER;
+      local targetType = MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER;
       local startingAddress = 0x0A;
       local values = {"1":88 , "2":880};
       local quantity = values.len();
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      this.assertTrue(error == MODBUS_EXCEPTION.INVALID_VALUES);
+                      this.assertTrue(error == MODBUSRTU_EXCEPTION.INVALID_VALUES);
                       resolve(_PASS_MESSAGE);
                   }else{
                       reject("Exception is not thrown");
@@ -472,14 +472,14 @@ class DeviceTestCase extends ImpTestCase {
   }
 
   function testInvalidTargetTypeWrite(){
-      local targetType = MODBUS_TARGET_TYPE.DISCRETE_INPUT;
+      local targetType = MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT;
       local startingAddress = 0x01;
       local values = [true, false];
       local quantity = values.len();
       return Promise(function(resolve, reject){
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result){
                   if(error){
-                      this.assertTrue(error == MODBUS_EXCEPTION.INVALID_TARGET_TYPE);
+                      this.assertTrue(error == MODBUSRTU_EXCEPTION.INVALID_TARGET_TYPE);
                       resolve(_PASS_MESSAGE);
                   }else{
                       reject("Exception is not thrown");
@@ -496,7 +496,7 @@ class DeviceTestCase extends ImpTestCase {
       return Promise(function(resolve, reject){
             _modbus.read(DEVICE_ADDRESS, targetType, startingAddress, quantity, function(error, result){
                   if(error){
-                      this.assertTrue(error == MODBUS_EXCEPTION.INVALID_TARGET_TYPE);
+                      this.assertTrue(error == MODBUSRTU_EXCEPTION.INVALID_TARGET_TYPE);
                       resolve(_PASS_MESSAGE);
                   }else{
                       reject("Exception is not thrown");

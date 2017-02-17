@@ -82,7 +82,7 @@ class Modbus485Master {
      * @param {Int} OR_mask - The OR mask
      * @param {Function} callback - The function to be fired when it receives response regarding this request
      */
-    function maskWriteRegister (deviceAddress, referenceAddress, AND_Mask, OR_Mask, callback = null){
+    function maskWriteRegister(deviceAddress, referenceAddress, AND_Mask, OR_Mask, callback = null) {
         _enqueue(function (){
             local PDU = ModbusRTU.createMaskWriteRegisterPDU(referenceAddress , AND_Mask , OR_Mask);
             _send(deviceAddress,PDU,ModbusRTU.FUNCTION_CODES.maskWriteRegister.resLen,callback);
@@ -95,7 +95,7 @@ class Modbus485Master {
      * @param {Int} deviceAddress - The unique address that identifies a device
      * @param {Function} callback - The function to be fired when it receives response regarding this request
      */
-    function reportSlaveID (deviceAddress, callback = null) {
+    function reportSlaveID(deviceAddress, callback = null) {
         _enqueue(function (){
             local PDU = ModbusRTU.createReportSlaveIdPDU();
             _send(deviceAddress,PDU,ModbusRTU.FUNCTION_CODES.reportSlaveID.resLen,callback);
@@ -167,24 +167,24 @@ class Modbus485Master {
                 local PDU = null;
                 local resLen = null;
                 switch (targetType) {
-                    case MODBUS_TARGET_TYPE.COIL:
+                    case MODBUSRTU_TARGET_TYPE.COIL:
                         PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readCoils, startingAddress, quantity);
                         resLen = ModbusRTU.FUNCTION_CODES.readCoils.resLen(quantity);
                         break;
-                    case MODBUS_TARGET_TYPE.DISCRETE_INPUT:
+                    case MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT:
                         PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readInputs, startingAddress, quantity);
                         resLen = ModbusRTU.FUNCTION_CODES.readInputs.resLen(quantity);
                         break;
-                    case MODBUS_TARGET_TYPE.HOLDING_REGISTER:
+                    case MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER:
                         PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readHoldingRegs, startingAddress, quantity);
                         resLen = ModbusRTU.FUNCTION_CODES.readHoldingRegs.resLen(quantity);
                         break;
-                    case MODBUS_TARGET_TYPE.INPUT_REGISTER:
+                    case MODBUSRTU_TARGET_TYPE.INPUT_REGISTER:
                         PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readInputRegs, startingAddress, quantity);
                         resLen = ModbusRTU.FUNCTION_CODES.readInputRegs.resLen(quantity);
                         break;
                     default:
-                        throw MODBUS_EXCEPTION.INVALID_TARGET_TYPE;
+                        throw MODBUSRTU_EXCEPTION.INVALID_TARGET_TYPE;
                 }
                 _send(deviceAddress, PDU, resLen, callback);
             }catch(error){
@@ -211,12 +211,12 @@ class Modbus485Master {
                 _targetType = targetType;
                 _quantity = quantity;
                 switch (targetType) {
-                    case MODBUS_TARGET_TYPE.COIL:
+                    case MODBUSRTU_TARGET_TYPE.COIL:
                         return _writeCoils(deviceAddress, startingAddress, quantity, values, callback);
-                    case MODBUS_TARGET_TYPE.HOLDING_REGISTER:
+                    case MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER:
                         return _writeRegs(deviceAddress, startingAddress, quantity, values, callback);
                     default:
-                        throw MODBUS_EXCEPTION.INVALID_TARGET_TYPE;
+                        throw MODBUSRTU_EXCEPTION.INVALID_TARGET_TYPE;
                 }
             }catch(error){
                 _callbackHandler = callback;
@@ -234,7 +234,7 @@ class Modbus485Master {
     function _responseTimeoutFactory(timeout) {
         return imp.wakeup(timeout, function() {
             _responseTimer = null;
-            _errorCb(MODBUS_EXCEPTION.RESPONSE_TIMEOUT);
+            _errorCb(MODBUSRTU_EXCEPTION.RESPONSE_TIMEOUT);
         }.bindenv(this));
     }
 
@@ -318,7 +318,7 @@ class Modbus485Master {
                         _dequeue();
                     }.bindenv(this));
                 } else{
-                    throw MODBUS_EXCEPTION.INVALID_CRC;
+                    throw MODBUSRTU_EXCEPTION.INVALID_CRC;
                 }
             }
         } catch(error){
@@ -448,7 +448,7 @@ class Modbus485Master {
         switch (typeof values) {
             case "array":
                 if (quantity != values.len()){
-                    throw MODBUS_EXCEPTION.INVALID_ARG_LENGTH;
+                    throw MODBUSRTU_EXCEPTION.INVALID_ARG_LENGTH;
                 }
                 local byte, bitshift;
                 foreach (bit,val in values) {
@@ -469,7 +469,7 @@ class Modbus485Master {
             case "blob":
                 break;
             default:
-                throw MODBUS_EXCEPTION.INVALID_VALUES;
+                throw MODBUSRTU_EXCEPTION.INVALID_VALUES;
         }
         local request = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleCoil : ModbusRTU.FUNCTION_CODES.writeMultipleCoils;
         local PDU = ModbusRTU.createWritePDU(request,startingAddress,numBytes,quantity,values);
@@ -486,7 +486,7 @@ class Modbus485Master {
         switch (typeof values) {
             case "array":
                 if (quantity != values.len()) {
-                    throw MODBUS_EXCEPTION.INVALID_ARG_LENGTH;
+                    throw MODBUSRTU_EXCEPTION.INVALID_ARG_LENGTH;
                 }
                 foreach (val in values) {
                     newvalues.writen(swap2(val), 'w');
@@ -500,7 +500,7 @@ class Modbus485Master {
             case "blob":
                 break;
             default:
-                throw MODBUS_EXCEPTION.INVALID_VALUES;
+                throw MODBUSRTU_EXCEPTION.INVALID_VALUES;
         }
         local request = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleReg : ModbusRTU.FUNCTION_CODES.writeMultipleRegs;
         local PDU = ModbusRTU.createWritePDU(request,startingAddress,numBytes,quantity,values);

@@ -5,7 +5,7 @@
 //------------------------------------------------------------------------------
 // Constants
 
-enum MODBUS_SUB_FUNCTION_CODE {
+enum MODBUSRTU_SUB_FUNCTION_CODE {
     RETURN_QUERY_DATA = 0x0000,
     RESTART_COMMUNICATION_OPTION = 0x0001,
     RETURN_DIAGNOSTICS_REGISTER = 0x0002,
@@ -23,7 +23,7 @@ enum MODBUS_SUB_FUNCTION_CODE {
     CLEAR_OVERRUN_COUNTER_AND_FLAG = 0x0014
 }
 
-enum MODBUS_EXCEPTION {
+enum MODBUSRTU_EXCEPTION {
     ILLEGAL_FUNCTION = 0x01,
     ILLEGAL_DATA_ADDR = 0x02,
     ILLEGAL_DATA_VAL = 0x03,
@@ -43,27 +43,27 @@ enum MODBUS_EXCEPTION {
     INVALID_VALUES = 0x58,
 }
 
-enum MODBUS_ADDRESS_TYPE {
+enum MODBUSRTU_ADDRESS_TYPE {
     DIRECT,
     STANDARD,
     EXTENDED,
 }
 
-enum MODBUS_TARGET_TYPE {
+enum MODBUSRTU_TARGET_TYPE {
     COIL,
     DISCRETE_INPUT,
     INPUT_REGISTER,
     HOLDING_REGISTER,
 }
 
-enum MODBUS_READ_DEVICE_CODE {
+enum MODBUSRTU_READ_DEVICE_CODE {
     BASIC = 0x01,
     REGULAR = 0x02,
     EXTENDED = 0x03,
     SPECIFIC = 0x04
 }
 
-enum MODBUS_OBJECT_ID {
+enum MODBUSRTU_OBJECT_ID {
     VENDOR_NAME = 0x00,
     PRODUCT_CODE = 0x01,
     MAJOR_MINOR_REVISION = 0x02,
@@ -431,14 +431,14 @@ class ModbusRTU {
      */
     static function _isValidAddress(addressType, address) {
         switch (addressType) {
-            case MODBUS_ADDRESS_TYPE.DIRECT:
+            case MODBUSRTU_ADDRESS_TYPE.DIRECT:
                 return (address >= 0 && address <= 9998);
-            case MODBUS_ADDRESS_TYPE.STANDARD:
+            case MODBUSRTU_ADDRESS_TYPE.STANDARD:
                 return (address >= 00001 && address <= 09999) ||
                        (address >= 10001 && address <= 19999) ||
                        (address >= 30001 && address <= 39999) ||
                        (address >= 40001 && address <= 49999);
-            case MODBUS_ADDRESS_TYPE.EXTENDED:
+            case MODBUSRTU_ADDRESS_TYPE.EXTENDED:
                 return (address >= 000001 && address <= 065536) ||
                        (address >= 100001 && address <= 165536) ||
                        (address >= 300001 && address <= 365536) ||
@@ -455,29 +455,29 @@ class ModbusRTU {
      */
     static function _getTargetType(addressType, address) {
         switch (addressType) {
-            case MODBUS_ADDRESS_TYPE.DIRECT:
+            case MODBUSRTU_ADDRESS_TYPE.DIRECT:
                 server.error("Target type must be provided for direct addressing");
-                throw MODBUS_EXCEPTION.INVALID_TARGET_TYPE;
-            case MODBUS_ADDRESS_TYPE.STANDARD:
+                throw MODBUSRTU_EXCEPTION.INVALID_TARGET_TYPE;
+            case MODBUSRTU_ADDRESS_TYPE.STANDARD:
                 if        (address >= 1 && address <= 9999) {
-                    return MODBUS_TARGET_TYPE.COIL;
+                    return MODBUSRTU_TARGET_TYPE.COIL;
                 } else if (address >= 10001 && address <= 19999) {
-                    return MODBUS_TARGET_TYPE.DISCRETE_INPUT;
+                    return MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT;
                 } else if (address >= 30001 && address <= 39999) {
-                    return MODBUS_TARGET_TYPE.INPUT_REGISTER;
+                    return MODBUSRTU_TARGET_TYPE.INPUT_REGISTER;
                 } else if (address >= 40001 && address <= 49999) {
-                    return MODBUS_TARGET_TYPE.HOLDING_REGISTER;
+                    return MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER;
                 }
                 break;
-            case MODBUS_ADDRESS_TYPE.EXTENDED:
+            case MODBUSRTU_ADDRESS_TYPE.EXTENDED:
                 if (address >= 1 && address <= 65536) {
-                    return MODBUS_TARGET_TYPE.COIL;
+                    return MODBUSRTU_TARGET_TYPE.COIL;
                 } else if (address >= 100001 && address <= 165536) {
-                    return MODBUS_TARGET_TYPE.DISCRETE_INPUT;
+                    return MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT;
                 } else if (address >= 300001 && address <= 365536) {
-                    return MODBUS_TARGET_TYPE.INPUT_REGISTER;
+                    return MODBUSRTU_TARGET_TYPE.INPUT_REGISTER;
                 } else if (address >= 400001 && address <= 465536) {
-                    return MODBUS_TARGET_TYPE.HOLDING_REGISTER;
+                    return MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER;
                 }
                 break;
         }
@@ -491,22 +491,22 @@ class ModbusRTU {
      */
     static function _getTargetOffset(addressType, targetType) {
         switch (addressType) {
-            case MODBUS_ADDRESS_TYPE.DIRECT:
+            case MODBUSRTU_ADDRESS_TYPE.DIRECT:
                 return 0;
-            case MODBUS_ADDRESS_TYPE.STANDARD:
+            case MODBUSRTU_ADDRESS_TYPE.STANDARD:
                 switch (targetType) {
-                    case MODBUS_TARGET_TYPE.COIL:             return 1;
-                    case MODBUS_TARGET_TYPE.DISCRETE_INPUT:   return 10001;
-                    case MODBUS_TARGET_TYPE.INPUT_REGISTER:   return 30001;
-                    case MODBUS_TARGET_TYPE.HOLDING_REGISTER: return 40001;
+                    case MODBUSRTU_TARGET_TYPE.COIL:             return 1;
+                    case MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT:   return 10001;
+                    case MODBUSRTU_TARGET_TYPE.INPUT_REGISTER:   return 30001;
+                    case MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER: return 40001;
                 }
                 break;
-            case MODBUS_ADDRESS_TYPE.EXTENDED:
+            case MODBUSRTU_ADDRESS_TYPE.EXTENDED:
                 switch (targetType) {
-                    case MODBUS_TARGET_TYPE.COIL:             return 1;
-                    case MODBUS_TARGET_TYPE.DISCRETE_INPUT:   return 100001;
-                    case MODBUS_TARGET_TYPE.INPUT_REGISTER:   return 300001;
-                    case MODBUS_TARGET_TYPE.HOLDING_REGISTER: return 400001;
+                    case MODBUSRTU_TARGET_TYPE.COIL:             return 1;
+                    case MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT:   return 100001;
+                    case MODBUSRTU_TARGET_TYPE.INPUT_REGISTER:   return 300001;
+                    case MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER: return 400001;
                 }
                 break;
         }

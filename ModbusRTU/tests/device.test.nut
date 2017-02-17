@@ -195,8 +195,8 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testCreatereadDeviceIdentificationPDU() {
-    local readDeviceIdCode = MODBUS_READ_DEVICE_CODE.BASIC;
-    local objectId = MODBUS_OBJECT_ID.VENDOR_NAME;
+    local readDeviceIdCode = MODBUSRTU_READ_DEVICE_CODE.BASIC;
+    local objectId = MODBUSRTU_OBJECT_ID.VENDOR_NAME;
     local expectedPDU = blob();
     expectedPDU.writen(ModbusRTU.FUNCTION_CODES.readDeviceIdentification.fcode,'b');
     expectedPDU.writen((0x0E),'b');
@@ -208,7 +208,7 @@ class DeviceTestCase extends ImpTestCase {
 
 
   function testCreateDiagnosticsPDU() {
-    local subFunctionCode = MODBUS_SUB_FUNCTION_CODE.RETURN_QUERY_DATA;
+    local subFunctionCode = MODBUSRTU_SUB_FUNCTION_CODE.RETURN_QUERY_DATA;
     local data = blob();
     data.writen(swap2(0x0000),'w')
     local expectedPDU = blob();
@@ -514,7 +514,7 @@ class DeviceTestCase extends ImpTestCase {
              }
          }
      } catch(error){
-        this.assertTrue(error == MODBUS_EXCEPTION.ILLEGAL_FUNCTION);
+        this.assertTrue(error == MODBUSRTU_EXCEPTION.ILLEGAL_FUNCTION);
      }
   }
 
@@ -539,7 +539,7 @@ class DeviceTestCase extends ImpTestCase {
             }
         }
     }catch(error){
-        this.assertTrue(error == MODBUS_EXCEPTION.INVALID_CRC);
+        this.assertTrue(error == MODBUSRTU_EXCEPTION.INVALID_CRC);
     }
   }
 

@@ -1,7 +1,7 @@
 
 # [ModbusRTU](./ModbusRTU/)
 
-This library creates and parses Modbus Protocol Data Unit (PDU).
+This library creates and parses Modbus Protocol Data Unit (PDU). This library is a prerequisite to other libraries. 
 
 
 # [Modbus485Master](./Modbus485Master/)

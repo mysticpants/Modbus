@@ -310,7 +310,6 @@ class Modbus485Master {
                 }
                 //  got a valid packet
                 if(_hasValidCRC(_receiveBuffer)){
-                    _log(_receiveBuffer);
                     _clearPreviousCommand();
                     imp.wakeup(0, function() {
                         if (_callbackHandler) {
@@ -325,6 +324,7 @@ class Modbus485Master {
         } catch(error){
               _errorCb(error);
         }
+        _log(_receiveBuffer);
     }
 
     /*
@@ -336,15 +336,11 @@ class Modbus485Master {
             case ModbusRTU.FUNCTION_CODES.readDeviceIdentification.fcode :
                 local resLen = 7;
                 foreach (value in result) {
-                    resLen += result.len() + 2;
+                    resLen += value.len() + 2;
                 }
                 return resLen;
             case ModbusRTU.FUNCTION_CODES.reportSlaveID.fcode :
-                local resLen = 2;
-                foreach (value in result) {
-                    resLen += result.len();
-                }
-                return resLen;
+                return 3 + result.slaveId.len(); //  function code  , byte count , indicator
         }
     }
 

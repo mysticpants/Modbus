@@ -9,7 +9,7 @@ function errorMessage (error, resolve,reject){
         case MODBUS_EXCEPTION.ILLEGAL_DATA_ADDR :
           return resolve("Illegal data address, please try a different address");
         case MODBUS_EXCEPTION.RESPONSE_TIMEOUT :
-          return reject("Timeout. No response from the device");
+          return resolve("Timeout. No response from the device");
         default :
           return reject("Error code : " + error);
     }

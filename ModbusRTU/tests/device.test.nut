@@ -1,6 +1,25 @@
 const MINIMUM_RESPONSE_LENGTH = 5;
 
 
+function parseReportSlaveID (fakeBuffer){
+    local length = fakeBuffer.len();
+    if (length < MINIMUM_RESPONSE_LENGTH){
+        return false;
+    }
+    fakeBuffer.seek(1);
+    local params = {
+        functionCode = ModbusRTU.FUNCTION_CODES.reportSlaveID.fcode,
+        PDU = fakeBuffer.readblob(length - 1),
+        expectedResLen = null,
+        expectedResType = ModbusRTU.FUNCTION_CODES.reportSlaveID.fcode
+    };
+    local result = ModbusRTU.parse(params);
+    if (result == false) {
+        return fakeBuffer.seek(length);
+    }
+    return result;
+}
+
 
 function parseReadExceptionStatus (fakeBuffer){
     local length = fakeBuffer.len();
@@ -305,6 +324,30 @@ class DeviceTestCase extends ImpTestCase {
     this.assertTrue(expectedPDU.tostring() == PDU.tostring());
   }
 
+  function testParseReportSlaveID(){
+    local result = null;
+    local fakeBuffer = blob();
+    local slaveID = "abcde";
+    local runIndicator = 0xFF;
+    fakeBuffer.writen(0x01,'b');
+    fakeBuffer.writen(0x11,'b');
+    fakeBuffer.writen(slaveID.len() + 1,'b');
+    fakeBuffer.writestring(slaveID);
+    fakeBuffer.writen(runIndicator,'b');
+    fakeBuffer.seek(0);
+    local mockBuffer = blob();
+    while(true){
+        if (!fakeBuffer.eos()){
+            local byte = fakeBuffer.readn('b');
+            mockBuffer.writen(byte,'b');
+            result = parseReportSlaveID(mockBuffer);
+        } else {
+            break;
+        }
+    }
+    this.assertTrue(result.slaveId == slaveID);
+    this.assertTrue(result.runIndicator == (runIndicator == 0? false : true));
+  }
 
   function testParseReadExceptionStatus(){
     local result = null;

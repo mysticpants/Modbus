@@ -174,7 +174,7 @@ class ModbusRTU {
         PDU.writen(swap2(readQuantity),'w');
         PDU.writen(swap2(writeStartAddress),'w');
         PDU.writen(swap2(writeQuantity),'w');
-        PDU.writen(swap2(writeValue.len()),'w');
+        PDU.writen(writeValue.len(),'b');
         PDU.writeblob(writeValue);
         return PDU;
     }

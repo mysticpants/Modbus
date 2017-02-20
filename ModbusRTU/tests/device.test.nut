@@ -184,7 +184,7 @@ class DeviceTestCase extends ImpTestCase {
     expectedPDU.writen(swap2(readQuantity),'w');
     expectedPDU.writen(swap2(writeStartAddress),'w');
     expectedPDU.writen(swap2(writeQuantity),'w');
-    expectedPDU.writen(swap2(writeValue.len()),'w');
+    expectedPDU.writen(writeValue.len(),'b');
     expectedPDU.writeblob(writeValue);
     local PDU = ModbusRTU.createReadWriteMultipleRegistersPDU(readingStartAddress,readQuantity,writeStartAddress,writeQuantity,writeValue);
     this.assertTrue(expectedPDU.tostring() == PDU.tostring());

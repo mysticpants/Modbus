@@ -1,6 +1,6 @@
 
 
-class ModbusTCP {
+class ModbusTCPMaster {
 
     static VERSION = "1.0.0";
     static MAX_TRANSACTION_COUNT = 255;
@@ -12,11 +12,13 @@ class ModbusTCP {
     _connectionSettings = null;
     _shouldRetry = null;
     _connectCallback = null;
+    _debug = null;
 
-    constructor (spi, interruptPin, csPin, resetPin){
+    constructor (spi, interruptPin, csPin, resetPin, debug = false){
         _wiz = W5500.API(spi, interruptPin, csPin, resetPin);
         _transactionCount = 1;
         _transactions = {};
+        _debug = debug;
     }
 
 

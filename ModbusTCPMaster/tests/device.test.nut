@@ -24,7 +24,7 @@ class DeviceTestCase extends ImpTestCase {
   function setUp() {
     local spi = hardware.spi0;
     spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
-    _modbus = ModbusTCP(spi, hardware.pinXC, null, hardware.pinXA);
+    _modbus = ModbusTCPMaster(spi, hardware.pinXC, null, hardware.pinXA);
     _connection = Promise (function(resolve,reject){
         _modbus.connect({
             "gatewayIP"  : [192, 168, 201, 1],

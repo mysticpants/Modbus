@@ -8,7 +8,7 @@ local spi = hardware.spi0;
 spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
 
 // instantiate a modbus object
-local modbus = ModbusTCP(spi, hardware.pinXC, null, hardware.pinXA);
+local modbus = ModbusTCPMaster(spi, hardware.pinXC, null, hardware.pinXA);
 
 // the network setting
 local networkSettings = {

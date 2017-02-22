@@ -26,16 +26,17 @@ local connectionSettings = {
 // open the connection
 modbus.connect(networkSettings, connectionSettings, function(error, conn){
     if (error) {
-        return server.log(error);
-    }
-    // read and write multiple registers in one go , with read run before write
-    modbus.readWriteMultipleRegisters(0x0A, 2, 0x0A, 2, [28,88], function(error, result){
-        if (error) {
-            server.error(error);
-        } else {
-            foreach (index, value in result) {
-                server.log(format("Index : %d, value : %d",index,value));
+        server.log(error);
+    } else {
+        // read and write multiple registers in one go , with read run before write
+        modbus.readWriteMultipleRegisters(0x0A, 2, 0x0A, 2, [28,88], function(error, result){
+            if (error) {
+                server.error(error);
+            } else {
+                foreach (index, value in result) {
+                    server.log(format("Index : %d, value : %d",index,value));
+                }
             }
-        }
-    });
+        });
+    }
 });

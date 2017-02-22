@@ -36,7 +36,7 @@ Instantiate a new ModbusTCPMaster object and set the configuration of spi .
 
 | Key          | Default     | Notes                                                                                                                       |
 | ------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------- |
-| spi          | N/A         | The Spi object Wiznet uses                                                                                                  |
+| spi          | N/A         | The spi object Wiznet uses                                                                                                  |
 | interruptPin | N/A         | The interrupt pin. It can be any digital input that supports a callback on pin state change                                 |
 | csPin        | N/A         | The Chip Select pin. If you are not using the Imp005, you must pass in the digital output pin to be used as the chip select |
 | resetPin     | N/A         | The reset pin                                                                                                               |
@@ -53,7 +53,68 @@ spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
 
 // instantiate a modbus object
 modbus <- ModbusTCPMaster(spi, hardware.pinXC, null, hardware.pinXA);
+
 ```
+
+
+### connect(*networkSettings, connectionSettings, [callback]*)
+
+This function configures the network and opens a TCP connection with the device. It will try to reconnect when the connection is not closed intentionally
+
+#### Parameters
+
+| Key                  | Data Type   | Required | Default Value | Description                                                  |
+| -------------------- | ----------- | -------- | ------------- | ------------------------------------------------------------ |
+| *networkSettings*    | `table`     | No       | Null          | The network settings. It entails gatewayIP, subnet, sourceIP |
+| *connectionSettings* | `table`     | No       | Null          | The connection settings. It entails the device IP and port   |
+| *callback*           | `function`  | No       | Null          | The function to be fired when the connection is established  |
+
+#### Example
+
+```squirrel
+// the network setting
+local networkSettings = {
+    "gatewayIP"  : [192, 168, 201, 1],
+    "subnet"     : [255, 255, 255, 0],
+    "sourceIP"   : [192, 168, 1, 30]
+};
+
+// the device address and port
+local connectionSettings = {
+    "destIP"     : [192, 168, 1, 90],
+    "destPort"   : [0x01, 0xF6]
+};
+
+
+// open the connection
+modbus.connect(networkSettings, connectionSettings, function(error, conn){
+    if (error) {
+        server.log(error);
+    } else {
+        // do something here
+    }
+});
+
+```
+
+
+### disconnect()
+
+This function closes the existing TCP connection.
+
+#### Parameters
+
+None
+
+#### Example
+
+```squirrel
+
+modbus.disconnect();
+
+```
+
+
 
 ### read(*targetType, startingAddress, quantity, values, [callback]*)
 
@@ -405,10 +466,12 @@ The table below enumerates all the exception codes that can be possibly encounte
 | 86            | Invalid Address Type    |
 | 87            | Invalid Target Type     |
 | 88            | Invalid Values          |
+| 89            | Invalid Quantity        |
+
 
 
 
 
 # License
 
-The ModbusRTUMaster library is licensed under the [MIT License](https://github.com/electricimp/thethingsapi/tree/master/LICENSE).
+The ModbusTCPMaster library is licensed under the [MIT License](https://github.com/electricimp/thethingsapi/tree/master/LICENSE).

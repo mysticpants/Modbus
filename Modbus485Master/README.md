@@ -362,8 +362,8 @@ This function allows reading the identification and additional information relat
 
 ##### Object ID
 
-| Value                                  | Category  |
-| -------------------------------------- | --------- |
+| Value                                     | Category  |
+| ----------------------------------------- | --------- |
 | MODBUSRTU_OBJECT_ID.VENDOR_NAME           | Basic     |
 | MODBUSRTU_OBJECT_ID.PRODUCT_CODE          | Basic     |
 | MODBUSRTU_OBJECT_ID.MAJOR_MINOR_REVISION  | Basic     |
@@ -413,10 +413,12 @@ The table below enumerates all the exception codes that can be possibly encounte
 | 86            | Invalid Address Type    |
 | 87            | Invalid Target Type     |
 | 88            | Invalid Values          |
+| 89            | Invalid Quantity        |
+
 
 
 
 
 # License
 
-The ModbusRTUMaster library is licensed under the [MIT License](https://github.com/electricimp/thethingsapi/tree/master/LICENSE).
+The Modbus485Master library is licensed under the [MIT License](https://github.com/electricimp/thethingsapi/tree/master/LICENSE).

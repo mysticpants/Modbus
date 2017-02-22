@@ -28,14 +28,14 @@ class Modbus485Master {
   /*
    * Constructor for Modbus485Master
    *
-   * @param  {Object} uart - The UART object
-   * @param  {Object} rts - The pin used as RTS
-   * @param  {Int} baudRate - 19200 bit/sec by dafult
-   * @param  {Int} dateBits - Word size , 8 bit by default
-   * @param  {Constant} parity - PARITY_NONE by default
-   * @param  {Int} stopBits - 1 bit by default
-   * @param  {Float} timeout - 1.0 second by default
-   * @param  {Boolean} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
+   * @param  {object} uart - The UART object
+   * @param  {object} rts - The pin used as RTS
+   * @param  {integer} baudRate - 19200 bit/sec by dafult
+   * @param  {integer} dateBits - Word size , 8 bit by default
+   * @param  {enum} parity - PARITY_NONE by default
+   * @param  {integer} stopBits - 1 bit by default
+   * @param  {float} timeout - 1.0 second by default
+   * @param  {bool} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
    *
    */
     constructor(uart, rts, baudRate = 19200, dataBits = 8, parity = PARITY_NONE, stopBits = 1, timeout = 1.0, debug = false) {
@@ -57,13 +57,13 @@ class Modbus485Master {
   /*
    * This function performs a combination of one read operation and one write operation in a single MODBUS transaction. The write operation is performed before the read.
    *
-   * @param {Int} deviceAddress - The unique address that identifies a device
-   * @param {Int} readingStartAddress - The address from which it begins reading values
-   * @param {Int} readQuantity - The number of consecutive addresses values are read from
-   * @param {Int} writeStartAddress - The address from which it begins writing values
-   * @param {Int} writeQuantity - The number of consecutive addresses values are written into
-   * @param {Blob} writeValue - The value written into the holding register
-   * @param {Function} callback - The function to be fired when it receives response regarding this request
+   * @param {integer} deviceAddress - The unique address that identifies a device
+   * @param {integer} readingStartAddress - The address from which it begins reading values
+   * @param {integer} readQuantity - The number of consecutive addresses values are read from
+   * @param {integer} writeStartAddress - The address from which it begins writing values
+   * @param {integer} writeQuantity - The number of consecutive addresses values are written into
+   * @param {blob} writeValue - The value written into the holding register
+   * @param {function} callback - The function to be fired when it receives response regarding this request
    */
     function readWriteMultipleRegisters (deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, callback = null){
         _enqueue(function (){
@@ -76,11 +76,11 @@ class Modbus485Master {
     /*
      * This function modifies the contents of a specified holding register using a combination of an AND mask, an OR mask, and the register's current contents. The function can be used to set or clear individual bits in the register.
      *
-     * @param {Int} deviceAddress - The unique address that identifies a device
-     * @param {Int} referenceAddress - The address of the holding register the value is written into
-     * @param {Int} AND_mask - The AND mask
-     * @param {Int} OR_mask - The OR mask
-     * @param {Function} callback - The function to be fired when it receives response regarding this request
+     * @param {integer} deviceAddress - The unique address that identifies a device
+     * @param {integer} referenceAddress - The address of the holding register the value is written into
+     * @param {integer} AND_mask - The AND mask
+     * @param {integer} OR_mask - The OR mask
+     * @param {function} callback - The function to be fired when it receives response regarding this request
      */
     function maskWriteRegister(deviceAddress, referenceAddress, AND_Mask, OR_Mask, callback = null) {
         _enqueue(function (){
@@ -92,8 +92,8 @@ class Modbus485Master {
     /*
      * This function reads the description of the type, the current status, and other information specific to a remote device.
      *
-     * @param {Int} deviceAddress - The unique address that identifies a device
-     * @param {Function} callback - The function to be fired when it receives response regarding this request
+     * @param {integer} deviceAddress - The unique address that identifies a device
+     * @param {function} callback - The function to be fired when it receives response regarding this request
      */
     function reportSlaveID(deviceAddress, callback = null) {
         _enqueue(function (){
@@ -105,10 +105,10 @@ class Modbus485Master {
     /*
      * This function allows reading the identification and additional information relative to the physical and functional description of a remote device, only.
      *
-     * @param {Int} deviceAddress - The unique address that identifies a device
-     * @param {Enum} readDeviceIdCode - read device id code
-     * @param {Enum} objectId - Object id
-     * @param {Function} callback - The function to be fired when it receives response regarding this request
+     * @param {integer} deviceAddress - The unique address that identifies a device
+     * @param {enum} readDeviceIdCode - read device id code
+     * @param {enum} objectId - object id
+     * @param {function} callback - The function to be fired when it receives response regarding this request
      */
     function readDeviceIdentification (deviceAddress, readDeviceIdCode, objectId, callback = null){
         _enqueue(function (){
@@ -120,10 +120,10 @@ class Modbus485Master {
     /*
      * This function provides a series of tests for checking the communication system between a client ( Master) device and a server ( Slave), or for checking various internal error conditions within a server.
      *
-     * @param {Int} deviceAddress - The unique address that identifies a device
-     * @param {Int} subFunctionCode - The address from which it begins reading values
-     * @param {Blob} data - The data field required by Modbus request
-     * @param {Function} callback - The function to be fired when it receives response regarding this request
+     * @param {integer} deviceAddress - The unique address that identifies a device
+     * @param {integer} subFunctionCode - The address from which it begins reading values
+     * @param {blob} data - The data field required by Modbus request
+     * @param {function} callback - The function to be fired when it receives response regarding this request
      */
     function diagnostics (deviceAddress, subFunctionCode, data, callback = null){
         _enqueue(function() {
@@ -138,8 +138,8 @@ class Modbus485Master {
     /*
      * This function reads the contents of eight Exception Status outputs in a remote device
      *
-     * @param {Int} deviceAddress - The unique address that identifies a device
-     * @param {Function} callback - The function to be fired when it receives response regarding this request
+     * @param {integer} deviceAddress - The unique address that identifies a device
+     * @param {function} callback - The function to be fired when it receives response regarding this request
      */
     function readExceptionStatus (deviceAddress, callback = null){
         _enqueue(function() {
@@ -152,11 +152,11 @@ class Modbus485Master {
     /*
      * This is the generic function to read values from a single coil ,register or multiple coils , registers .
      *
-     * @param {Int} deviceAddress - The unique address that identifies a device
-     * @param {Enum} targetType - The address from which it begins reading values
-     * @param {Int} startingAddress - The address from which it begins reading values
-     * @param {Int} quantity - The number of consecutive addresses the values are read from
-     * @param {Function} callback - The function to be fired when it receives response regarding this request
+     * @param {integer} deviceAddress - The unique address that identifies a device
+     * @param {enum} targetType - The address from which it begins reading values
+     * @param {integer} startingAddress - The address from which it begins reading values
+     * @param {integer} quantity - The number of consecutive addresses the values are read from
+     * @param {function} callback - The function to be fired when it receives response regarding this request
      */
     function read(deviceAddress, targetType, startingAddress, quantity, callback = null) {
         _enqueue(function() {
@@ -197,12 +197,12 @@ class Modbus485Master {
     /*
      * This is the generic function to write values into coils or holding registers .
      *
-     * @param {Int} deviceAddress - The unique address that identifies a device
-     * @param {Enum} targetType - The address from which it begins reading values
-     * @param {Int} startingAddress - The address from which it begins writing values
-     * @param {Int} quantity - The number of consecutive addresses the values are written into
-     * @param {Int, Array[Int,Bool], Bool, Blob} values - The values written into Coils or Registers
-     * @param {Function} callback - The function to be fired when it receives response regarding this request
+     * @param {integer} deviceAddress - The unique address that identifies a device
+     * @param {enum} targetType - The address from which it begins reading values
+     * @param {integer} startingAddress - The address from which it begins writing values
+     * @param {integer} quantity - The number of consecutive addresses the values are written into
+     * @param {integer, Array[integer,Bool], Bool, blob} values - The values written into Coils or Registers
+     * @param {function} callback - The function to be fired when it receives response regarding this request
      */
     function write(deviceAddress, targetType, startingAddress, quantity, values, callback = null) {
         _enqueue(function() {
@@ -229,7 +229,7 @@ class Modbus485Master {
     /*
      * Invoke RESPONSE_TIMEOUT exception in certain seconds
      *
-     * @param {Float} timeout - The time in which exception RESPONSE_TIMEOUT will be invoked
+     * @param {float} timeout - The time in which exception RESPONSE_TIMEOUT will be invoked
      */
     function _responseTimeoutFactory(timeout) {
         return imp.wakeup(timeout, function() {
@@ -386,7 +386,7 @@ class Modbus485Master {
     /*
      * It determines if the ADU is valid
      *
-     * @param {Blob} frame - ADU
+     * @param {blob} frame - ADU
      */
     function _hasValidCRC(ADU) {
         local length = ADU.len();

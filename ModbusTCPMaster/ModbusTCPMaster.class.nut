@@ -1,10 +1,13 @@
+// Copyright (c) 2017 Electric Imp
+// This file is licensed under the MIT License
+// http://opensource.org/licenses/MIT
+
 
 
 class ModbusTCPMaster {
 
     static VERSION = "1.0.0";
     static MAX_TRANSACTION_COUNT = 255;
-
     _transactions = null;
     _wiz = null;
     _transactionCount = null;
@@ -14,6 +17,18 @@ class ModbusTCPMaster {
     _connectCallback = null;
     _debug = null;
 
+
+    /*
+     * Constructor for ModbusTCPMaster
+     *
+     * @param  {object} spi - The spi object
+     * @param  {object} interruptPin - The interrupt pin
+     * @param  {object} csPin - The chip select pin
+     * @param  {object} resetPin - The reset pin
+     * @param  {bool} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
+     *
+     */
+
     constructor (spi, interruptPin, csPin, resetPin, debug = false){
         _wiz = W5500.API(spi, interruptPin, csPin, resetPin);
         _transactionCount = 1;
@@ -22,6 +37,15 @@ class ModbusTCPMaster {
     }
 
 
+
+    /*
+     * configure and open a TCP connection
+     *
+     * @param  {table} networkSettings - The network settings table. It entails sourceIP, subnet, gatewayIP
+     * @param  {table} connectionSettings - The connection settings table. It entails device IP and port
+     * @param  {function} debug - The function to be fired when the connection is established
+     *
+     */
     function connect(networkSettings, connectionSettings, callback = null){
         _shouldRetry = true;
         _connectCallback = callback;
@@ -30,26 +54,24 @@ class ModbusTCPMaster {
         _wiz.openConnection(connectionSettings, _onConnect.bindenv(this));
     }
 
-    function _onConnect(error, conn) {
-        _connection = conn;
-        _wiz.setReceiveCallback(_connection, _parseADU.bindenv(this));
-        _wiz.setDisconnectCallback(_connection, _onDisconnect.bindenv(this));
-        _callbackHandler(error,conn,_connectCallback);
-    }
 
-    function _onDisconnect(conn){
-        if (_shouldRetry) {
-            _connectCallback = null;
-            _wiz.openConnection(_connectionSettings, _onConnect.bindenv(this));
-        }
-    }
 
+    /*
+     * close the existing TCP connection
+     *
+     *
+     */
     function disconnect(){
         _shouldRetry = false;
         _wiz.closeConnection(_connection);
     }
 
 
+    /*
+     * This function reads the description of the type, the current status, and other information specific to a remote device.
+     *
+     * @param {function} callback - The function to be fired when it receives response regarding this request
+     */
     function reportSlaveID(callback = null) {
         local properties = {
             expectedResLen = ModbusRTU.FUNCTION_CODES.reportSlaveID.resLen,
@@ -59,6 +81,17 @@ class ModbusTCPMaster {
         _send(ModbusRTU.createReportSlaveIdPDU(), properties);
     }
 
+
+
+    /*
+     * This is the generic function to write values into coils or holding registers .
+     *
+     * @param {enum} targetType - The address from which it begins reading values
+     * @param {integer} startingAddress - The address from which it begins writing values
+     * @param {integer} quantity - The number of consecutive addresses the values are written into
+     * @param {integer, Array[integer,Bool], Bool, blob} values - The values written into Coils or Registers
+     * @param {function} callback - The function to be fired when it receives response regarding this request
+     */
     function write(targetType, startingAddress, quantity, values, callback = null) {
         try{
             if (quantity < 1) {
@@ -79,7 +112,14 @@ class ModbusTCPMaster {
 
 
 
-
+    /*
+     * This is the generic function to read values from a single coil ,register or multiple coils , registers .
+     *
+     * @param {enum} targetType - The address from which it begins reading values
+     * @param {integer} startingAddress - The address from which it begins reading values
+     * @param {integer} quantity - The number of consecutive addresses the values are read from
+     * @param {function} callback - The function to be fired when it receives response regarding this request
+     */
     function read(targetType, startingAddress, quantity, callback = null) {
         try {
             local PDU = null;
@@ -122,7 +162,11 @@ class ModbusTCPMaster {
     }
 
 
-
+    /*
+     * This function reads the contents of eight Exception Status outputs in a remote device
+     *
+     * @param {function} callback - The function to be fired when it receives response regarding this request
+     */
     function readExceptionStatus(callback = null) {
         local properties = {
             expectedResLen = ModbusRTU.FUNCTION_CODES.readExceptionStatus.resLen,
@@ -132,6 +176,15 @@ class ModbusTCPMaster {
         _send(ModbusRTU.createReadExceptionStatusPDU(), properties);
     }
 
+
+    /*
+     * This function provides a series of tests for checking the communication system between a client ( Master) device and a server ( Slave), or for checking various internal error conditions within a server.
+     *
+     * @param {integer} deviceAddress - The unique address that identifies a device
+     * @param {integer} subFunctionCode - The address from which it begins reading values
+     * @param {blob} data - The data field required by Modbus request
+     * @param {function} callback - The function to be fired when it receives response regarding this request
+     */
     function diagnostics(subFunctionCode, data, callback = null) {
         local quantity = data.len() / 2;
         local properties = {
@@ -143,6 +196,14 @@ class ModbusTCPMaster {
         _send(ModbusRTU.createDiagnosticsPDU(subFunctionCode, data), properties);
     }
 
+    /*
+     * This function modifies the contents of a specified holding register using a combination of an AND mask, an OR mask, and the register's current contents. The function can be used to set or clear individual bits in the register.
+     *
+     * @param {integer} referenceAddress - The address of the holding register the value is written into
+     * @param {integer} AND_mask - The AND mask
+     * @param {integer} OR_mask - The OR mask
+     * @param {function} callback - The function to be fired when it receives response regarding this request
+     */
     function maskWriteRegister(referenceAddress, AND_Mask, OR_Mask, callback = null) {
         local properties = {
             expectedResLen = ModbusRTU.FUNCTION_CODES.maskWriteRegister.resLen,
@@ -152,6 +213,17 @@ class ModbusTCPMaster {
         _send(ModbusRTU.createMaskWriteRegisterPDU(referenceAddress, AND_Mask, OR_Mask), properties);
     }
 
+
+    /*
+     * This function performs a combination of one read operation and one write operation in a single MODBUS transaction. The write operation is performed before the read.
+     *
+     * @param {integer} readingStartAddress - The address from which it begins reading values
+     * @param {integer} readQuantity - The number of consecutive addresses values are read from
+     * @param {integer} writeStartAddress - The address from which it begins writing values
+     * @param {integer} writeQuantity - The number of consecutive addresses values are written into
+     * @param {blob} writeValue - The value written into the holding register
+     * @param {function} callback - The function to be fired when it receives response regarding this request
+     */
     function readWriteMultipleRegisters(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, callback = null) {
         writeValue = _processWriteRegistersValues(writeQuantity, writeValue);
         local properties = {
@@ -163,6 +235,13 @@ class ModbusTCPMaster {
         _send(ModbusRTU.createReadWriteMultipleRegistersPDU(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue), properties);
     }
 
+    /*
+     * This function allows reading the identification and additional information relative to the physical and functional description of a remote device, only.
+     *
+     * @param {enum} readDeviceIdCode - read device id code
+     * @param {enum} objectId - object id
+     * @param {function} callback - The function to be fired when it receives response regarding this request
+     */
     function readDeviceIdentification(readDeviceIdCode, objectId, callback = null) {
         local properties = {
             expectedResLen = ModbusRTU.FUNCTION_CODES.readDeviceIdentification.resLen,
@@ -173,6 +252,29 @@ class ModbusTCPMaster {
     }
 
 
+    /*
+     * The callback function to be fired when the connection is established
+     */
+    function _onConnect(error, conn) {
+        _connection = conn;
+        _wiz.setReceiveCallback(_connection, _parseADU.bindenv(this));
+        _wiz.setDisconnectCallback(_connection, _onDisconnect.bindenv(this));
+        _callbackHandler(error,conn,_connectCallback);
+    }
+
+    /*
+     * The callback function to be fired when the connection is dropped
+     */
+    function _onDisconnect(conn){
+        if (_shouldRetry) {
+            _connectCallback = null;
+            _wiz.openConnection(_connectionSettings, _onConnect.bindenv(this));
+        }
+    }
+
+    /*
+     * The callback function to be fired it receives a packet
+     */
     function _parseADU(error, connection, ADU){
         if (error) {
             _callbackHandler(error,null,_connectCallback);
@@ -191,8 +293,12 @@ class ModbusTCPMaster {
             _callbackHandler(error,null,callback);
         }
         _transactions.rawdelete(transactionID);
+        _log(ADU);
     }
 
+    /*
+     * create an ADU
+     */
     function _createADU(PDU) {
         local ADU = [0x00,_transactionCount,0x00,0x00,0x00,PDU.len() + 1,0x00];
         foreach (value in PDU) {
@@ -201,6 +307,9 @@ class ModbusTCPMaster {
         return ADU;
     }
 
+    /*
+     * send the ADU via Ethernet
+     */
     function _send(PDU, properties) {
         _transactions[_transactionCount] <- properties;
         local ADU = _createADU(PDU);
@@ -209,8 +318,12 @@ class ModbusTCPMaster {
         if (_transactionCount > MAX_TRANSACTION_COUNT) {
             _transactionCount = 1;
         }
+        _log(ADU);
     }
 
+    /*
+     * construct a writeCoils request
+     */
     function _writeCoils(startingAddress, quantity, values, callback) {
           local numBytes = math.ceil(quantity / 8.0);
           local writeValues = blob(numBytes);
@@ -249,6 +362,9 @@ class ModbusTCPMaster {
 
     }
 
+    /*
+     * process the values written into the holding registers
+     */
     function _processWriteRegistersValues(quantity, values) {
         local writeValues = blob();
         switch (typeof values) {
@@ -272,6 +388,9 @@ class ModbusTCPMaster {
         return writeValues;
     }
 
+    /*
+     * construct a writeRegisters request
+     */
     function _writeRegisters(startingAddress, quantity, values, callback) {
         local numBytes =  quantity * 2;
         local writeValues = _processWriteRegistersValues(quantity, values);
@@ -286,6 +405,35 @@ class ModbusTCPMaster {
     }
 
 
+    /*
+     * log the message
+     */
+    function _log(message){
+        if (_debug) {
+            switch (typeof message) {
+                case "array" :
+                    local mes = "Outgoing ADU : "
+                    return server.log(mes + message.reduce(function(pre,cur){
+                            if (pre == 0) {
+                                pre = format("%02X",pre);
+                            }
+                            return pre + " " + format("%02X",cur);
+                    }));
+                case "blob" :
+                    local mes = "Incoming ADU : ";
+                    foreach(value in message) {
+                        mes += format("%02X ",value);
+                    }
+                    return server.log(mes);
+                default :
+                    return server.log(message);
+            }
+        }
+    }
+
+    /*
+     * fire the callback
+     */
     function _callbackHandler(error, result, callback){
         if (callback) {
             if (error) {
@@ -295,6 +443,7 @@ class ModbusTCPMaster {
             }
         }
     }
-
-
 }
+
+
+//------------------------------------------------------------------------------

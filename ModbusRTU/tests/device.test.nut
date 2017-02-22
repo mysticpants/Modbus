@@ -1,162 +1,14 @@
 const MINIMUM_RESPONSE_LENGTH = 5;
+const DEVICE_ADDRESS = 0x01;
 
 
-function parseReportSlaveID (fakeBuffer){
+function parse (fakeBuffer, params){
     local length = fakeBuffer.len();
     if (length < MINIMUM_RESPONSE_LENGTH){
         return false;
     }
     fakeBuffer.seek(1);
-    local params = {
-        functionCode = ModbusRTU.FUNCTION_CODES.reportSlaveID.fcode,
-        PDU = fakeBuffer.readblob(length - 1),
-        expectedResLen = null,
-        expectedResType = ModbusRTU.FUNCTION_CODES.reportSlaveID.fcode
-    };
-    local result = ModbusRTU.parse(params);
-    if (result == false) {
-        return fakeBuffer.seek(length);
-    }
-    return result;
-}
-
-
-function parseReadExceptionStatus (fakeBuffer){
-    local length = fakeBuffer.len();
-    if (length < MINIMUM_RESPONSE_LENGTH){
-        return false;
-    }
-    fakeBuffer.seek(1);
-    local params = {
-        functionCode = ModbusRTU.FUNCTION_CODES.readExceptionStatus.fcode,
-        PDU = fakeBuffer.readblob(length - 1),
-        expectedResLen = ModbusRTU.FUNCTION_CODES.readExceptionStatus.resLen,
-        expectedResType = ModbusRTU.FUNCTION_CODES.readExceptionStatus.fcode
-    };
-    local result = ModbusRTU.parse(params);
-    if (result == false) {
-        return fakeBuffer.seek(length);
-    }
-    return result;
-}
-
-
-function parseMaskWriteRegister(fakeBuffer){
-    local length = fakeBuffer.len();
-    if (length < MINIMUM_RESPONSE_LENGTH){
-        return false;
-    }
-    fakeBuffer.seek(1);
-    local params = {
-        functionCode = ModbusRTU.FUNCTION_CODES.maskWriteRegister.fcode,
-        PDU = fakeBuffer.readblob(length - 1),
-        expectedResLen = ModbusRTU.FUNCTION_CODES.maskWriteRegister.resLen,
-        expectedResType = ModbusRTU.FUNCTION_CODES.maskWriteRegister.fcode
-    };
-    local result = ModbusRTU.parse(params);
-    if (result == false) {
-        return fakeBuffer.seek(length);
-    }
-    return result;
-}
-
-
-function parseReadWriteMultipleRegisters (fakeBuffer){
-    local length = fakeBuffer.len();
-    if (length < MINIMUM_RESPONSE_LENGTH){
-        return false;
-    }
-    fakeBuffer.seek(1);
-    local params = {
-        functionCode = ModbusRTU.FUNCTION_CODES.readWriteMultipleRegisters.fcode,
-        expectedResType = ModbusRTU.FUNCTION_CODES.readWriteMultipleRegisters.fcode,
-        PDU = fakeBuffer.readblob(length - 1),
-        expectedResLen = ModbusRTU.FUNCTION_CODES.readWriteMultipleRegisters.resLen(1),
-        quantity = 1
-    };
-    local result = ModbusRTU.parse(params);
-    if (result == false) {
-        return fakeBuffer.seek(length);
-    }
-    return result ;
-}
-
-function parseDiagnostics (fakeBuffer){
-    local length = fakeBuffer.len();
-    if (length < MINIMUM_RESPONSE_LENGTH){
-        return false;
-    }
-    fakeBuffer.seek(1);
-    local params = {
-        functionCode = ModbusRTU.FUNCTION_CODES.diagnostics.fcode,
-        expectedResType = ModbusRTU.FUNCTION_CODES.diagnostics.fcode,
-        PDU = fakeBuffer.readblob(length - 1),
-        expectedResLen = ModbusRTU.FUNCTION_CODES.diagnostics.resLen(1),
-        quantity = 1
-    };
-    local result = ModbusRTU.parse(params);
-    if (result == false) {
-        return fakeBuffer.seek(length);
-    }
-    return result;
-}
-
-
-function parseReadDeviceIdentification (fakeBuffer){
-    local length = fakeBuffer.len();
-    if (length < MINIMUM_RESPONSE_LENGTH){
-        return false;
-    }
-    fakeBuffer.seek(1);
-    local params = {
-        functionCode = ModbusRTU.FUNCTION_CODES.readDeviceIdentification.fcode,
-        expectedResType = ModbusRTU.FUNCTION_CODES.readDeviceIdentification.fcode,
-        PDU = fakeBuffer.readblob(length - 1),
-        expectedResLen = null,
-    };
-    local result = ModbusRTU.parse(params);
-    if (result == false) {
-        return fakeBuffer.seek(length);
-    }
-    return result;
-}
-
-
-function parseReadCoils(fakeBuffer, quantity){
-    local length = fakeBuffer.len();
-    if (length < MINIMUM_RESPONSE_LENGTH){
-        return false;
-    }
-    fakeBuffer.seek(1);
-    local params = {
-        functionCode = ModbusRTU.FUNCTION_CODES.readCoils.fcode,
-        expectedResType = ModbusRTU.FUNCTION_CODES.readCoils.fcode,
-        PDU = fakeBuffer.readblob(length - 1),
-        expectedResLen = ModbusRTU.FUNCTION_CODES.readCoils.resLen(quantity),
-        quantity = quantity
-    };
-    local result = ModbusRTU.parse(params);
-    if (result == false) {
-        return fakeBuffer.seek(length);
-    }
-    return result;
-
-}
-
-
-function parseReadRegisters(fakeBuffer, quantity){
-    local length = fakeBuffer.len();
-    if (length < MINIMUM_RESPONSE_LENGTH){
-        return false;
-    }
-    fakeBuffer.seek(1);
-    local params = {
-        functionCode = ModbusRTU.FUNCTION_CODES.readHoldingRegs.fcode,
-        expectedResType = ModbusRTU.FUNCTION_CODES.readHoldingRegs.fcode,
-        PDU = fakeBuffer.readblob(length - 1),
-        expectedResLen = ModbusRTU.FUNCTION_CODES.readHoldingRegs.resLen(quantity),
-        quantity = quantity
-    };
+    params.PDU <- fakeBuffer.readblob(length - 1);
     local result = ModbusRTU.parse(params);
     if (result == false) {
         return fakeBuffer.seek(length);
@@ -170,6 +22,7 @@ class DeviceTestCase extends ImpTestCase {
   function setUp() {
     return "testing Modbus";
   }
+
 
   function testCreateReadWriteMultipleRegistersPDU() {
     local readingStartAddress = 0x0001;
@@ -324,13 +177,15 @@ class DeviceTestCase extends ImpTestCase {
     this.assertTrue(expectedPDU.tostring() == PDU.tostring());
   }
 
+
   function testParseReportSlaveID(){
     local result = null;
     local fakeBuffer = blob();
     local slaveID = "abcde";
     local runIndicator = 0xFF;
-    fakeBuffer.writen(0x01,'b');
-    fakeBuffer.writen(0x11,'b');
+    local functionCode = ModbusRTU.FUNCTION_CODES.reportSlaveID.fcode;
+    fakeBuffer.writen(DEVICE_ADDRESS,'b');
+    fakeBuffer.writen(functionCode,'b');
     fakeBuffer.writen(slaveID.len() + 1,'b');
     fakeBuffer.writestring(slaveID);
     fakeBuffer.writen(runIndicator,'b');
@@ -340,7 +195,12 @@ class DeviceTestCase extends ImpTestCase {
         if (!fakeBuffer.eos()){
             local byte = fakeBuffer.readn('b');
             mockBuffer.writen(byte,'b');
-            result = parseReportSlaveID(mockBuffer);
+            local params = {
+                functionCode = functionCode,
+                expectedResLen = ModbusRTU.FUNCTION_CODES.reportSlaveID.resLen,
+                expectedResType = functionCode
+            };
+            result = parse(mockBuffer, params);
         } else {
             break;
         }
@@ -353,8 +213,9 @@ class DeviceTestCase extends ImpTestCase {
     local result = null;
     local fakeBuffer = blob();
     local outputData = 0x03;
-    fakeBuffer.writen(0x01,'b');
-    fakeBuffer.writen(0x07,'b');
+    local functionCode = ModbusRTU.FUNCTION_CODES.readExceptionStatus.fcode;
+    fakeBuffer.writen(DEVICE_ADDRESS,'b');
+    fakeBuffer.writen(functionCode,'b');
     fakeBuffer.writen(outputData,'b');
     fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
     fakeBuffer.seek(0);
@@ -363,7 +224,12 @@ class DeviceTestCase extends ImpTestCase {
         if (!fakeBuffer.eos()){
             local byte = fakeBuffer.readn('b');
             mockBuffer.writen(byte,'b');
-            result = parseReadExceptionStatus(mockBuffer);
+            local params = {
+                functionCode = functionCode,
+                expectedResLen = ModbusRTU.FUNCTION_CODES.readExceptionStatus.resLen,
+                expectedResType = functionCode
+            };
+            result = parse(mockBuffer, params);
         } else {
             break;
         }
@@ -374,8 +240,9 @@ class DeviceTestCase extends ImpTestCase {
   function testParseMarkWriteRegister(){
     local result = null;
     local fakeBuffer = blob();
-    fakeBuffer.writen(0x01,'b');
-    fakeBuffer.writen(0x016,'b');
+    local functionCode = ModbusRTU.FUNCTION_CODES.maskWriteRegister.fcode;
+    fakeBuffer.writen(DEVICE_ADDRESS,'b');
+    fakeBuffer.writen(functionCode,'b');
     fakeBuffer.writen(0x0009,'w');
     fakeBuffer.writen(0x0000,'w');
     fakeBuffer.writen(0x1111,'w');
@@ -386,7 +253,12 @@ class DeviceTestCase extends ImpTestCase {
         if (!fakeBuffer.eos()){
             local byte = fakeBuffer.readn('b');
             mockBuffer.writen(byte,'b');
-            result = parseMaskWriteRegister(mockBuffer);
+            local params = {
+                functionCode = functionCode,
+                expectedResLen = ModbusRTU.FUNCTION_CODES.maskWriteRegister.resLen,
+                expectedResType = functionCode
+            };
+            result = parse(mockBuffer, params);
         } else {
             break;
         }
@@ -395,12 +267,15 @@ class DeviceTestCase extends ImpTestCase {
   }
 
 
+
+
   function testParseReadWriteMultipleRegisters(){
     local result = null;
     local fakeBuffer = blob();
     local readValue = 0x0808;
-    fakeBuffer.writen(0x01,'b');
-    fakeBuffer.writen(0x017,'b');
+    local functionCode = ModbusRTU.FUNCTION_CODES.readWriteMultipleRegisters.fcode;
+    fakeBuffer.writen(DEVICE_ADDRESS,'b');
+    fakeBuffer.writen(functionCode,'b');
     fakeBuffer.writen(0x02,'b');
     fakeBuffer.writen(swap2(readValue),'w'); // read value
     fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
@@ -410,7 +285,13 @@ class DeviceTestCase extends ImpTestCase {
         if (!fakeBuffer.eos()){
             local byte = fakeBuffer.readn('b');
             mockBuffer.writen(byte,'b');
-            result = parseReadWriteMultipleRegisters(mockBuffer);
+            local params = {
+                functionCode = functionCode,
+                expectedResType = functionCode,
+                expectedResLen = ModbusRTU.FUNCTION_CODES.readWriteMultipleRegisters.resLen(1),
+                quantity = 1
+            };
+            result = parse(mockBuffer, params);
         } else {
             break;
         }
@@ -418,12 +299,15 @@ class DeviceTestCase extends ImpTestCase {
     this.assertTrue(result.pop() == readValue);
   }
 
+
+
   function testParseDiagnostics(){
     local fakeBuffer = blob();
     local result = null;
     local data = 0xFF00;
-    fakeBuffer.writen(0x01,'b');
-    fakeBuffer.writen(0x08,'b');
+    local functionCode = ModbusRTU.FUNCTION_CODES.diagnostics.fcode;
+    fakeBuffer.writen(DEVICE_ADDRESS,'b');
+    fakeBuffer.writen(functionCode,'b');
     fakeBuffer.writen(swap2(0x0001),'w');
     fakeBuffer.writen(swap2(data),'w');
     fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
@@ -433,7 +317,13 @@ class DeviceTestCase extends ImpTestCase {
         if (!fakeBuffer.eos()){
             local byte = fakeBuffer.readn('b');
             mockBuffer.writen(byte,'b');
-            result = parseDiagnostics(mockBuffer);
+            local params = {
+                functionCode = functionCode,
+                expectedResType = functionCode,
+                expectedResLen = ModbusRTU.FUNCTION_CODES.diagnostics.resLen(1),
+                quantity = 1
+            };
+            result = parse(mockBuffer, params);
         } else {
             break;
         }
@@ -441,13 +331,15 @@ class DeviceTestCase extends ImpTestCase {
     this.assertTrue(data == result.pop());
   }
 
+
   function testParseReadDeviceIdentification(){
     local fakeBuffer = blob();
     local result = null;
     local vendorName = "MysticPants";
     local produceCode = "CONCTOR";
-    fakeBuffer.writen(0x01,'b');
-    fakeBuffer.writen(0x2B,'b');
+    local functionCode = ModbusRTU.FUNCTION_CODES.readDeviceIdentification.fcode;
+    fakeBuffer.writen(DEVICE_ADDRESS,'b');
+    fakeBuffer.writen(functionCode,'b');
     fakeBuffer.writen(0x0E,'b');
     fakeBuffer.writen(0x01,'b');
     fakeBuffer.writen(0x01,'b');
@@ -469,7 +361,12 @@ class DeviceTestCase extends ImpTestCase {
         if (!fakeBuffer.eos()){
             local byte = fakeBuffer.readn('b');
             mockBuffer.writen(byte,'b');
-            result = parseReadDeviceIdentification(mockBuffer);
+            local params = {
+                functionCode = functionCode,
+                expectedResType = functionCode,
+                expectedResLen = ModbusRTU.FUNCTION_CODES.readDeviceIdentification.resLen,
+            };
+            result = parse(mockBuffer, params);
         } else {
             break;
         }
@@ -479,12 +376,16 @@ class DeviceTestCase extends ImpTestCase {
   }
 
 
+
+
   function testParseReadCoils(){
     local fakeBuffer = blob();
     local result = null;
     local coilStatus = 0xAA; // 10101010
-    fakeBuffer.writen(0x01,'b');
-    fakeBuffer.writen(0x01,'b');
+    local functionCode = ModbusRTU.FUNCTION_CODES.readCoils.fcode;
+    local quantity = 8;
+    fakeBuffer.writen(DEVICE_ADDRESS,'b');
+    fakeBuffer.writen(functionCode,'b');
     fakeBuffer.writen(0x01,'b'); // byte count
     fakeBuffer.writen(coilStatus,'b'); // coil status
     fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
@@ -494,12 +395,18 @@ class DeviceTestCase extends ImpTestCase {
         if (!fakeBuffer.eos()){
             local byte = fakeBuffer.readn('b');
             mockBuffer.writen(byte,'b');
-            result = parseReadCoils(mockBuffer, 8);
+            local params = {
+                functionCode = functionCode,
+                expectedResType = functionCode,
+                expectedResLen = ModbusRTU.FUNCTION_CODES.readCoils.resLen(quantity),
+                quantity = quantity
+            };
+            result = parse(mockBuffer, params);
         } else {
             break;
         }
     }
-    for(local position = 0; position < 8 ; position++){
+    for(local position = 0; position < quantity ; position++){
         local bit = (coilStatus >> position) & 1;
         local status = (bit == 1)? true : false;
         this.assertTrue(status == result[position]);
@@ -511,20 +418,28 @@ class DeviceTestCase extends ImpTestCase {
     local fakeBuffer = blob();
     local result = null;
     local values = blob();
+    local functionCode = ModbusRTU.FUNCTION_CODES.readHoldingRegs.fcode;
     values.writen(swap2(18),'w');
     values.writen(swap2(28),'w');
-    fakeBuffer.writen(0x01,'b');
-    fakeBuffer.writen(0x03,'b');
+    fakeBuffer.writen(DEVICE_ADDRESS,'b');
+    fakeBuffer.writen(functionCode,'b');
     fakeBuffer.writen(4,'b'); // byte count
     fakeBuffer.writeblob(values); // registers value
     fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
     fakeBuffer.seek(0);
+    local quantity = values.len()/2;
     local mockBuffer = blob();
     while(true){
         if (!fakeBuffer.eos()){
             local byte = fakeBuffer.readn('b');
             mockBuffer.writen(byte,'b');
-            result = parseReadRegisters(mockBuffer, values.len()/2);
+            local params = {
+                functionCode = functionCode,
+                expectedResType = functionCode,
+                expectedResLen = ModbusRTU.FUNCTION_CODES.readHoldingRegs.resLen(quantity),
+                quantity = quantity
+            };
+            result = parse(mockBuffer, params);
         } else {
             break;
         }
@@ -537,21 +452,30 @@ class DeviceTestCase extends ImpTestCase {
 
   }
 
+
   function testModbusException (){
      local result = null;
      local fakeBuffer = blob();
-     fakeBuffer.writen(0x01,'b');
+     local functionCode = ModbusRTU.FUNCTION_CODES.readCoils.fcode;
+     fakeBuffer.writen(DEVICE_ADDRESS,'b');
      fakeBuffer.writen(0x81,'b');
-     fakeBuffer.writen(0x01,'b');// ILLEGAL_FUNCTION
+     fakeBuffer.writen(MODBUSRTU_EXCEPTION.ILLEGAL_FUNCTION,'b');// ILLEGAL_FUNCTION
      fakeBuffer.writen(CRC16.calculate(fakeBuffer),'w');
      fakeBuffer.seek(0);
+     local quantity = 8;
      local mockBuffer = blob();
      try {
          while(true){
              if (!fakeBuffer.eos()){
                  local byte = fakeBuffer.readn('b');
                  mockBuffer.writen(byte,'b');
-                 result = parseReadCoils(mockBuffer, 8);
+                 local params = {
+                     functionCode = functionCode,
+                     expectedResType = functionCode,
+                     expectedResLen = ModbusRTU.FUNCTION_CODES.readCoils.resLen(quantity),
+                     quantity = quantity
+                 };
+                 result = parse(mockBuffer, params);
              } else {
                  break;
              }
@@ -561,12 +485,15 @@ class DeviceTestCase extends ImpTestCase {
      }
   }
 
+
+
   function testInvalidCRC(){
     local result = null;
     local fakeBuffer = blob();
     local outputData = 0x03;
-    fakeBuffer.writen(0x01,'b');
-    fakeBuffer.writen(0x07,'b');
+    local functionCode = ModbusRTU.FUNCTION_CODES.readExceptionStatus.fcode ;
+    fakeBuffer.writen(DEVICE_ADDRESS,'b');
+    fakeBuffer.writen(functionCode,'b');
     fakeBuffer.writen(outputData,'b');
     fakeBuffer.writen(0xabcd,'w'); // invalid crc
     fakeBuffer.seek(0);
@@ -576,7 +503,12 @@ class DeviceTestCase extends ImpTestCase {
             if (!fakeBuffer.eos()){
                 local byte = fakeBuffer.readn('b');
                 mockBuffer.writen(byte,'b');
-                result = parseReadExceptionStatus(mockBuffer);
+                local params = {
+                    expectedResLen = ModbusRTU.FUNCTION_CODES.readExceptionStatus.resLen,
+                    expectedResType = functionCode,
+                    functionCode = functionCode
+                };
+                result = parse(mockBuffer, params);
             } else {
                 break;
             }
@@ -585,6 +517,7 @@ class DeviceTestCase extends ImpTestCase {
         this.assertTrue(error == MODBUSRTU_EXCEPTION.INVALID_CRC);
     }
   }
+
 
   function tearDown() {
     return "Test finished";

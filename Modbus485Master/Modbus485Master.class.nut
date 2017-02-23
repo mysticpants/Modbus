@@ -23,27 +23,30 @@ class Modbus485Master {
 
   /*
    * Constructor for Modbus485Master
-   *
-   * @param  {object} uart - The UART object
-   * @param  {object} rts - The pin used as RTS
-   * @param  {integer} baudRate - 19200 bit/sec by dafult
-   * @param  {integer} dateBits - Word size , 8 bit by default
-   * @param  {enum} parity - PARITY_NONE by default
-   * @param  {integer} stopBits - 1 bit by default
-   * @param  {float} timeout - 1.0 second by default
-   * @param  {bool} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
+   * @param  {table} params - The table contains all the arugments the constructor expects
+   * @item  {object} uart - The UART object
+   * @item  {object} rts - The pin used as RTS
+   * @item  {integer} baudRate - 19200 bit/sec by dafult
+   * @item  {integer} dateBits - Word size , 8 bit by default
+   * @item  {enum} parity - PARITY_NONE by default
+   * @item  {integer} stopBits - 1 bit by default
+   * @item  {float} timeout - 1.0 second by default
+   * @item  {bool} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
    *
    */
-    constructor(uart, rts, baudRate = 19200, dataBits = 8, parity = PARITY_NONE, stopBits = 1, timeout = 1.0, debug = false) {
-
+    constructor(params) {
         if (!("CRC16" in getroottable())) throw "Must include CRC16 library v1.0.0+";
         if (!("ModbusRTU" in getroottable())) throw "Must include ModbusRTU library v1.0.0+";
-        _uart          = uart;
-        _rts           = rts
-        _timeout       = timeout;
+        _uart          = params.uart;
+        _rts           = params.rts
         _receiveBuffer = blob();
         _queue         = [];
-        _debug         = debug;
+        _timeout       = ("timeout" in params) ? params.timeout : 1.0;
+        _debug         = ("debug" in params) ? params.debug : false;
+        local baudRate = ("baudRate" in params) ? params.baudRate : 19200;
+        local dataBits = ("dataBits" in params) ? params.dataBits : 8;
+        local parity   = ("parity" in params) ? params.parity : PARITY_NONE;
+        local stopBits = ("stopBits" in params) ? params.stopBits : 1;
         _uart.configure(baudRate, dataBits, parity, stopBits, NO_CTSRTS, _uartCallback.bindenv(this));
         _rts.configure(DIGITAL_OUT, 0);
     }
@@ -293,10 +296,12 @@ class Modbus485Master {
             } else {
                 if (_expectedResLen == null) {
                     _expectedResLen = _calculateResponseLen(_expectedResType, result);
-                    return _receiveBuffer.seek(bufferLength); // waiting for more data
+                    // waiting for more data
+                    return _receiveBuffer.seek(bufferLength);
                 }
                 if (bufferLength < _expectedResLen + 3) {
-                    return _receiveBuffer.seek(bufferLength); // waiting for more data
+                    // waiting for more data
+                    return _receiveBuffer.seek(bufferLength);
                 }
                 //  got a valid packet
                 if(_hasValidCRC(_receiveBuffer)) {
@@ -305,7 +310,7 @@ class Modbus485Master {
                         if (_callbackHandler) {
                             _callbackHandler(null, result);
                         }
-                        _dequeue();
+                        _nextInQueue();
                     }.bindenv(this));
                 } else {
                     throw MODBUSRTU_EXCEPTION.INVALID_CRC;
@@ -399,7 +404,7 @@ class Modbus485Master {
             if (_callbackHandler) {
                 _callbackHandler(err, false);
             }
-            _dequeue();
+            _nextInQueue();
         }.bindenv(this))
     }
 
@@ -418,7 +423,7 @@ class Modbus485Master {
      * remove the function from a queue
      *
      */
-    function _dequeue() {
+    function _nextInQueue() {
         _queue.remove(0);
         if (_queue.len() > 0) {
             _queue[0]();
@@ -505,6 +510,3 @@ class Modbus485Master {
         _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.writeMultipleRegs.resLen, callback);
     }
 }
-
-
-//------------------------------------------------------------------------------

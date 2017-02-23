@@ -22,7 +22,10 @@ class DeviceTestCase extends ImpTestCase {
   _modbus = null;
 
   function setUp() {
-      _modbus = Modbus485Master(hardware.uart2, hardware.pinL);
+        _modbus = Modbus485Master({
+            uart = hardware.uart2,
+            rts  = hardware.pinL,
+        });
       return "Modbus485Master";
   }
 

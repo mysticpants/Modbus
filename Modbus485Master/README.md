@@ -29,11 +29,13 @@ The following instructions are applicable to [impAccelerator™ Fieldbus Gateway
 
 This is the main library class. It implements most of the functions listed in the [Modbus specification](http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf).
 
-### Constructor: Modbus485Master(*uart, rts, [baudRate], [dataBits], [parity], [stopBits], [timeout], [debug]*)
+### Constructor: Modbus485Master(*params*)
 
 Instantiate a new Modbus485Master object and set the configuration of UART .
 
 #### Parameters
+
+*params* is of type `table` and expects the following items : 
 
 | Key      | Default     | Notes                                                                           |
 | ------   | ----------- | ------------------------------------------------------------------------------- |
@@ -51,7 +53,11 @@ Instantiate a new Modbus485Master object and set the configuration of UART .
 #### Example
 
 ```squirrel
-modbus <- Modbus485Master(hardware.uart2, hardware.pinL);
+local params = {
+    uart = hardware.uart2,
+    rts  = hardware.pinL
+};
+modbus <- Modbus485Master(params);
 
 ```
 

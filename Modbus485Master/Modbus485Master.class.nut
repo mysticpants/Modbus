@@ -10,16 +10,12 @@ class Modbus485Master {
     static MINIMUM_RESPONSE_LENGTH = 5;
     _uart               = null;
     _rts                = null;
-    _charTime           = null;
     _timeout            = null;
     _responseTimer      = null;
-    _turnaroundTime     = null;
     _receiveBuffer      = null;
     _expectedResType    = null;
     _expectedResAddr    = null;
     _expectedResLen     = null;
-    _startingAddress    = null;
-    _targetType         = null;
     _quantity           = null;
     _callbackHandler    = null;
     _queue              = null;
@@ -44,7 +40,6 @@ class Modbus485Master {
         if (!("ModbusRTU" in getroottable())) throw "Must include ModbusRTU library v1.0.0+";
         _uart          = uart;
         _rts           = rts
-        _charTime      = 1.0 / baudRate;
         _timeout       = timeout;
         _receiveBuffer = blob();
         _queue         = [];
@@ -65,11 +60,11 @@ class Modbus485Master {
    * @param {blob} writeValue - The value written into the holding register
    * @param {function} callback - The function to be fired when it receives response regarding this request
    */
-    function readWriteMultipleRegisters (deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, callback = null){
-        _enqueue(function (){
+    function readWriteMultipleRegisters(deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, callback = null) {
+        _enqueue(function() {
             _quantity = readQuantity;
             local PDU = ModbusRTU.createReadWriteMultipleRegistersPDU(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue);
-            _send(deviceAddress,PDU, ModbusRTU.FUNCTION_CODES.readWriteMultipleRegisters.resLen(readQuantity),callback);
+            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.readWriteMultipleRegisters.resLen(readQuantity), callback);
         }.bindenv(this));
     }
 
@@ -83,9 +78,9 @@ class Modbus485Master {
      * @param {function} callback - The function to be fired when it receives response regarding this request
      */
     function maskWriteRegister(deviceAddress, referenceAddress, AND_Mask, OR_Mask, callback = null) {
-        _enqueue(function (){
-            local PDU = ModbusRTU.createMaskWriteRegisterPDU(referenceAddress , AND_Mask , OR_Mask);
-            _send(deviceAddress,PDU,ModbusRTU.FUNCTION_CODES.maskWriteRegister.resLen,callback);
+        _enqueue(function() {
+            local PDU = ModbusRTU.createMaskWriteRegisterPDU(referenceAddress, AND_Mask, OR_Mask);
+            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.maskWriteRegister.resLen, callback);
         }.bindenv(this));
     }
 
@@ -96,9 +91,9 @@ class Modbus485Master {
      * @param {function} callback - The function to be fired when it receives response regarding this request
      */
     function reportSlaveID(deviceAddress, callback = null) {
-        _enqueue(function (){
+        _enqueue(function() {
             local PDU = ModbusRTU.createReportSlaveIdPDU();
-            _send(deviceAddress,PDU,ModbusRTU.FUNCTION_CODES.reportSlaveID.resLen,callback);
+            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.reportSlaveID.resLen, callback);
         }.bindenv(this));
     }
 
@@ -110,8 +105,8 @@ class Modbus485Master {
      * @param {enum} objectId - object id
      * @param {function} callback - The function to be fired when it receives response regarding this request
      */
-    function readDeviceIdentification (deviceAddress, readDeviceIdCode, objectId, callback = null){
-        _enqueue(function (){
+    function readDeviceIdentification(deviceAddress, readDeviceIdCode, objectId, callback = null) {
+        _enqueue(function() {
             local PDU = ModbusRTU.createReadDeviceIdentificationPDU(readDeviceIdCode,objectId);
             _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.readDeviceIdentification.resLen, callback);
         }.bindenv(this));
@@ -125,14 +120,13 @@ class Modbus485Master {
      * @param {blob} data - The data field required by Modbus request
      * @param {function} callback - The function to be fired when it receives response regarding this request
      */
-    function diagnostics (deviceAddress, subFunctionCode, data, callback = null){
+    function diagnostics(deviceAddress, subFunctionCode, data, callback = null) {
         _enqueue(function() {
             local wordCount = data.len() / 2;
             local PDU = ModbusRTU.createDiagnosticsPDU(subFunctionCode ,data);
             _quantity = wordCount ;
-            _send(deviceAddress,PDU,ModbusRTU.FUNCTION_CODES.diagnostics.resLen(wordCount),callback);
+            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.diagnostics.resLen(wordCount), callback);
         }.bindenv(this));
-
     }
 
     /*
@@ -141,10 +135,10 @@ class Modbus485Master {
      * @param {integer} deviceAddress - The unique address that identifies a device
      * @param {function} callback - The function to be fired when it receives response regarding this request
      */
-    function readExceptionStatus (deviceAddress, callback = null){
+    function readExceptionStatus(deviceAddress, callback = null) {
         _enqueue(function() {
             local PDU = ModbusRTU.createReadExceptionStatusPDU();
-            _send(deviceAddress,PDU, ModbusRTU.FUNCTION_CODES.readExceptionStatus.resLen , callback);
+            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.readExceptionStatus.resLen, callback);
         }.bindenv(this));
     }
 
@@ -160,9 +154,7 @@ class Modbus485Master {
      */
     function read(deviceAddress, targetType, startingAddress, quantity, callback = null) {
         _enqueue(function() {
-            try{
-                _startingAddress = startingAddress;
-                _targetType = targetType;
+            try {
                 _quantity = quantity;
                 local PDU = null;
                 local resLen = null;
@@ -187,7 +179,7 @@ class Modbus485Master {
                         throw MODBUSRTU_EXCEPTION.INVALID_TARGET_TYPE;
                 }
                 _send(deviceAddress, PDU, resLen, callback);
-            }catch(error){
+            } catch (error) {
                 _callbackHandler = callback;
                 _errorCb(error);
             }
@@ -206,9 +198,7 @@ class Modbus485Master {
      */
     function write(deviceAddress, targetType, startingAddress, quantity, values, callback = null) {
         _enqueue(function() {
-            try{
-                _startingAddress = startingAddress;
-                _targetType = targetType;
+            try {
                 _quantity = quantity;
                 switch (targetType) {
                     case MODBUSRTU_TARGET_TYPE.COIL:
@@ -218,7 +208,7 @@ class Modbus485Master {
                     default:
                         throw MODBUSRTU_EXCEPTION.INVALID_TARGET_TYPE;
                 }
-            }catch(error){
+            } catch (error) {
                 _callbackHandler = callback;
                 _errorCb(error);
             }
@@ -248,8 +238,6 @@ class Modbus485Master {
             imp.cancelwakeup(_responseTimer);
             _responseTimer = null;
         }
-        _startingAddress = null;
-        _targetType      = null;
         _quantity        = null;
         _expectedResType = null;
         _expectedResAddr = null;
@@ -263,9 +251,10 @@ class Modbus485Master {
      *
      */
     function _uartCallback() {
+        const MAX_RECEIVE_BUFFER_LENGTH = 300;
         local byte = _uart.read();
-        while ((byte != -1) && (_receiveBuffer.len() < 300)) {
-            if (_receiveBuffer.len() > 0 || byte != 0x00) {
+        while ((byte != -1) && (_receiveBuffer.len() < MAX_RECEIVE_BUFFER_LENGTH)) {
+            if ((_receiveBuffer.len() > 0) || (byte != 0x00)) {
                 _receiveBuffer.writen(byte, 'b');
             }
             byte = _uart.read();
@@ -280,12 +269,13 @@ class Modbus485Master {
      *
      */
     function _processBuffer() {
-        try{
+        try {
             local bufferLength = _receiveBuffer.len();
             if (bufferLength < MINIMUM_RESPONSE_LENGTH) {
                 return ;
             }
-            _receiveBuffer.seek(1); // skip the device address
+            // skip the device address
+            _receiveBuffer.seek(1);
             // Parse and handle variable length responses
             local params = {
                 PDU              = _receiveBuffer.readblob(bufferLength - 1),
@@ -301,15 +291,15 @@ class Modbus485Master {
                 // Not the expected function code response. Shuffle forward and wait for more data.
                 return _receiveBuffer.seek(1);
             } else {
-                if (_expectedResLen == null){
+                if (_expectedResLen == null) {
                     _expectedResLen = _calculateResponseLen(_expectedResType, result);
                     return _receiveBuffer.seek(bufferLength); // waiting for more data
                 }
-                if (bufferLength < _expectedResLen + 3){
+                if (bufferLength < _expectedResLen + 3) {
                     return _receiveBuffer.seek(bufferLength); // waiting for more data
                 }
                 //  got a valid packet
-                if(_hasValidCRC(_receiveBuffer)){
+                if(_hasValidCRC(_receiveBuffer)) {
                     _clearPreviousCommand();
                     imp.wakeup(0, function() {
                         if (_callbackHandler) {
@@ -317,12 +307,12 @@ class Modbus485Master {
                         }
                         _dequeue();
                     }.bindenv(this));
-                } else{
+                } else {
                     throw MODBUSRTU_EXCEPTION.INVALID_CRC;
                 }
             }
-        } catch(error){
-              _errorCb(error);
+        } catch (error) {
+            _errorCb(error);
         }
         _log(_receiveBuffer);
     }
@@ -331,16 +321,18 @@ class Modbus485Master {
      * calculate the length of the response from based on the result
      *
      */
-    function _calculateResponseLen(expectedResType, result){
-        switch(_expectedResType){
-            case ModbusRTU.FUNCTION_CODES.readDeviceIdentification.fcode :
+    function _calculateResponseLen(expectedResType, result) {
+        switch (_expectedResType) {
+            case ModbusRTU.FUNCTION_CODES.readDeviceIdentification.fcode:
+                // the first 7 bytes in the response
                 local resLen = 7;
                 foreach (value in result) {
                     resLen += value.len() + 2;
                 }
                 return resLen;
-            case ModbusRTU.FUNCTION_CODES.reportSlaveID.fcode :
-                return 3 + result.slaveId.len(); //  function code  , byte count , indicator
+            case ModbusRTU.FUNCTION_CODES.reportSlaveID.fcode:
+                // 3 bytes from function code, byte count, indicator
+                return 3 + result.slaveId.len();
         }
     }
 
@@ -366,7 +358,7 @@ class Modbus485Master {
         if (deviceAddress > 0x00) {
             _expectedResAddr = deviceAddress;
             _expectedResType = PDU[0];
-            _expectedResLen = responseLength;
+            _expectedResLen  = responseLength;
         }
         _callbackHandler = callback;
         local frame = _createADU(deviceAddress, PDU);
@@ -404,7 +396,9 @@ class Modbus485Master {
     function _errorCb(err) {
         _clearPreviousCommand();
         imp.wakeup(0, function() {
-            if (_callbackHandler) _callbackHandler(err, false);
+            if (_callbackHandler) {
+                _callbackHandler(err, false);
+            }
             _dequeue();
         }.bindenv(this))
     }
@@ -415,7 +409,9 @@ class Modbus485Master {
      */
     function _enqueue(queueFunction) {
         _queue.push(queueFunction);
-        if (_queue.len() == 1) imp.wakeup(0, queueFunction);
+        if (_queue.len() == 1) {
+            imp.wakeup(0, queueFunction);
+        }
     }
 
     /*
@@ -424,7 +420,9 @@ class Modbus485Master {
      */
     function _dequeue() {
         _queue.remove(0);
-        if (_queue.len() > 0) _queue[0]();
+        if (_queue.len() > 0) {
+            _queue[0]();
+        }
     }
 
     /*
@@ -432,8 +430,8 @@ class Modbus485Master {
      *
      */
     function _log(message) {
-        if(_debug){
-          server.log(message);
+        if (_debug) {
+            server.log(message);
         }
     }
 
@@ -447,7 +445,7 @@ class Modbus485Master {
         local newvalues = blob(numBytes);
         switch (typeof values) {
             case "array":
-                if (quantity != values.len()){
+                if (quantity != values.len()) {
                     throw MODBUSRTU_EXCEPTION.INVALID_ARG_LENGTH;
                 }
                 local byte, bitshift;

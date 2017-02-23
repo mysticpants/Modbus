@@ -12,7 +12,7 @@ local modbus = ModbusTCPMaster(spi, hardware.pinXC, null, hardware.pinXA);
 
 // the network setting
 local networkSettings = {
-    "gatewayIP"  : [192, 168, 201, 1],
+    "gatewayIP"  : [192, 168, 1, 1],
     "subnet"     : [255, 255, 255, 0],
     "sourceIP"   : [192, 168, 1, 30]
 };

@@ -30,7 +30,7 @@ class ModbusTCPMaster {
      */
 
     constructor (spi, interruptPin, csPin, resetPin, debug = false){
-        _wiz = W5500.API(spi, interruptPin, csPin, resetPin);
+        _wiz = W5500(spi, interruptPin, csPin, resetPin);
         _transactionCount = 1;
         _transactions = {};
         _debug = debug;
@@ -47,11 +47,19 @@ class ModbusTCPMaster {
      *
      */
     function connect(networkSettings, connectionSettings, callback = null){
+        local sourceIP = networkSettings.sourceIP;
+        local subnet = ("subnet" in networkSettings) ? networkSettings.subnet : null;
+        local gatewayIP = ("gatewayIP" in networkSettings) ? networkSettings.gatewayIP : null;
+        local mac = ("mac" in networkSettings) ? networkSettings.mac : null;
         _shouldRetry = true;
         _connectCallback = callback;
         _connectionSettings = connectionSettings;
-        _wiz.configureNetworkSettings(networkSettings);
-        _wiz.openConnection(connectionSettings, _onConnect.bindenv(this));
+        _wiz.configureNetworkSettings(sourceIP, subnet, gatewayIP, mac);
+        _wiz.onReady(function(){
+            local destIP = connectionSettings.destIP;
+            local destPort = connectionSettings.destPort;
+            _wiz.openConnection(destIP, destPort, _onConnect.bindenv(this));
+        }.bindenv(this));
     }
 
 
@@ -257,9 +265,9 @@ class ModbusTCPMaster {
      */
     function _onConnect(error, conn) {
         _connection = conn;
-        _wiz.setReceiveCallback(_connection, _parseADU.bindenv(this));
-        _wiz.setDisconnectCallback(_connection, _onDisconnect.bindenv(this));
-        _callbackHandler(error,conn,_connectCallback);
+        _connection.setReceiveHandler(_parseADU.bindenv(this));
+        _connection.setDisconnectHandler(_onDisconnect.bindenv(this));
+        _callbackHandler(error, conn, _connectCallback);
     }
 
     /*
@@ -313,7 +321,7 @@ class ModbusTCPMaster {
     function _send(PDU, properties) {
         _transactions[_transactionCount] <- properties;
         local ADU = _createADU(PDU);
-        _wiz.transmit(_connection,ADU);
+        _connection.transmit(_connection,ADU);
         _transactionCount ++ ;
         if (_transactionCount > MAX_TRANSACTION_COUNT) {
             _transactionCount = 1;

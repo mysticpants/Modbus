@@ -85,22 +85,30 @@ class ModbusRTU {
             readCoils = {
                 fcode   = 0x01,
                 reqLen  = 5,
-                resLen  = function(n){ return 2 + math.ceil(n/8.0); }
+                resLen  = function(n) {
+                    return 2 + math.ceil(n / 8.0);
+                }
             },
             readInputs = {
                 fcode   = 0x02,
                 reqLen  = 5,
-                resLen  = function(n){ return 2 + math.ceil(n/8.0); }
+                resLen  = function(n) {
+                    return 2 + math.ceil(n / 8.0);
+                }
             },
             readHoldingRegs = {
                 fcode   = 0x03,
                 reqLen  = 5,
-                resLen  = function(n){ return 2*n + 2; }
+                resLen  = function(n) {
+                    return 2 * n + 2;
+                }
             },
             readInputRegs = {
                 fcode   = 0x04,
                 reqLen  = 5,
-                resLen  = function(n){ return 2*n + 2; }
+                resLen  = function(n) {
+                    return 2 * n + 2;
+                }
             },
             writeSingleCoil = {
                 fcode   = 0x05,
@@ -114,12 +122,16 @@ class ModbusRTU {
             },
             writeMultipleCoils = {
                 fcode   = 0x0F,
-                reqLen  = function(n) { return 6 + math.ceil(n/8.0); },
+                reqLen  = function(n) {
+                    return 6 + math.ceil(n / 8.0);
+                },
                 resLen  = 5
             },
             writeMultipleRegs = {
                 fcode   = 0x10,
-                reqLen  = function(n) { return 6 + n*2; },
+                reqLen  = function(n) {
+                    return 6 + n * 2;
+                },
                 resLen  = 5
             },
             readExceptionStatus = {
@@ -129,8 +141,12 @@ class ModbusRTU {
             },
             diagnostics = {
                 fcode   = 0x08,
-                reqLen  = function(n) { return 3 + n*2; },
-                resLen  = function (n) { return 3 + n*2; }
+                reqLen  = function(n) {
+                    return 3 + n * 2;
+                },
+                resLen  = function(n) {
+                    return 3 + n * 2;
+                }
             },
             reportSlaveID = {
                 fcode   = 0x11,
@@ -150,12 +166,18 @@ class ModbusRTU {
             readFIFOQueue = {
                 fcode   = 0x18,
                 reqLen  = 3,
-                resLen  = function (n) { return 5 + n*2; }
+                resLen  = function(n) {
+                    return 5 + n * 2;
+                }
             },
             readWriteMultipleRegisters = {
                 fcode   = 0x17,
-                reqLen  = function (n){ return 10 + n*2; },
-                resLen  = function (n){ return 2 + n*2; }
+                reqLen  = function(n) {
+                    return 10 + n * 2;
+                },
+                resLen  = function(n) {
+                    return 2 + n * 2;
+                }
             }
     }
 
@@ -170,12 +192,12 @@ class ModbusRTU {
     static function createReadWriteMultipleRegistersPDU(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue) {
         local readWriteMultipleRegisters = FUNCTION_CODES.readWriteMultipleRegisters;
         local PDU = blob(readWriteMultipleRegisters.reqLen(writeQuantity));
-        PDU.writen(readWriteMultipleRegisters.fcode,'b');
-        PDU.writen(swap2(readingStartAddress),'w');
-        PDU.writen(swap2(readQuantity),'w');
-        PDU.writen(swap2(writeStartAddress),'w');
-        PDU.writen(swap2(writeQuantity),'w');
-        PDU.writen(writeValue.len(),'b');
+        PDU.writen(readWriteMultipleRegisters.fcode, 'b');
+        PDU.writen(swap2(readingStartAddress), 'w');
+        PDU.writen(swap2(readQuantity), 'w');
+        PDU.writen(swap2(writeStartAddress), 'w');
+        PDU.writen(swap2(writeQuantity), 'w');
+        PDU.writen(writeValue.len(), 'b');
         PDU.writeblob(writeValue);
         return PDU;
     }
@@ -187,10 +209,10 @@ class ModbusRTU {
     static function createMaskWriteRegisterPDU(referenceAddress, AND_Mask, OR_Mask) {
         local maskWriteRegister = FUNCTION_CODES.maskWriteRegister;
         local PDU = blob(maskWriteRegister.reqLen);
-        PDU.writen(maskWriteRegister.fcode,'b');
-        PDU.writen(swap2(referenceAddress),'w');
-        PDU.writen(swap2(AND_Mask),'w');
-        PDU.writen(swap2(OR_Mask),'w');
+        PDU.writen(maskWriteRegister.fcode, 'b');
+        PDU.writen(swap2(referenceAddress), 'w');
+        PDU.writen(swap2(AND_Mask), 'w');
+        PDU.writen(swap2(OR_Mask), 'w');
         return PDU;
     }
 
@@ -201,7 +223,7 @@ class ModbusRTU {
     static function createReportSlaveIdPDU() {
         local reportSlaveID = FUNCTION_CODES.reportSlaveID;
         local PDU = blob(reportSlaveID.reqLen);
-        PDU.writen(reportSlaveID.fcode,'b');
+        PDU.writen(reportSlaveID.fcode, 'b');
         return PDU;
     }
 
@@ -213,10 +235,10 @@ class ModbusRTU {
         const MEI_TYPE = 0x0E;
         local readDeviceIdentification = FUNCTION_CODES.readDeviceIdentification;
         local PDU = blob(readDeviceIdentification.reqLen);
-        PDU.writen(readDeviceIdentification.fcode,'b');
-        PDU.writen(MEI_TYPE,'b');
-        PDU.writen(readDeviceIdCode,'b');
-        PDU.writen(objectId,'b');
+        PDU.writen(readDeviceIdentification.fcode, 'b');
+        PDU.writen(MEI_TYPE, 'b');
+        PDU.writen(readDeviceIdCode, 'b');
+        PDU.writen(objectId, 'b');
         return PDU;
     }
 
@@ -226,9 +248,9 @@ class ModbusRTU {
      */
     static function createDiagnosticsPDU(subFunctionCode, data) {
         local diagnostics = FUNCTION_CODES.diagnostics;
-        local PDU = blob(diagnostics.reqLen(data.len()/2));
-        PDU.writen(diagnostics.fcode,'b');
-        PDU.writen(swap2(subFunctionCode),'w');
+        local PDU = blob(diagnostics.reqLen(data.len() / 2));
+        PDU.writen(diagnostics.fcode, 'b');
+        PDU.writen(swap2(subFunctionCode), 'w');
         PDU.writeblob(data);
         return PDU;
     }
@@ -240,7 +262,7 @@ class ModbusRTU {
     static function createReadExceptionStatusPDU() {
         local readExceptionStatus = FUNCTION_CODES.readExceptionStatus;
         local PDU = blob(readExceptionStatus.reqLen);
-        PDU.writen(readExceptionStatus.fcode,'b');
+        PDU.writen(readExceptionStatus.fcode, 'b');
         return PDU;
     }
 
@@ -252,7 +274,7 @@ class ModbusRTU {
         local PDU = blob(targetType.reqLen);
         PDU.writen(targetType.fcode, 'b');
         PDU.writen(swap2(startingAddress), 'w');
-        PDU.writen(swap2(quantity),'w');
+        PDU.writen(swap2(quantity), 'w');
         return PDU;
     }
 
@@ -283,16 +305,17 @@ class ModbusRTU {
         local expectedResType = params.expectedResType;
         local expectedResLen = params.expectedResLen;
         local result = false;
-        if ((functionCode & 0x80) == 0x80){
-            throw PDU.readn('b'); // exception code
+        if ((functionCode & 0x80) == 0x80) {
+            // exception code
+            throw PDU.readn('b');
         }
-        if (expectedResLen && (PDU.len() < expectedResLen)){
+        if (expectedResLen && (PDU.len() < expectedResLen)) {
             return false;
         }
         if (functionCode != expectedResType){
             return -1;
         }
-        switch (functionCode){
+        switch (functionCode) {
             case FUNCTION_CODES.readExceptionStatus.fcode:
                 return _readExceptionStatus(PDU);
             case FUNCTION_CODES.readDeviceIdentification.fcode:
@@ -324,7 +347,7 @@ class ModbusRTU {
     static function _diagnostics(PDU, quantity) {
         PDU.seek(3);
         local result = [];
-        while(result.len() != quantity){
+        while (result.len() != quantity) {
             result.push(swap2(PDU.readn('w')));
         }
         return result;
@@ -364,7 +387,8 @@ class ModbusRTU {
                     for (local bit = 0; bit < 8; ++bit) {
                         result.push((byte & (bitmask << bit)) != 0x00);
                         if (result.len() == quantity) {
-                            PDU.seek(0,'e'); // move the pointer to the end to break out of the while loop
+                            // move the pointer to the end to break out of the while loop
+                            PDU.seek(0, 'e');
                             break;
                         }
                     }
@@ -374,7 +398,7 @@ class ModbusRTU {
             case FUNCTION_CODES.readHoldingRegs.fcode:
             case FUNCTION_CODES.readInputRegs.fcode:
                 while (result.len() != quantity) {
-                    result.push(swap2(PDU.readn('w')))
+                    result.push(swap2(PDU.readn('w')));
                 }
                 break;
         }
@@ -388,9 +412,9 @@ class ModbusRTU {
     static function _reportSlaveID(PDU) {
         PDU.seek(1);
         local byteCount = PDU.readn('b');
-        if (PDU.len() - PDU.tell() >= byteCount){
+        if (PDU.len() - PDU.tell() >= byteCount) {
              local results = {
-                 slaveId = PDU.readstring(byteCount - 1),
+                 slaveId      = PDU.readstring(byteCount - 1),
                  runIndicator = ((PDU.readn('b') == 0) ? false : true),
              };
              return results;
@@ -410,7 +434,7 @@ class ModbusRTU {
          PDU.seek(6);
          local objectCount = PDU.readn('b');
          local objects = {};
-         while (objects.len() < objectCount){
+         while (objects.len() < objectCount) {
              if (PDU.len() - PDU.tell() < 2) {
                  // Not enough data
                  return false;

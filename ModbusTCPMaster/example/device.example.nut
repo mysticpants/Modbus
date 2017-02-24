@@ -1,7 +1,7 @@
-
-/*
-  this example shows how to use readWriteMultipleRegisters
-*/
+#require "W5500.class.nut:1.0.0"
+#require "ModbusRTU.class.nut:1.0.0"
+#require "ModbusTCPMaster.class.nut:1.0.0"
+// this example shows how to use readWriteMultipleRegisters
 
 // configure spi
 local spi = hardware.spi0;
@@ -28,17 +28,17 @@ local connectionSettings = {
 };
 
 // open the connection
-modbus.connect(networkSettings, connectionSettings, function(error, conn){
+modbus.connect(networkSettings, connectionSettings, function(error, conn) {
     if (error) {
         server.log(error);
     } else {
         // read and write multiple registers in one go , with read run before write
-        modbus.readWriteMultipleRegisters(0x0A, 2, 0x0A, 2, [28,88], function(error, result){
+        modbus.readWriteMultipleRegisters(0x0A, 2, 0x0A, 2, [28, 88], function(error, result) {
             if (error) {
                 server.error(error);
             } else {
                 foreach (index, value in result) {
-                    server.log(format("Index : %d, value : %d",index,value));
+                    server.log(format("Index : %d, value : %d", index, value));
                 }
             }
         });

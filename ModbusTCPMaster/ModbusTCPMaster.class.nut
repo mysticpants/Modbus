@@ -87,7 +87,7 @@ class ModbusTCPMaster {
     // @param {enum} targetType - The address from which it begins reading values
     // @param {integer} startingAddress - The address from which it begins writing values
     // @param {integer} quantity - The number of consecutive addresses the values are written into
-    // @param {integer, Array[integer,Bool], Bool, blob} values - The values written into Coils or Registers
+    // @param {integer, Array[integer, Bool], Bool, blob} values - The values written into Coils or Registers
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
     function write(targetType, startingAddress, quantity, values, callback = null) {
@@ -121,6 +121,9 @@ class ModbusTCPMaster {
             local PDU = null;
             local resLen = null;
             local resType = null;
+            if (quantity < 1) {
+                throw MODBUSRTU_EXCEPTION.INVALID_QUANTITY;
+            }
             switch (targetType) {
                 case MODBUSRTU_TARGET_TYPE.COIL:
                     PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readCoils, startingAddress, quantity);
@@ -281,7 +284,7 @@ class ModbusTCPMaster {
         try {
             local result = ModbusRTU.parse(params);
             _callbackHandler(null, result, callback);
-        } catch(error) {
+        } catch (error) {
             _callbackHandler(error, null, callback);
         }
         _transactions.rawdelete(transactionID);
@@ -293,10 +296,10 @@ class ModbusTCPMaster {
     //
     function _createADU(PDU) {
         local ADU = blob();
-        ADU.writen(swap2(_transactionCount),'w');
-        ADU.writen(swap2(0x0000),'w');
-        ADU.writen(swap2(PDU.len() + 1),'w');
-        ADU.writen(0x00,'b');
+        ADU.writen(swap2(_transactionCount), 'w');
+        ADU.writen(swap2(0x0000), 'w');
+        ADU.writen(swap2(PDU.len() + 1), 'w');
+        ADU.writen(0x00, 'b');
         ADU.writeblob(PDU);
         return ADU;
     }
@@ -319,40 +322,40 @@ class ModbusTCPMaster {
     // construct a writeCoils request
     //
     function _writeCoils(startingAddress, quantity, values, callback) {
-          local numBytes = math.ceil(quantity / 8.0);
-          local writeValues = blob(numBytes);
-          local functionType = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleCoil: ModbusRTU.FUNCTION_CODES.writeMultipleCoils;
-          switch (typeof values) {
-              case "integer":
-                  writeValues.writen(swap2(values), 'w');
-                  break;
-              case "bool":
-                  writeValues.writen(swap2(values ? 0xFF00: 0), 'w');
-                  break;
-              case "blob":
-                  writeValues = values;
-                  break;
-              case "array":
-                  if (quantity != values.len()) {
-                      throw MODBUSRTU_EXCEPTION.INVALID_ARG_LENGTH;
-                  }
-                  local byte, bitshift;
-                  foreach (bit, val in values) {
-                      byte = bit / 8;
-                      bitshift = bit % 8;
-                      writeValues[byte] = writeValues[byte] | ((val ? 1: 0) << bitshift);
-                  }
-                  break;
-              default:
-                  throw MODBUSRTU_EXCEPTION.INVALID_VALUES;
-          }
-          local properties = {
-              callback = callback,
-              expectedResType = functionType.fcode,
-              expectedResLen = functionType.resLen,
-              quantity = quantity
-          };
-          _send(ModbusRTU.createWritePDU(functionType, startingAddress, numBytes, quantity, writeValues), properties);
+        local numBytes = math.ceil(quantity / 8.0);
+        local writeValues = blob(numBytes);
+        local functionType = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleCoil: ModbusRTU.FUNCTION_CODES.writeMultipleCoils;
+        switch (typeof values) {
+            case "integer":
+                writeValues.writen(swap2(values), 'w');
+                break;
+            case "bool":
+                writeValues.writen(swap2(values ? 0xFF00: 0), 'w');
+                break;
+            case "blob":
+                writeValues = values;
+                break;
+            case "array":
+                if (quantity != values.len()) {
+                    throw MODBUSRTU_EXCEPTION.INVALID_ARG_LENGTH;
+                }
+                local byte, bitshift;
+                foreach (bit, val in values) {
+                    byte = bit / 8;
+                    bitshift = bit % 8;
+                    writeValues[byte] = writeValues[byte] | ((val ? 1: 0) << bitshift);
+                }
+                break;
+                default:
+                    throw MODBUSRTU_EXCEPTION.INVALID_VALUES;
+        }
+        local properties = {
+            callback = callback,
+            expectedResType = functionType.fcode,
+            expectedResLen = functionType.resLen,
+            quantity = quantity
+        };
+        _send(ModbusRTU.createWritePDU(functionType, startingAddress, numBytes, quantity, writeValues), properties);
     }
 
     //
@@ -418,7 +421,7 @@ class ModbusTCPMaster {
     //
     // fire the callback
     //
-    function _callbackHandler(error, result, callback){
+    function _callbackHandler(error, result, callback) {
         if (callback) {
             if (error) {
                 callback(error, null);

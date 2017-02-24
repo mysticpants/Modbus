@@ -24,15 +24,19 @@ class DeviceTestCase extends ImpTestCase {
   function setUp() {
     local spi = hardware.spi0;
     spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
-    _modbus = ModbusTCPMaster(spi, hardware.pinXC, null, hardware.pinXA);
+    _modbus = ModbusTCPMaster({
+        spi = spi,
+        interruptPin = hardware.pinXC,
+        resetPin = hardware.pinXA
+    });
     _connection = Promise (function(resolve,reject){
         _modbus.connect({
-            "gatewayIP"  : [192, 168, 201, 1],
-            "subnet"     : [255, 255, 255, 0],
-            "sourceIP"   : [192, 168, 1, 30]
+            "gatewayIP"  : "192.168.1.1",
+            "subnet"     : "255.255.255.0",
+            "sourceIP"   : "192.168.1.30"
         },{
-            "destIP"     : [192, 168, 1, 90],
-            "destPort"   : [0x01, 0xF6]
+            "destIP"     : "192.168.1.90",
+            "destPort"   : 502
         },function(error,conn){
             resolve("Connection established");
         }.bindenv(this));

@@ -2,9 +2,6 @@
 // This file is licensed under the MIT License
 // http://opensource.org/licenses/MIT
 
-//------------------------------------------------------------------------------
-// Constants
-
 enum MODBUSRTU_SUB_FUNCTION_CODE {
     RETURN_QUERY_DATA = 0x0000,
     RESTART_COMMUNICATION_OPTION = 0x0001,
@@ -61,7 +58,7 @@ enum MODBUSRTU_READ_DEVICE_CODE {
     BASIC = 0x01,
     REGULAR = 0x02,
     EXTENDED = 0x03,
-    SPECIFIC = 0x04
+    SPECIFIC = 0x04,
 }
 
 enum MODBUSRTU_OBJECT_ID {
@@ -73,10 +70,6 @@ enum MODBUSRTU_OBJECT_ID {
     MODEL_NAME = 0x05,
     USER_APPLICATION_NAME = 0x06,
 }
-
-
-
-//------------------------------------------------------------------------------
 
 class ModbusRTU {
     static VERSION = "1.0.0";
@@ -181,14 +174,9 @@ class ModbusRTU {
             }
     }
 
-
-
-
-
-    /*
-     * function to create PDU for readWriteMultipleRegisters
-     *
-     */
+    //
+    // function to create PDU for readWriteMultipleRegisters
+    //
     static function createReadWriteMultipleRegistersPDU(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue) {
         local readWriteMultipleRegisters = FUNCTION_CODES.readWriteMultipleRegisters;
         local PDU = blob(readWriteMultipleRegisters.reqLen(writeQuantity));
@@ -202,10 +190,9 @@ class ModbusRTU {
         return PDU;
     }
 
-    /*
-     * function to create PDU for maskWriteRegister
-     *
-     */
+    //
+    // function to create PDU for maskWriteRegister
+    //
     static function createMaskWriteRegisterPDU(referenceAddress, AND_Mask, OR_Mask) {
         local maskWriteRegister = FUNCTION_CODES.maskWriteRegister;
         local PDU = blob(maskWriteRegister.reqLen);
@@ -216,10 +203,9 @@ class ModbusRTU {
         return PDU;
     }
 
-    /*
-     * function to create PDU for reportSlaveID
-     *
-     */
+    //
+    // function to create PDU for reportSlaveID
+    //
     static function createReportSlaveIdPDU() {
         local reportSlaveID = FUNCTION_CODES.reportSlaveID;
         local PDU = blob(reportSlaveID.reqLen);
@@ -227,10 +213,9 @@ class ModbusRTU {
         return PDU;
     }
 
-    /*
-     * function to create PDU for readDeviceIdentification
-     *
-     */
+    //
+    // function to create PDU for readDeviceIdentification
+    //
     static function createReadDeviceIdentificationPDU(readDeviceIdCode, objectId) {
         const MEI_TYPE = 0x0E;
         local readDeviceIdentification = FUNCTION_CODES.readDeviceIdentification;
@@ -242,10 +227,9 @@ class ModbusRTU {
         return PDU;
     }
 
-    /*
-     * function to create PDU for diagnostics
-     *
-     */
+    //
+    // function to create PDU for diagnostics
+    //
     static function createDiagnosticsPDU(subFunctionCode, data) {
         local diagnostics = FUNCTION_CODES.diagnostics;
         local PDU = blob(diagnostics.reqLen(data.len() / 2));
@@ -255,10 +239,9 @@ class ModbusRTU {
         return PDU;
     }
 
-    /*
-     * function to create PDU for readExceptionStatus
-     *
-     */
+    //
+    // function to create PDU for readExceptionStatus
+    //
     static function createReadExceptionStatusPDU() {
         local readExceptionStatus = FUNCTION_CODES.readExceptionStatus;
         local PDU = blob(readExceptionStatus.reqLen);
@@ -266,10 +249,9 @@ class ModbusRTU {
         return PDU;
     }
 
-    /*
-     * function to create PDU for read
-     *
-     */
+    //
+    // function to create PDU for read
+    //
     static function createReadPDU(targetType, startingAddress, quantity) {
         local PDU = blob(targetType.reqLen);
         PDU.writen(targetType.fcode, 'b');
@@ -278,10 +260,9 @@ class ModbusRTU {
         return PDU;
     }
 
-    /*
-     * function to create PDU for write
-     *
-     */
+    //
+    // function to create PDU for write
+    //
     static function createWritePDU(targetType, startingAddress, numBytes, quantity, values) {
         local PDU = blob();
         PDU.writen(targetType.fcode, 'b');
@@ -295,10 +276,9 @@ class ModbusRTU {
     }
 
 
-    /*
-     * function to parse the incoming ADU
-     *
-     */
+    //
+    // function to parse the incoming ADU
+    //
     static function parse(params) {
         local PDU = params.PDU;
         local functionCode = PDU.readn('b');
@@ -339,11 +319,9 @@ class ModbusRTU {
         }
     }
 
-
-    /*
-     * function to parse ADU for diagnostics
-     *
-     */
+    //
+    // function to parse ADU for diagnostics
+    //
     static function _diagnostics(PDU, quantity) {
         PDU.seek(3);
         local result = [];
@@ -353,28 +331,24 @@ class ModbusRTU {
         return result;
     }
 
-    /*
-     * function to parse ADU for readExceptionStatus
-     *
-     */
+    //
+    // function to parse ADU for readExceptionStatus
+    //
     static function _readExceptionStatus(PDU) {
         PDU.seek(1);
         return PDU.readn('b');
     }
 
-
-    /*
-     * function to parse ADU for write
-     *
-     */
+    //
+    // function to parse ADU for write
+    //
     static function _writeData(PDU) {
         return true;
     }
 
-    /*
-     * function to parse ADU for read
-     *
-     */
+    //
+    // function to parse ADU for read
+    //
     static function _readData(PDU, expectedResType, quantity) {
         PDU.seek(2);
         local result = [];
@@ -384,7 +358,7 @@ class ModbusRTU {
                 while (!PDU.eos()) {
                     local byte = PDU.readn('b');
                     local bitmask = 1;
-                    for (local bit = 0; bit < 8; ++bit) {
+                    for (local bit = 0; bit < 8; ++ bit) {
                         result.push((byte & (bitmask << bit)) != 0x00);
                         if (result.len() == quantity) {
                             // move the pointer to the end to break out of the while loop
@@ -405,28 +379,26 @@ class ModbusRTU {
         return result;
     }
 
-    /*
-     * function to parse ADU for reportSlaveID
-     *
-     */
+    //
+    // function to parse ADU for reportSlaveID
+    //
     static function _reportSlaveID(PDU) {
         PDU.seek(1);
         local byteCount = PDU.readn('b');
         if (PDU.len() - PDU.tell() >= byteCount) {
              local results = {
                  slaveId      = PDU.readstring(byteCount - 1),
-                 runIndicator = ((PDU.readn('b') == 0) ? false : true),
+                 runIndicator = ((PDU.readn('b') == 0) ? false: true),
              };
              return results;
         }
         return false;
     }
 
-    /*
-     * function to parse ADU for readDeviceIdentification
-     *
-     */
-     static function _readDeviceIdentification(PDU) {
+    //
+    // function to parse ADU for readDeviceIdentification
+    //
+    static function _readDeviceIdentification(PDU) {
          if (PDU.len() < 7) {
              // Not enough data for this function code
              return false;
@@ -450,10 +422,9 @@ class ModbusRTU {
          return objects;
      }
 
-    /*
-     * function to determine if the given address is valid
-     *
-     */
+    //
+    // function to determine if the given address is valid
+    //
     static function _isValidAddress(addressType, address) {
         switch (addressType) {
             case MODBUSRTU_ADDRESS_TYPE.DIRECT:
@@ -473,18 +444,16 @@ class ModbusRTU {
         }
     }
 
-
-    /*
-     * function to determine the type based on the given address
-     *
-     */
+    //
+    // function to determine the type based on the given address
+    //
     static function _getTargetType(addressType, address) {
         switch (addressType) {
             case MODBUSRTU_ADDRESS_TYPE.DIRECT:
                 server.error("Target type must be provided for direct addressing");
                 throw MODBUSRTU_EXCEPTION.INVALID_TARGET_TYPE;
             case MODBUSRTU_ADDRESS_TYPE.STANDARD:
-                if        (address >= 1 && address <= 9999) {
+                if (address >= 1 && address <= 9999) {
                     return MODBUSRTU_TARGET_TYPE.COIL;
                 } else if (address >= 10001 && address <= 19999) {
                     return MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT;
@@ -509,11 +478,9 @@ class ModbusRTU {
         return false;
     }
 
-
-    /*
-     * function to determine the offset
-     *
-     */
+    //
+    // function to determine the offset
+    //
     static function _getTargetOffset(addressType, targetType) {
         switch (addressType) {
             case MODBUSRTU_ADDRESS_TYPE.DIRECT:

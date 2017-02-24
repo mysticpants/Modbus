@@ -8,19 +8,23 @@ local spi = hardware.spi0;
 spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
 
 // instantiate a modbus object
-local modbus = ModbusTCPMaster(spi, hardware.pinXC, null, hardware.pinXA);
+local modbus = ModbusTCPMaster({
+    spi = spi,
+    interruptPin = hardware.pinXC,
+    resetPin = hardware.pinXA
+});
 
 // the network setting
 local networkSettings = {
-    "gatewayIP"  : [192, 168, 1, 1],
-    "subnet"     : [255, 255, 255, 0],
-    "sourceIP"   : [192, 168, 1, 30]
+    "gatewayIP"  : "192.168.1.1",
+    "subnet"     : "255.255.255.0",
+    "sourceIP"   : "192.168.1.30"
 };
 
 // the device address and port
 local connectionSettings = {
-    "destIP"     : [192, 168, 1, 90],
-    "destPort"   : [0x01, 0xF6]
+    "destIP"     : "192.168.1.90",
+    "destPort"   : 502
 };
 
 // open the connection

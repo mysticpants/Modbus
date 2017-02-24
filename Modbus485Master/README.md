@@ -35,7 +35,7 @@ Instantiate a new Modbus485Master object and set the configuration of UART .
 
 #### Parameters
 
-*params* is of type `table` and expects the following items : 
+*params* is of type `table` and expects the following items :
 
 | Key      | Default     | Notes                                                                           |
 | ------   | ----------- | ------------------------------------------------------------------------------- |
@@ -93,24 +93,23 @@ This is the generic function to read values from a single coil, register or mult
 ```squirrel
 // read from a single coil
 modbus.read(0x01, MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT, 0x01, 1, function(error, result) {
-      if (error) {
+    if (error) {
         server.error(error);
-      } else {
+    } else {
         server.log(result);
-      }
-  }.bindenv(this));
+    }
+}.bindenv(this));
 
 // read from multiple registers
 modbus.read(0x01, MODBUSRTU_TARGET_TYPE.INPUT_REGISTER, 0x01 , 5, function(error, results) {
-      if (error) {
+    if (error) {
         server.error(error);
-      } else {
+    } else {
         foreach(key, value in results) {
-          server.log(key + " : " + value);
+            server.log(key + " : " + value);
         }
-      }
-  }.bindenv(this));
-
+    }
+}.bindenv(this));
 ```
 
 
@@ -142,24 +141,23 @@ This is the generic function to write values into coils or holding registers .
 ```squirrel
 // write to a single coil
 modbus.write(0x01, MODBUSRTU_TARGET_TYPE.COIL, 0x01, 1, true, function(error, result) {
-      if (error){
+    if (error) {
         server.error(error);
-      } else {
+    } else {
         server.log(result);
-      }
-  }.bindenv(this));
+    }
+}.bindenv(this));
 
 // write to multiple registers
 modbus.write(0x01, MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER, 0x01, 5, [false, true, false, true, true], function(error, results) {
-      if (error) {
+    if (error) {
         server.error(error);
-      } else {
+    } else {
         foreach(key, value in results) {
-          server.log(key + " : " + value);
+            server.log(key + " : " + value);
         }
-      }
-  }.bindenv(this));
-
+    }
+}.bindenv(this));
 ```
 
 ### readExceptionStatus(*deviceAddress, [callback]*)
@@ -172,8 +170,8 @@ This function reads the contents of eight Exception Status outputs in a remote d
 
 | Key             | Data Type | Required | Default Value | Description                                                               |
 | --------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *deviceAddress* | `integer`       | Yes      | N/A           | The unique address that identifies a device                               |
-| *callback*      | `function`  | No       | Null          | The function to be fired when it receives response regarding this request |
+| *deviceAddress* | `integer` | Yes      | N/A           | The unique address that identifies a device                               |
+| *callback*      | `function`| No       | Null          | The function to be fired when it receives response regarding this request |
 
 #### Example
 
@@ -241,8 +239,6 @@ modbus.diagnostics(0x01, MODBUSRTU_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTIO
         server.log(result);
     }
 }.bindenv(this));
-
-
 ```
 
 
@@ -420,10 +416,6 @@ The table below enumerates all the exception codes that can be possibly encounte
 | 87            | Invalid Target Type     |
 | 88            | Invalid Values          |
 | 89            | Invalid Quantity        |
-
-
-
-
 
 # License
 

@@ -1,2 +1,5 @@
 #include "./lib/CRC16.class.nut"
+#include "ModbusSlave.class.nut"
+#include "./../ModbusRTU/ModbusRTU.class.nut"
 #include "Modbus485Slave.class.nut"
+#include "./example/device.example.nut"

@@ -35,7 +35,7 @@ Instantiate a new Modbus485Master object and set the configuration of UART .
 
 #### Parameters
 
-*params* is of type `table` and expects the following items :
+The constructor expects a `table` which contains the following items : 
 
 | Key      | Default     | Notes                                                                           |
 | ------   | ----------- | ------------------------------------------------------------------------------- |

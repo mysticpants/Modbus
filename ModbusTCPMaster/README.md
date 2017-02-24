@@ -28,11 +28,13 @@ The following instructions are applicable to [impAccelerator™ Fieldbus Gateway
 
 This is the main library class. It implements most of the functions listed in the [Modbus specification](http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf).
 
-### Constructor: ModbusTCPMaster(*spi, interruptPin, csPin, resetPin, [debug]*)
+### Constructor: ModbusTCPMaster(*params*)
 
 Instantiate a new ModbusTCPMaster object and set the configuration of spi .
 
 #### Parameters
+
+The constructor expects a `table` which contains the following items :
 
 | Key          | Default     | Notes                                                                                                                       |
 | ------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -40,6 +42,7 @@ Instantiate a new ModbusTCPMaster object and set the configuration of spi .
 | interruptPin | N/A         | The interrupt pin. It can be any digital input that supports a callback on pin state change                                 |
 | csPin        | N/A         | The Chip Select pin. If you are not using the Imp005, you must pass in the digital output pin to be used as the chip select |
 | resetPin     | N/A         | The reset pin                                                                                                               |
+| autoRetry    | false       | If enabled, it will reconnect automatically                                                                                 |
 | debug        | false       | If enabled, the outgoing and incoming ADU will be printed for debugging purpose                                             |
 
 
@@ -98,13 +101,15 @@ modbus.connect(networkSettings, connectionSettings, function(error, conn){
 ```
 
 
-### disconnect()
+### disconnect(callback)
 
 This function closes the existing TCP connection.
 
 #### Parameters
 
-None
+| Key                  | Data Type   | Required | Default Value | Description                                                  |
+| -------------------- | ----------- | -------- | ------------- | ------------------------------------------------------------ |
+| *callback*           | `function`  | No       | Null          | The function to be fired when the connection is dropped      |
 
 #### Example
 
@@ -147,24 +152,23 @@ This is the generic function to read values from a single coil, register or mult
 ```squirrel
 // read from a single coil
 modbus.read(MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT, 0x01, 1, function(error, result) {
-      if (error) {
+    if (error) {
         server.error(error);
-      } else {
+    } else {
         server.log(result);
-      }
-  }.bindenv(this));
+    }
+}.bindenv(this));
 
 // read from multiple registers
 modbus.read(MODBUSRTU_TARGET_TYPE.INPUT_REGISTER, 0x01 , 5, function(error, results) {
-      if (error) {
+    if (error) {
         server.error(error);
-      } else {
+    } else {
         foreach(key, value in results) {
           server.log(key + " : " + value);
         }
-      }
-  }.bindenv(this));
-
+    }
+}.bindenv(this));
 ```
 
 
@@ -195,23 +199,23 @@ This is the generic function to write values into coils or holding registers .
 ```squirrel
 // write to a single coil
 modbus.write(MODBUSRTU_TARGET_TYPE.COIL, 0x01, 1, true, function(error, result) {
-      if (error){
+    if (error){
         server.error(error);
-      } else {
+    } else {
         server.log(result);
-      }
-  }.bindenv(this));
+    }
+}.bindenv(this));
 
 // write to multiple registers
 modbus.write(MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER, 0x01, 5, [false, true, false, true, true], function(error, results) {
-      if (error) {
+    if (error) {
         server.error(error);
-      } else {
+    } else {
         foreach(key, value in results) {
-          server.log(key + " : " + value);
+            server.log(key + " : " + value);
         }
-      }
-  }.bindenv(this));
+    }
+}.bindenv(this));
 
 ```
 
@@ -467,10 +471,6 @@ The table below enumerates all the exception codes that can be possibly encounte
 | 87            | Invalid Target Type     |
 | 88            | Invalid Values          |
 | 89            | Invalid Quantity        |
-
-
-
-
 
 # License
 

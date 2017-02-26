@@ -103,10 +103,8 @@ The function creates a <a href="#PDU">PDU</a> for diagnostics.
 
 | Key               | Data Type | Required | Default Value | Description                                                               |
 | ----------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *deviceAddress*   | `integer` | Yes      | N/A           | The unique address that identifies a device                               |
 | *subFunctionCode* | `enum`    | Yes      | N/A           | Refer to **Sub-function Code**                                            |
 | *data*            | `blob`    | Yes      | N/A           | The data field required by Modbus request                                 |
-| *callback*        | Function  | No       | Null          | The function to be fired when it receives response regarding this request |
 
 
 ### Sub-function Codes

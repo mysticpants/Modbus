@@ -35,7 +35,7 @@ Instantiate a new Modbus485Master object and set the configuration of UART .
 
 #### Parameters
 
-The constructor expects a `table` which contains the following items : 
+The constructor expects a `table` which contains the following items :
 
 | Key      | Default     | Notes                                                                           |
 | ------   | ----------- | ------------------------------------------------------------------------------- |
@@ -75,7 +75,7 @@ This is the generic function to read values from a single coil, register or mult
 | *targetType*      | `enum`    | Yes      | N/A           | Refer to **<a href='#target-type'>Target Type</a>**                       |
 | *startingAddress* | `integer` | Yes      | N/A           | The address from which it begins reading values                           |
 | *quantity*        | `integer` | Yes      | N/A           | The number of consecutive addresses the values are read from              |
-| *callback*        | `function`  | No       | Null          | The function to be fired when it receives response regarding this request |
+| *callback*        | `function`| No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively. It takes two parameters, error and result respectively |
 
 
 <h4 id='target-type'>Target Type</h4>
@@ -128,7 +128,7 @@ This is the generic function to write values into coils or holding registers .
 | *startingAddress* | `integer`                         | Yes      | N/A           | The address from which it begins writing values                           |
 | *quantity*        | `integer`                         | Yes      | N/A           | The number of consecutive addresses the values are written into           |
 | *values*          | `integer`, `array`, `bool`, `blob`| Yes      | N/A           | The values written into Coils or Registers. Please view Notes below       |
-| *callback*        | `function`                        | No       | Null          | The function to be fired when it receives response regarding this request |
+| *callback*        | `function`                        | No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
 
 ##### Notes :
 
@@ -171,7 +171,7 @@ This function reads the contents of eight Exception Status outputs in a remote d
 | Key             | Data Type | Required | Default Value | Description                                                               |
 | --------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
 | *deviceAddress* | `integer` | Yes      | N/A           | The unique address that identifies a device                               |
-| *callback*      | `function`| No       | Null          | The function to be fired when it receives response regarding this request |
+| *callback*      | `function`| No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
 
 #### Example
 
@@ -202,7 +202,7 @@ This function provides a series of tests for checking the communication system b
 | *deviceAddress*   | `integer`       | Yes      | N/A           | The unique address that identifies a device                               |
 | *subFunctionCode* | `enum`      | Yes      | N/A           | Refer to **Sub-function Code**                                            |
 | *data*            | `blob`      | Yes      | N/A           | The data field required by Modbus request                                 |
-| *callback*        | `function`  | No       | Null          | The function to be fired when it receives response regarding this request |
+| *callback*        | `function`  | No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
 
 
 ### Sub-function Codes
@@ -253,7 +253,7 @@ This function reads the description of the type, the current status, and other i
 | Key             | Data Type | Required | Default Value | Description                                                               |
 | --------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
 | *deviceAddress* | `integer`       | Yes      | N/A           | The unique address that identifies a device                               |
-| *callback*      | `function`  | No       | Null          | The function to be fired when it receives response regarding this request |
+| *callback*      | `function`  | No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
 
 #### Example
 
@@ -286,7 +286,7 @@ This function modifies the contents of a specified holding register using a comb
 | *referenceAddress* | `integer`       | Yes      | N/A           | The address of the holding register the value is written into             |
 | *AND_mask*         | `integer`       | Yes      | N/A           | The AND mask                                                              |
 | *OR_mask*          | `integer`       | Yes      | N/A           | The OR mask                                                               |
-| *callback*         | `function`  | No       | Null          | The function to be fired when it receives response regarding this request |
+| *callback*         | `function`  | No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
 
 #### Example
 
@@ -319,7 +319,7 @@ This function performs a combination of one read operation and one write operati
 | *writeStartAddress*   | `integer`       | Yes      | N/A           | The address from which it begins writing values                           |
 | *writeQuantity*       | `integer`       | Yes      | N/A           | The number of consecutive addresses values are written into               |
 | *writeValue*          | `blob`      | Yes      | N/A           | The value written into the holding register                               |
-| *callback*            | `function`  | No       | Null          | The function to be fired when it receives response regarding this request |
+| *callback*            | `function`  | No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
 
 #### Example
 
@@ -349,7 +349,7 @@ This function allows reading the identification and additional information relat
 | *deviceAddress*    | `integer`       | Yes      | N/A           | The unique address that identifies a device                               |
 | *readDeviceIdCode* | `enum`      | Yes      | N/A           | Refer to **Read Device ID Code**                                          |
 | *objectId*         | `enum`      | Yes      | N/A           | Refer to **Object ID**                                                    |
-| *callback*         | `function`  | No       | Null          | The function to be fired when it receives response regarding this request |
+| *callback*         | `function`  | No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
 
 
 ##### Read Device ID Codes

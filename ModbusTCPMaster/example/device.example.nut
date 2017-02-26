@@ -7,11 +7,10 @@
 local spi = hardware.spi0;
 spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
 
+local wiz = W5500(hardware.pinXC, spi, null, hardware.pinXA);
 // instantiate a modbus object
 local modbus = ModbusTCPMaster({
-    spi = spi,
-    interruptPin = hardware.pinXC,
-    resetPin = hardware.pinXA
+    wiz = wiz
 });
 
 // the network setting

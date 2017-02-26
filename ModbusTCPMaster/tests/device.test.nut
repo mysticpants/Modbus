@@ -23,9 +23,7 @@ class DeviceTestCase extends ImpTestCase {
         local spi = hardware.spi0;
         spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
         _modbus = ModbusTCPMaster({
-            spi = spi,
-            interruptPin = hardware.pinXC,
-            resetPin = hardware.pinXA
+            wiz = W5500(hardware.pinXC, spi, null, hardware.pinXA)
         });
         _connection = Promise(function(resolve, reject) {
             _modbus.connect({

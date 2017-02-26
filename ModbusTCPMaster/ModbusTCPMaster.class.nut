@@ -17,21 +17,15 @@ class ModbusTCPMaster {
     //
     // Constructor for ModbusTCPMaster
     //
-    // @param  {object} spi - The spi object
-    // @param  {object} interruptPin - The interrupt pin
-    // @param  {object} csPin - The chip select pin
-    // @param  {object} resetPin - The reset pin
-    // @param  {bool} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
+    // @param  {table} params - The parameters passed into the constructor
+    // @item  {object} wiz - The W5500 object
+    // @item  {bool} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
     //
     constructor(params) {
-        local csPin = ("csPin" in params) ? params.csPin: null;
-        local resetPin = ("resetPin" in params) ? params.resetPin: null;
-        local autoRetry = ("autoRetry" in params) ? params.autoRetry: false;
-        local debug = ("debug" in params) ? params.debug: false;
-        _wiz = W5500(params.interruptPin, params.spi, csPin, resetPin, autoRetry);
+        _debug = ("debug" in params) ? params.debug: false;
+        _wiz = params.wiz;
         _transactionCount = 1;
         _transactions = {};
-        _debug = debug;
     }
 
     //
@@ -261,6 +255,7 @@ class ModbusTCPMaster {
     // The callback function to be fired when the connection is dropped
     //
     function _onDisconnect(conn) {
+        _connection = null;
         if (_shouldRetry) {
             _connectCallback = null;
             _wiz.openConnection(_connectionSettings.destIP, _connectionSettings.destPort, _onConnect.bindenv(this));
@@ -272,7 +267,7 @@ class ModbusTCPMaster {
     //
     function _parseADU(error, ADU) {
         if (error) {
-            _callbackHandler(error, null, _connectCallback);
+            return _callbackHandler(error, null, _connectCallback);
         }
         ADU.seek(0);
         local header = ADU.readblob(7);
@@ -310,12 +305,17 @@ class ModbusTCPMaster {
     function _send(PDU, properties) {
         _transactions[_transactionCount] <- properties;
         local ADU = _createADU(PDU);
-        _connection.transmit(ADU);
-        _transactionCount ++;
-        if (_transactionCount > MAX_TRANSACTION_COUNT) {
-            _transactionCount = 1;
-        }
-        _log(ADU,"Outgoing ADU: ");
+        _connection.transmit(ADU, function(error) {
+            if (error) {
+                _callbackHandler(error, null, properties.callback);
+            } else {
+                _transactionCount ++;
+                if (_transactionCount > MAX_TRANSACTION_COUNT) {
+                    _transactionCount = 1;
+                }
+                _log(ADU,"Outgoing ADU: ");
+            }
+        }.bindenv(this));
     }
 
     //

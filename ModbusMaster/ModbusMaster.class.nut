@@ -1,21 +1,18 @@
-
-
-
 class ModbusMaster {
     static VERSION = "1.0.0";
     _debug = null;
 
-    constructor(debug = false){
+    constructor(debug) {
         _debug = debug;
     }
 
-    function reportSlaveID(deviceAddress, callback = null) {
+    function reportSlaveID(callback = null) {
         local properties = {
             expectedResLen = ModbusRTU.FUNCTION_CODES.reportSlaveID.resLen,
             expectedResType = ModbusRTU.FUNCTION_CODES.reportSlaveID.fcode,
             callback = callback
         };
-        _send(deviceAddress, ModbusRTU.createReportSlaveIdPDU(), properties);
+        _send(ModbusRTU.createReportSlaveIdPDU(), properties);
     }
 
     //
@@ -23,13 +20,13 @@ class ModbusMaster {
     //
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
-    function readExceptionStatus(deviceAddress, callback = null) {
+    function readExceptionStatus(callback = null) {
         local properties = {
             expectedResLen = ModbusRTU.FUNCTION_CODES.readExceptionStatus.resLen,
             expectedResType = ModbusRTU.FUNCTION_CODES.readExceptionStatus.fcode,
             callback = callback
         };
-        _send(deviceAddress, ModbusRTU.createReadExceptionStatusPDU(), properties);
+        _send(ModbusRTU.createReadExceptionStatusPDU(), properties);
     }
 
     //
@@ -40,7 +37,7 @@ class ModbusMaster {
     // @param {blob} data - The data field required by Modbus request
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
-    function diagnostics(deviceAddres, subFunctionCode, data, callback = null) {
+    function diagnostics(subFunctionCode, data, callback = null) {
         local quantity = data.len() / 2;
         local properties = {
             expectedResLen = ModbusRTU.FUNCTION_CODES.diagnostics.resLen(quantity),
@@ -48,7 +45,7 @@ class ModbusMaster {
             quantity = quantity,
             callback = callback
         };
-        _send(deviceAddres, ModbusRTU.createDiagnosticsPDU(subFunctionCode, data), properties);
+        _send(ModbusRTU.createDiagnosticsPDU(subFunctionCode, data), properties);
     }
 
     //
@@ -59,13 +56,13 @@ class ModbusMaster {
     // @param {integer} OR_mask - The OR mask
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
-    function maskWriteRegister(deviceAddress, referenceAddress, AND_Mask, OR_Mask, callback = null) {
+    function maskWriteRegister(referenceAddress, AND_Mask, OR_Mask, callback = null) {
         local properties = {
             expectedResLen = ModbusRTU.FUNCTION_CODES.maskWriteRegister.resLen,
             expectedResType = ModbusRTU.FUNCTION_CODES.maskWriteRegister.fcode,
             callback = callback
         };
-        _send(deviceAddress, ModbusRTU.createMaskWriteRegisterPDU(referenceAddress, AND_Mask, OR_Mask), properties);
+        _send(ModbusRTU.createMaskWriteRegisterPDU(referenceAddress, AND_Mask, OR_Mask), properties);
     }
 
     //
@@ -78,7 +75,7 @@ class ModbusMaster {
     // @param {blob} writeValue - The value written into the holding register
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
-    function readWriteMultipleRegisters(deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, callback = null) {
+    function readWriteMultipleRegisters(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, callback = null) {
         writeValue = _processWriteRegistersValues(writeQuantity, writeValue);
         local properties = {
             expectedResLen = ModbusRTU.FUNCTION_CODES.readWriteMultipleRegisters.resLen(readQuantity),
@@ -86,7 +83,7 @@ class ModbusMaster {
             quantity = readQuantity,
             callback = callback
         };
-        _send(deviceAddress, ModbusRTU.createReadWriteMultipleRegistersPDU(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue), properties);
+        _send(ModbusRTU.createReadWriteMultipleRegistersPDU(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue), properties);
     }
 
     //
@@ -96,15 +93,14 @@ class ModbusMaster {
     // @param {enum} objectId - object id
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
-    function readDeviceIdentification(deviceAddress, readDeviceIdCode, objectId, callback = null) {
+    function readDeviceIdentification(readDeviceIdCode, objectId, callback = null) {
         local properties = {
             expectedResLen = ModbusRTU.FUNCTION_CODES.readDeviceIdentification.resLen,
             expectedResType = ModbusRTU.FUNCTION_CODES.readDeviceIdentification.fcode,
             callback = callback
         };
-        _send(deviceAddress, ModbusRTU.createReadDeviceIdentificationPDU(readDeviceIdCode, objectId), properties);
+        _send(ModbusRTU.createReadDeviceIdentificationPDU(readDeviceIdCode, objectId), properties);
     }
-
 
     //
     // This is the generic function to write values into coils or holding registers .
@@ -115,16 +111,16 @@ class ModbusMaster {
     // @param {integer, Array[integer, Bool], Bool, blob} values - The values written into Coils or Registers
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
-    function write(deviceAddress, targetType, startingAddress, quantity, values, callback = null) {
+    function write(targetType, startingAddress, quantity, values, callback = null) {
         try {
             if (quantity < 1) {
                 throw MODBUSRTU_EXCEPTION.INVALID_QUANTITY;
             }
             switch (targetType) {
                 case MODBUSRTU_TARGET_TYPE.COIL:
-                    return _writeCoils(deviceAddress, startingAddress, quantity, values, callback);
+                    return _writeCoils(startingAddress, quantity, values, callback);
                 case MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER:
-                    return _writeRegisters(deviceAddress, startingAddress, quantity, values, callback);
+                    return _writeRegisters(startingAddress, quantity, values, callback);
                 default:
                     throw MODBUSRTU_EXCEPTION.INVALID_TARGET_TYPE;
             }
@@ -141,7 +137,7 @@ class ModbusMaster {
     // @param {integer} quantity - The number of consecutive addresses the values are read from
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
-    function read(deviceAddress, targetType, startingAddress, quantity, callback = null) {
+    function read(targetType, startingAddress, quantity, callback = null) {
         try {
             local PDU = null;
             local resLen = null;
@@ -179,26 +175,25 @@ class ModbusMaster {
                 quantity = quantity,
                 callback = callback
             };
-            _send(deviceAddress, PDU, properties);
+            _send(PDU, properties);
         } catch (error) {
             _callbackHandler(error, null, callback);
         }
     }
 
-
     //
     // construct a writeCoils request
     //
-    function _writeCoils(deviceAddress, startingAddress, quantity, values, callback) {
+    function _writeCoils(startingAddress, quantity, values, callback) {
         local numBytes = math.ceil(quantity / 8.0);
         local writeValues = blob(numBytes);
-        local functionType = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleCoil: ModbusRTU.FUNCTION_CODES.writeMultipleCoils;
+        local functionType = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleCoil : ModbusRTU.FUNCTION_CODES.writeMultipleCoils;
         switch (typeof values) {
             case "integer":
                 writeValues.writen(swap2(values), 'w');
                 break;
             case "bool":
-                writeValues.writen(swap2(values ? 0xFF00: 0), 'w');
+                writeValues.writen(swap2(values ? 0xFF00 : 0), 'w');
                 break;
             case "blob":
                 writeValues = values;
@@ -211,11 +206,11 @@ class ModbusMaster {
                 foreach (bit, val in values) {
                     byte = bit / 8;
                     bitshift = bit % 8;
-                    writeValues[byte] = writeValues[byte] | ((val ? 1: 0) << bitshift);
+                    writeValues[byte] = writeValues[byte] | ((val ? 1 : 0) << bitshift);
                 }
                 break;
-                default:
-                    throw MODBUSRTU_EXCEPTION.INVALID_VALUES;
+            default:
+                throw MODBUSRTU_EXCEPTION.INVALID_VALUES;
         }
         local properties = {
             callback = callback,
@@ -223,14 +218,14 @@ class ModbusMaster {
             expectedResLen = functionType.resLen,
             quantity = quantity
         };
-        _send(deviceAddress, ModbusRTU.createWritePDU(functionType, startingAddress, numBytes, quantity, writeValues), properties);
+        _send(ModbusRTU.createWritePDU(functionType, startingAddress, numBytes, quantity, writeValues), properties);
     }
 
     //
     // construct a writeRegisters request
     //
-    function _writeRegisters(deviceAddress, startingAddress, quantity, values, callback) {
-        local numBytes =  quantity * 2;
+    function _writeRegisters(startingAddress, quantity, values, callback) {
+        local numBytes = quantity * 2;
         local writeValues = _processWriteRegistersValues(quantity, values);
         local functionType = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleReg : ModbusRTU.FUNCTION_CODES.writeMultipleRegs;
         local properties = {
@@ -239,7 +234,7 @@ class ModbusMaster {
             expectedResLen = functionType.resLen,
             quantity = quantity
         };
-        _send(deviceAddress, ModbusRTU.createWritePDU(functionType, startingAddress, numBytes, quantity, writeValues), properties);
+        _send(ModbusRTU.createWritePDU(functionType, startingAddress, numBytes, quantity, writeValues), properties);
     }
 
     //
@@ -268,7 +263,6 @@ class ModbusMaster {
         return writeValues;
     }
 
-
     //
     // log the message
     //
@@ -277,7 +271,7 @@ class ModbusMaster {
             switch (typeof message) {
                 case "blob":
                     local mes = vargv[0];
-                    foreach(value in message) {
+                    foreach (value in message) {
                         mes += format("%02X ", value);
                     }
                     return server.log(mes);
@@ -287,9 +281,18 @@ class ModbusMaster {
         }
     }
 
-    function _send(deviceAddress, PDU, properties);
+    //
+    // send the ADU
+    //
+    function _send(PDU, properties);
 
+    //
+    // fire the callback
+    //
     function _callbackHandler(error, result, callback);
 
-    function _createADU(deviceAddress, PDU);
+    //
+    // create an ADU
+    //
+    function _createADU(PDU);
 }

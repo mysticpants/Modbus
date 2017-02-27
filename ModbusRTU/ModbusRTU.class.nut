@@ -67,103 +67,103 @@ class ModbusRTU {
     static VERSION = "1.0.0";
      // resLen and reqLen are the length of the PDU
     static FUNCTION_CODES = {
-            readCoils = {
-                fcode   = 0x01,
-                reqLen  = 5,
-                resLen  = function(n) {
-                    return 2 + math.ceil(n / 8.0);
-                }
-            },
-            readInputs = {
-                fcode   = 0x02,
-                reqLen  = 5,
-                resLen  = function(n) {
-                    return 2 + math.ceil(n / 8.0);
-                }
-            },
-            readHoldingRegs = {
-                fcode   = 0x03,
-                reqLen  = 5,
-                resLen  = function(n) {
-                    return 2 * n + 2;
-                }
-            },
-            readInputRegs = {
-                fcode   = 0x04,
-                reqLen  = 5,
-                resLen  = function(n) {
-                    return 2 * n + 2;
-                }
-            },
-            writeSingleCoil = {
-                fcode   = 0x05,
-                reqLen  = 5,
-                resLen  = 5
-            },
-            writeSingleReg = {
-                fcode   = 0x06,
-                reqLen  = 5,
-                resLen  = 5
-            },
-            writeMultipleCoils = {
-                fcode   = 0x0F,
-                reqLen  = function(n) {
-                    return 6 + math.ceil(n / 8.0);
-                },
-                resLen  = 5
-            },
-            writeMultipleRegs = {
-                fcode   = 0x10,
-                reqLen  = function(n) {
-                    return 6 + n * 2;
-                },
-                resLen  = 5
-            },
-            readExceptionStatus = {
-                fcode   = 0x07,
-                reqLen  = 1,
-                resLen  = 2
-            },
-            diagnostics = {
-                fcode   = 0x08,
-                reqLen  = function(n) {
-                    return 3 + n * 2;
-                },
-                resLen  = function(n) {
-                    return 3 + n * 2;
-                }
-            },
-            reportSlaveID = {
-                fcode   = 0x11,
-                reqLen  = 1,
-                resLen  = null
-            },
-            readDeviceIdentification = {
-                fcode   = 0x2B,
-                reqLen  = 4,
-                resLen  = null
-            },
-            maskWriteRegister = {
-                fcode   = 0x16,
-                reqLen  = 7,
-                resLen  = 7
-            },
-            readFIFOQueue = {
-                fcode   = 0x18,
-                reqLen  = 3,
-                resLen  = function(n) {
-                    return 5 + n * 2;
-                }
-            },
-            readWriteMultipleRegisters = {
-                fcode   = 0x17,
-                reqLen  = function(n) {
-                    return 10 + n * 2;
-                },
-                resLen  = function(n) {
-                    return 2 + n * 2;
-                }
+        readCoils = {
+            fcode   = 0x01,
+            reqLen  = 5,
+            resLen  = function(n) {
+                return 2 + math.ceil(n / 8.0);
             }
+        },
+        readInputs = {
+            fcode   = 0x02,
+            reqLen  = 5,
+            resLen  = function(n) {
+                return 2 + math.ceil(n / 8.0);
+            }
+        },
+        readHoldingRegs = {
+            fcode   = 0x03,
+            reqLen  = 5,
+            resLen  = function(n) {
+                return 2 * n + 2;
+            }
+        },
+        readInputRegs = {
+            fcode   = 0x04,
+            reqLen  = 5,
+            resLen  = function(n) {
+                return 2 * n + 2;
+            }
+        },
+        writeSingleCoil = {
+            fcode   = 0x05,
+            reqLen  = 5,
+            resLen  = 5
+        },
+        writeSingleReg = {
+            fcode   = 0x06,
+            reqLen  = 5,
+            resLen  = 5
+        },
+        writeMultipleCoils = {
+            fcode   = 0x0F,
+            reqLen  = function(n) {
+                return 6 + math.ceil(n / 8.0);
+            },
+            resLen  = 5
+        },
+        writeMultipleRegs = {
+            fcode   = 0x10,
+            reqLen  = function(n) {
+                return 6 + n * 2;
+            },
+            resLen  = 5
+        },
+        readExceptionStatus = {
+            fcode   = 0x07,
+            reqLen  = 1,
+            resLen  = 2
+        },
+        diagnostics = {
+            fcode   = 0x08,
+            reqLen  = function(n) {
+                return 3 + n * 2;
+            },
+            resLen  = function(n) {
+                return 3 + n * 2;
+            }
+        },
+        reportSlaveID = {
+            fcode   = 0x11,
+            reqLen  = 1,
+            resLen  = null
+        },
+        readDeviceIdentification = {
+            fcode   = 0x2B,
+            reqLen  = 4,
+            resLen  = null
+        },
+        maskWriteRegister = {
+            fcode   = 0x16,
+            reqLen  = 7,
+            resLen  = 7
+        },
+        readFIFOQueue = {
+            fcode   = 0x18,
+            reqLen  = 3,
+            resLen  = function(n) {
+                return 5 + n * 2;
+            }
+        },
+        readWriteMultipleRegisters = {
+            fcode   = 0x17,
+            reqLen  = function(n) {
+                return 10 + n * 2;
+            },
+            resLen  = function(n) {
+                return 2 + n * 2;
+            }
+        }
     }
 
     //

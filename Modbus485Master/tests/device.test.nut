@@ -3,13 +3,13 @@ const DEVICE_ADDRESS = 1;
 function errorMessage(error, resolve, reject) {
     switch (error) {
         case MODBUSRTU_EXCEPTION.ILLEGAL_FUNCTION:
-          return resolve("This function is not supported by the device");
+            return resolve("This function is not supported by the device");
         case MODBUSRTU_EXCEPTION.ILLEGAL_DATA_ADDR:
-          return resolve("Illegal data address, please try a different address");
+            return resolve("Illegal data address, please try a different address");
         case MODBUSRTU_EXCEPTION.RESPONSE_TIMEOUT:
-          return resolve("Timeout. No response from the device");
+            return resolve("Timeout. No response from the device");
         default:
-          return reject("Error code: " + error);
+            return reject("Error code: " + error);
     }
 }
 
@@ -115,7 +115,7 @@ class DeviceTestCase extends ImpTestCase {
                     }
                     resolve(message);
                 }
-              }.bindenv(this));
+            }.bindenv(this));
         }.bindenv(this));
     }
 
@@ -168,7 +168,7 @@ class DeviceTestCase extends ImpTestCase {
                 } else {
                     this.assertTrue(result.len() == 3);
                     local message = "Object ID: Content \n";
-                    foreach (key, value in result ) {
+                    foreach (key, value in result) {
                         message += key + ": " + value + "\n";
                     }
                     resolve(message);
@@ -260,7 +260,7 @@ class DeviceTestCase extends ImpTestCase {
     function testWriteMultipleCoilsBoolean() {
         local targetType = MODBUSRTU_TARGET_TYPE.COIL;
         local startingAddress = 0x0A;
-        local values = [true,false];
+        local values = [true, false];
         local quantity = values.len();
         return Promise(function(resolve, reject) {
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result) {
@@ -277,7 +277,7 @@ class DeviceTestCase extends ImpTestCase {
     function testWriteMutipleCoilsInt() {
         local targetType = MODBUSRTU_TARGET_TYPE.COIL;
         local startingAddress = 0x0A;
-        local values = [0x0000,0xFF00];
+        local values = [0x0000, 0xFF00];
         local quantity = values.len();
         return Promise(function(resolve, reject) {
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result) {
@@ -339,7 +339,7 @@ class DeviceTestCase extends ImpTestCase {
                 } else {
                     this.assertTrue(result);
                     resolve(result);
-                 }
+                }
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -347,7 +347,7 @@ class DeviceTestCase extends ImpTestCase {
     function testWriteMutipleRegistersInt() {
         local targetType = MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER;
         local startingAddress = 0x0A;
-        local values = [18,28];
+        local values = [18, 28];
         local quantity = values.len();
         return Promise(function(resolve, reject) {
             _modbus.write(DEVICE_ADDRESS, targetType, startingAddress, quantity, values, function(error, result) {
@@ -418,8 +418,8 @@ class DeviceTestCase extends ImpTestCase {
         local targetType = MODBUSRTU_TARGET_TYPE.COIL;
         local startingAddress = 0x01;
         local values = {
-            "1" : false,
-            "2" : true
+            "1": false,
+            "2": true
         };
         local quantity = values.len();
         return Promise(function(resolve, reject) {
@@ -438,8 +438,8 @@ class DeviceTestCase extends ImpTestCase {
         local targetType = MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER;
         local startingAddress = 0x0A;
         local values = {
-            "1" : 88,
-            "2" : 880
+            "1": 88,
+            "2": 880
         };
         local quantity = values.len();
         return Promise(function(resolve, reject) {

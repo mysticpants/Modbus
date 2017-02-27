@@ -16,9 +16,9 @@ class Modbus485Master extends ModbusMaster {
     _queue = null;
     _deviceAddress = null;
 
-    // 
+    //
     // Constructor for Modbus485Master
-    // 
+    //
     // @param  {object} uart - The UART object
     // @param  {object} rts - The pin used as RTS
     // @param  {table} params - The table contains all the arugments the constructor expects
@@ -28,7 +28,7 @@ class Modbus485Master extends ModbusMaster {
     // @item  {integer} stopBits - 1 bit by default
     // @item  {float} timeout - 1.0 second by default
     // @item  {bool} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
-    // 
+    //
     constructor(uart, rts, params = {}) {
         base(("debug" in params) ? params.debug : false);
         if (!("CRC16" in getroottable())) {
@@ -50,9 +50,9 @@ class Modbus485Master extends ModbusMaster {
         _rts.configure(DIGITAL_OUT, 0);
     }
 
-    // 
+    //
     // This function performs a combination of one read operation and one write operation in a single MODBUS transaction. The write operation is performed before the read.
-    // 
+    //
     // @param {integer} deviceAddress - The unique address that identifies a device
     // @param {integer} readingStartAddress - The address from which it begins reading values
     // @param {integer} readQuantity - The number of consecutive addresses values are read from
@@ -60,7 +60,7 @@ class Modbus485Master extends ModbusMaster {
     // @param {integer} writeQuantity - The number of consecutive addresses values are written into
     // @param {blob} writeValue - The value written into the holding register
     // @param {function} callback - The function to be fired when it receives response regarding this request
-    // 
+    //
     function readWriteMultipleRegisters(deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, callback = null) {
         local _readWriteMultipleRegisters = base.readWriteMultipleRegisters;
         _enqueue(function() {
@@ -69,15 +69,15 @@ class Modbus485Master extends ModbusMaster {
         }.bindenv(this));
     }
 
-    // 
+    //
     // This function modifies the contents of a specified holding register using a combination of an AND mask, an OR mask, and the register's current contents. The function can be used to set or clear individual bits in the register.
-    // 
+    //
     // @param {integer} deviceAddress - The unique address that identifies a device
     // @param {integer} referenceAddress - The address of the holding register the value is written into
     // @param {integer} AND_mask - The AND mask
     // @param {integer} OR_mask - The OR mask
     // @param {function} callback - The function to be fired when it receives response regarding this request
-    // 
+    //
     function maskWriteRegister(deviceAddress, referenceAddress, AND_Mask, OR_Mask, callback = null) {
         local _maskWriteRegister = base.maskWriteRegister;
         _enqueue(function() {
@@ -86,12 +86,12 @@ class Modbus485Master extends ModbusMaster {
         }.bindenv(this));
     }
 
-    // 
+    //
     // This function reads the description of the type, the current status, and other information specific to a remote device.
-    // 
+    //
     // @param {integer} deviceAddress - The unique address that identifies a device
     // @param {function} callback - The function to be fired when it receives response regarding this request
-    // 
+    //
     function reportSlaveID(deviceAddress, callback = null) {
         local _reportSlaveID = base.reportSlaveID;
         _enqueue(function() {
@@ -100,14 +100,14 @@ class Modbus485Master extends ModbusMaster {
         }.bindenv(this));
     }
 
-    // 
+    //
     // This function allows reading the identification and additional information relative to the physical and functional description of a remote device, only.
-    // 
+    //
     // @param {integer} deviceAddress - The unique address that identifies a device
     // @param {enum} readDeviceIdCode - read device id code
     // @param {enum} objectId - object id
     // @param {function} callback - The function to be fired when it receives response regarding this request
-    // 
+    //
     function readDeviceIdentification(deviceAddress, readDeviceIdCode, objectId, callback = null) {
         local _readDeviceIdentification = base.readDeviceIdentification;
         _enqueue(function() {
@@ -116,14 +116,14 @@ class Modbus485Master extends ModbusMaster {
         }.bindenv(this));
     }
 
-    // 
+    //
     // This function provides a series of tests for checking the communication system between a client ( Master) device and a server ( Slave), or for checking various internal error conditions within a server.
-    // 
+    //
     // @param {integer} deviceAddress - The unique address that identifies a device
     // @param {integer} subFunctionCode - The address from which it begins reading values
     // @param {blob} data - The data field required by Modbus request
     // @param {function} callback - The function to be fired when it receives response regarding this request
-    // 
+    //
     function diagnostics(deviceAddress, subFunctionCode, data, callback = null) {
         local _diagnostics = base.diagnostics;
         _enqueue(function() {
@@ -132,12 +132,12 @@ class Modbus485Master extends ModbusMaster {
         }.bindenv(this));
     }
 
-    // 
+    //
     // This function reads the contents of eight Exception Status outputs in a remote device
-    // 
+    //
     // @param {integer} deviceAddress - The unique address that identifies a device
     // @param {function} callback - The function to be fired when it receives response regarding this request
-    // 
+    //
     function readExceptionStatus(deviceAddress, callback = null) {
         local _readExceptionStatus = base.readExceptionStatus;
         _enqueue(function() {
@@ -146,15 +146,15 @@ class Modbus485Master extends ModbusMaster {
         }.bindenv(this));
     }
 
-    // 
+    //
     // This is the generic function to read values from a single coil ,register or multiple coils , registers .
-    // 
+    //
     // @param {integer} deviceAddress - The unique address that identifies a device
     // @param {enum} targetType - The address from which it begins reading values
     // @param {integer} startingAddress - The address from which it begins reading values
     // @param {integer} quantity - The number of consecutive addresses the values are read from
     // @param {function} callback - The function to be fired when it receives response regarding this request
-    // 
+    //
     function read(deviceAddress, targetType, startingAddress, quantity, callback = null) {
         local _read = base.read;
         _enqueue(function() {
@@ -163,16 +163,16 @@ class Modbus485Master extends ModbusMaster {
         }.bindenv(this))
     }
 
-    // 
+    //
     // This is the generic function to write values into coils or holding registers .
-    // 
+    //
     // @param {integer} deviceAddress - The unique address that identifies a device
     // @param {enum} targetType - The address from which it begins reading values
     // @param {integer} startingAddress - The address from which it begins writing values
     // @param {integer} quantity - The number of consecutive addresses the values are written into
     // @param {integer, Array[integer,Bool], Bool, blob} values - The values written into Coils or Registers
     // @param {function} callback - The function to be fired when it receives response regarding this request
-    // 
+    //
     function write(deviceAddress, targetType, startingAddress, quantity, values, callback = null) {
         local _write = base.write;
         _enqueue(function() {
@@ -181,11 +181,11 @@ class Modbus485Master extends ModbusMaster {
         }.bindenv(this));
     }
 
-    // 
+    //
     // Invoke RESPONSE_TIMEOUT exception in certain seconds
-    // 
+    //
     // @param {float} timeout - The time in which exception RESPONSE_TIMEOUT will be invoked
-    // 
+    //
     function _responseTimeoutFactory(timeout) {
         return imp.wakeup(timeout, function() {
             _responseTimer = null;
@@ -193,9 +193,9 @@ class Modbus485Master extends ModbusMaster {
         }.bindenv(this));
     }
 
-    // 
+    //
     // Clear previous command
-    // 
+    //
     function _clearPreviousCommand() {
         if (_responseTimer != null) {
             imp.cancelwakeup(_responseTimer);
@@ -208,9 +208,9 @@ class Modbus485Master extends ModbusMaster {
         _receiveBuffer.seek(0);
     }
 
-    // 
+    //
     // the callback fired when a byte is received via UART
-    // 
+    //
     function _uartCallback() {
         const MAX_RECEIVE_BUFFER_LENGTH = 300;
         local byte = _uart.read();
@@ -225,9 +225,9 @@ class Modbus485Master extends ModbusMaster {
         }
     }
 
-    // 
+    //
     // process the receive buffer (ADU)
-    // 
+    //
     function _processBuffer() {
         try {
             local bufferLength = _receiveBuffer.len();
@@ -273,9 +273,9 @@ class Modbus485Master extends ModbusMaster {
         _log(_receiveBuffer, "Incoming ADU : ");
     }
 
-    // 
+    //
     // calculate the length of the response from based on the result
-    // 
+    //
     function _calculateResponseLen(expectedResType, result) {
         switch (_expectedResType) {
             case ModbusRTU.FUNCTION_CODES.readDeviceIdentification.fcode:
@@ -291,9 +291,9 @@ class Modbus485Master extends ModbusMaster {
         }
     }
 
-    // 
+    //
     // function to create ADU
-    // 
+    //
     function _createADU(PDU) {
         local ADU = blob();
         ADU.writen(_deviceAddress, 'b');
@@ -302,9 +302,9 @@ class Modbus485Master extends ModbusMaster {
         return ADU;
     }
 
-    // 
+    //
     // send the ADU
-    // 
+    //
     function _send(PDU, properties) {
         _receiveBuffer = blob();
         if (_deviceAddress > 0x00) {
@@ -325,11 +325,11 @@ class Modbus485Master extends ModbusMaster {
         _responseTimer = _responseTimeoutFactory(_timeout);
     }
 
-    // 
+    //
     // It determines if the ADU is valid
-    // 
+    //
     // @param {blob} frame - ADU
-    // 
+    //
     function _hasValidCRC(ADU) {
         local length = ADU.len();
         ADU.seek(0);
@@ -338,9 +338,9 @@ class Modbus485Master extends ModbusMaster {
         return (receivedCRC == expectedCRC);
     }
 
-    // 
+    //
     // fire the callback function provided by the user when there is an error
-    // 
+    //
     function _callbackHandler(error, result, callback) {
         _clearPreviousCommand();
         imp.wakeup(0, function() {
@@ -351,9 +351,9 @@ class Modbus485Master extends ModbusMaster {
         }.bindenv(this));
     }
 
-    // 
+    //
     // put the function into a queue
-    // 
+    //
     function _enqueue(queueFunction) {
         _queue.push(queueFunction);
         if (_queue.len() == 1) {
@@ -361,9 +361,9 @@ class Modbus485Master extends ModbusMaster {
         }
     }
 
-    // 
+    //
     // remove the function from a queue
-    // 
+    //
     function _nextInQueue() {
         _queue.remove(0);
         if (_queue.len() > 0) {

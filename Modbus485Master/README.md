@@ -3,7 +3,7 @@
 This library allows an imp to communicate with other devices via the Modbus-RS485 protocol.
 
 **To use this library, add `#require "CRC16.class.nut:1.0.0"
-` , `#require "Modbus485Master.class.nut:1.0.0"` and `#require "ModbusRTU.class.nut:1.0.0"` to the top of your device code.**
+` , `#require "ModbusRTU.class.nut:1.0.0"` , `#require "ModbusMaster.class.nut:1.0.0"`  and `#require "Modbus485Master.class.nut:1.0.0"` to the top of your device code.**
 
 
 ## Hardware Setup
@@ -35,12 +35,15 @@ Instantiate a new Modbus485Master object and set the configuration of UART .
 
 #### Parameters
 
-The constructor expects a `table` which contains the following items :
-
 | Key      | Default     | Notes                                                                           |
 | ------   | ----------- | ------------------------------------------------------------------------------- |
 | uart     | N/A         | The UART object connected to the modbus slave/s                                 |
 | rts      | N/A         | A pin to be used for flow control                                               |
+| params   | {}          | A table consists of the following items                                         |
+
+##### Items
+
+| Key      | Default     | Notes                                                                           |
 | baudRate | 19200       | The baud rate of the UART connection                                            |
 | dataBits | 8           | The word size on the UART connection in bits (7 or 8 bits)                      |
 | parity   | PARITY_NONE | Parity configuration of the UART connection                                     |
@@ -53,12 +56,7 @@ The constructor expects a `table` which contains the following items :
 #### Example
 
 ```squirrel
-local params = {
-    uart = hardware.uart2,
-    rts  = hardware.pinL
-};
-modbus <- Modbus485Master(params);
-
+modbus <- Modbus485Master(hardware.uart2, hardware.pinL);
 ```
 
 ### read(*deviceAddress, targetType, startingAddress, quantity, values, [callback]*)
@@ -410,9 +408,6 @@ The table below enumerates all the exception codes that can be possibly encounte
 | 81            | Invalid CRC             |
 | 82            | Invalid Argument Length |
 | 83            | Invalid Device Address  |
-| 84            | Invalid Address         |
-| 85            | Invalid Address Range   |
-| 86            | Invalid Address Type    |
 | 87            | Invalid Target Type     |
 | 88            | Invalid Values          |
 | 89            | Invalid Quantity        |

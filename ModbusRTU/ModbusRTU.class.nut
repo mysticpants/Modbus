@@ -33,19 +33,11 @@ enum MODBUSRTU_EXCEPTION {
     INVALID_CRC = 0x51,
     INVALID_ARG_LENGTH = 0x52,
     INVALID_DEVICE_ADDR = 0x53,
-    INVALID_ADDRESS = 0x54,
-    INVALID_ADDRESS_RANGE = 0x55,
-    INVALID_ADDRESS_TYPE = 0x56,
     INVALID_TARGET_TYPE = 0x57,
     INVALID_VALUES = 0x58,
     INVALID_QUANTITY = 0x59,
 }
 
-enum MODBUSRTU_ADDRESS_TYPE {
-    DIRECT,
-    STANDARD,
-    EXTENDED,
-}
 
 enum MODBUSRTU_TARGET_TYPE {
     COIL,
@@ -421,87 +413,4 @@ class ModbusRTU {
          }
          return objects;
      }
-
-    //
-    // function to determine if the given address is valid
-    //
-    static function _isValidAddress(addressType, address) {
-        switch (addressType) {
-            case MODBUSRTU_ADDRESS_TYPE.DIRECT:
-                return (address >= 0 && address <= 9998);
-            case MODBUSRTU_ADDRESS_TYPE.STANDARD:
-                return (address >= 00001 && address <= 09999) ||
-                       (address >= 10001 && address <= 19999) ||
-                       (address >= 30001 && address <= 39999) ||
-                       (address >= 40001 && address <= 49999);
-            case MODBUSRTU_ADDRESS_TYPE.EXTENDED:
-                return (address >= 000001 && address <= 065536) ||
-                       (address >= 100001 && address <= 165536) ||
-                       (address >= 300001 && address <= 365536) ||
-                       (address >= 400001 && address <= 465536);
-            default:
-                return false;
-        }
-    }
-
-    //
-    // function to determine the type based on the given address
-    //
-    static function _getTargetType(addressType, address) {
-        switch (addressType) {
-            case MODBUSRTU_ADDRESS_TYPE.DIRECT:
-                server.error("Target type must be provided for direct addressing");
-                throw MODBUSRTU_EXCEPTION.INVALID_TARGET_TYPE;
-            case MODBUSRTU_ADDRESS_TYPE.STANDARD:
-                if (address >= 1 && address <= 9999) {
-                    return MODBUSRTU_TARGET_TYPE.COIL;
-                } else if (address >= 10001 && address <= 19999) {
-                    return MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT;
-                } else if (address >= 30001 && address <= 39999) {
-                    return MODBUSRTU_TARGET_TYPE.INPUT_REGISTER;
-                } else if (address >= 40001 && address <= 49999) {
-                    return MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER;
-                }
-                break;
-            case MODBUSRTU_ADDRESS_TYPE.EXTENDED:
-                if (address >= 1 && address <= 65536) {
-                    return MODBUSRTU_TARGET_TYPE.COIL;
-                } else if (address >= 100001 && address <= 165536) {
-                    return MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT;
-                } else if (address >= 300001 && address <= 365536) {
-                    return MODBUSRTU_TARGET_TYPE.INPUT_REGISTER;
-                } else if (address >= 400001 && address <= 465536) {
-                    return MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER;
-                }
-                break;
-        }
-        return false;
-    }
-
-    //
-    // function to determine the offset
-    //
-    static function _getTargetOffset(addressType, targetType) {
-        switch (addressType) {
-            case MODBUSRTU_ADDRESS_TYPE.DIRECT:
-                return 0;
-            case MODBUSRTU_ADDRESS_TYPE.STANDARD:
-                switch (targetType) {
-                    case MODBUSRTU_TARGET_TYPE.COIL:             return 1;
-                    case MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT:   return 10001;
-                    case MODBUSRTU_TARGET_TYPE.INPUT_REGISTER:   return 30001;
-                    case MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER: return 40001;
-                }
-                break;
-            case MODBUSRTU_ADDRESS_TYPE.EXTENDED:
-                switch (targetType) {
-                    case MODBUSRTU_TARGET_TYPE.COIL:             return 1;
-                    case MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT:   return 100001;
-                    case MODBUSRTU_TARGET_TYPE.INPUT_REGISTER:   return 300001;
-                    case MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER: return 400001;
-                }
-                break;
-        }
-        return false;
-    }
 }

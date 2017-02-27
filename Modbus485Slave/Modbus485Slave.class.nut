@@ -64,21 +64,27 @@ class Modbus485Slave {
         if (bufferLength < result.expectedReqLen + 3) {
             return _receiveBuffer.seek(bufferLength);
         }
-        local response = null;
-        if (_hasValidCRC()) {
-            response = result.response;
-        } else {
-            response = _errorResponse(result.functionCode)
+        local response = result.response;
+        if (!_hasValidCRC()) {
+            response = _errorResponse(result.functionCode, MODBUSRTU_EXCEPTION.INVALID_CRC)
         }
-        local ADU = blob();
-        ADU.writen(_slaveID, 'b');
-        ADU.writeblob(result.response);
-        ADU.writen(CRC16.calculate(ADU),'w');
+        local ADU = _createADU(response);
         _send(ADU);
     }
 
-    function _errorResponse(functionCode, error) {
+    function _createADU(PDU) {
+        local ADU = blob();
+        ADU.writen(_slaveID, 'b');
+        ADU.writeblob(PDU);
+        ADU.writen(CRC16.calculate(ADU),'w');
+        return ADU;
+    }
 
+    function _errorResponse(functionCode, error) {
+        local PDU = blob();
+        PDU.writen(functionCode | 0x80, 'b');
+        PDU.writen(error, 'b');
+        return PDU;
     }
 
     function _send(ADU) {

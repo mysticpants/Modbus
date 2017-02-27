@@ -5,3 +5,4 @@ builds/*
 agent.nut
 device.nut
 settings.wrench
+lib/*

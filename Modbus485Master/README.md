@@ -44,6 +44,7 @@ Instantiate a new Modbus485Master object and set the configuration of UART .
 ##### Items
 
 | Key      | Default     | Notes                                                                           |
+| ------   | ----------- | ------------------------------------------------------------------------------- |
 | baudRate | 19200       | The baud rate of the UART connection                                            |
 | dataBits | 8           | The word size on the UART connection in bits (7 or 8 bits)                      |
 | parity   | PARITY_NONE | Parity configuration of the UART connection                                     |

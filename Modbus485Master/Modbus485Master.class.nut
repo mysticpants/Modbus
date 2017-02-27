@@ -2,8 +2,7 @@
 // This file is licensed under the MIT License
 // http://opensource.org/licenses/MIT
 
-class Modbus485Master {
-    static VERSION = "1.0.0";
+class Modbus485Master extends ModbusMaster {
     static MINIMUM_RESPONSE_LENGTH = 5;
     _uart               = null;
     _rts                = null;
@@ -14,9 +13,8 @@ class Modbus485Master {
     _expectedResAddr    = null;
     _expectedResLen     = null;
     _quantity           = null;
-    _callbackHandler    = null;
+    _callback           = null;
     _queue              = null;
-    _debug              = null;
 
     //
     // Constructor for Modbus485Master
@@ -31,7 +29,8 @@ class Modbus485Master {
     // @item  {float} timeout - 1.0 second by default
     // @item  {bool} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
     //
-    constructor(params) {
+    constructor(uart, rts, params = {}) {
+        base(("debug" in params) ? params.debug : false);
         if (!("CRC16" in getroottable())) {
             throw "Must include CRC16 library v1.0.0+";
         }
@@ -43,10 +42,9 @@ class Modbus485Master {
         local parity   = ("parity" in params) ? params.parity : PARITY_NONE;
         local stopBits = ("stopBits" in params) ? params.stopBits : 1;
         _timeout       = ("timeout" in params) ? params.timeout : 1.0;
-        _debug         = ("debug" in params) ? params.debug : false;
-        _uart          = params.uart;
-        _rts           = params.rts
         _receiveBuffer = blob();
+        _uart          = uart;
+        _rts           = rts;
         _queue         = [];
         _uart.configure(baudRate, dataBits, parity, stopBits, NO_CTSRTS, _uartCallback.bindenv(this));
         _rts.configure(DIGITAL_OUT, 0);
@@ -64,10 +62,9 @@ class Modbus485Master {
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
     function readWriteMultipleRegisters(deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, callback = null) {
+        local _readWriteMultipleRegisters = base.readWriteMultipleRegisters;
         _enqueue(function() {
-            _quantity = readQuantity;
-            local PDU = ModbusRTU.createReadWriteMultipleRegistersPDU(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue);
-            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.readWriteMultipleRegisters.resLen(readQuantity), callback);
+            return _readWriteMultipleRegisters(deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, callback);
         }.bindenv(this));
     }
 
@@ -81,9 +78,9 @@ class Modbus485Master {
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
     function maskWriteRegister(deviceAddress, referenceAddress, AND_Mask, OR_Mask, callback = null) {
+        local _maskWriteRegister = base.maskWriteRegister;
         _enqueue(function() {
-            local PDU = ModbusRTU.createMaskWriteRegisterPDU(referenceAddress, AND_Mask, OR_Mask);
-            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.maskWriteRegister.resLen, callback);
+            return _maskWriteRegister(deviceAddress, referenceAddress, AND_Mask, OR_Mask, callback);
         }.bindenv(this));
     }
 
@@ -94,9 +91,9 @@ class Modbus485Master {
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
     function reportSlaveID(deviceAddress, callback = null) {
+        local _reportSlaveID = base.reportSlaveID;
         _enqueue(function() {
-            local PDU = ModbusRTU.createReportSlaveIdPDU();
-            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.reportSlaveID.resLen, callback);
+            return _reportSlaveID(deviceAddress, callback);
         }.bindenv(this));
     }
 
@@ -109,9 +106,9 @@ class Modbus485Master {
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
     function readDeviceIdentification(deviceAddress, readDeviceIdCode, objectId, callback = null) {
+        local _readDeviceIdentification = base.readDeviceIdentification;
         _enqueue(function() {
-            local PDU = ModbusRTU.createReadDeviceIdentificationPDU(readDeviceIdCode, objectId);
-            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.readDeviceIdentification.resLen, callback);
+            return _readDeviceIdentification(deviceAddress, readDeviceIdCode, objectId, callback);
         }.bindenv(this));
     }
 
@@ -124,11 +121,9 @@ class Modbus485Master {
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
     function diagnostics(deviceAddress, subFunctionCode, data, callback = null) {
+        local _diagnostics = base.diagnostics;
         _enqueue(function() {
-            local wordCount = data.len() / 2;
-            local PDU = ModbusRTU.createDiagnosticsPDU(subFunctionCode, data);
-            _quantity = wordCount;
-            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.diagnostics.resLen(wordCount), callback);
+            return _diagnostics(deviceAddress, subFunctionCode, data, callback);
         }.bindenv(this));
     }
 
@@ -139,9 +134,9 @@ class Modbus485Master {
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
     function readExceptionStatus(deviceAddress, callback = null) {
+        local _readExceptionStatus = base.readExceptionStatus;
         _enqueue(function() {
-            local PDU = ModbusRTU.createReadExceptionStatusPDU();
-            _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.readExceptionStatus.resLen, callback);
+            return _readExceptionStatus(deviceAddress, callback);
         }.bindenv(this));
     }
 
@@ -155,36 +150,9 @@ class Modbus485Master {
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
     function read(deviceAddress, targetType, startingAddress, quantity, callback = null) {
+        local _read = base.read;
         _enqueue(function() {
-            try {
-                _quantity = quantity;
-                local PDU = null;
-                local resLen = null;
-                switch (targetType) {
-                    case MODBUSRTU_TARGET_TYPE.COIL:
-                        PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readCoils, startingAddress, quantity);
-                        resLen = ModbusRTU.FUNCTION_CODES.readCoils.resLen(quantity);
-                        break;
-                    case MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT:
-                        PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readInputs, startingAddress, quantity);
-                        resLen = ModbusRTU.FUNCTION_CODES.readInputs.resLen(quantity);
-                        break;
-                    case MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER:
-                        PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readHoldingRegs, startingAddress, quantity);
-                        resLen = ModbusRTU.FUNCTION_CODES.readHoldingRegs.resLen(quantity);
-                        break;
-                    case MODBUSRTU_TARGET_TYPE.INPUT_REGISTER:
-                        PDU = ModbusRTU.createReadPDU(ModbusRTU.FUNCTION_CODES.readInputRegs, startingAddress, quantity);
-                        resLen = ModbusRTU.FUNCTION_CODES.readInputRegs.resLen(quantity);
-                        break;
-                    default:
-                        throw MODBUSRTU_EXCEPTION.INVALID_TARGET_TYPE;
-                }
-                _send(deviceAddress, PDU, resLen, callback);
-            } catch (error) {
-                _callbackHandler = callback;
-                _errorCb(error);
-            }
+            return _read(deviceAddress, targetType, startingAddress, quantity, callback);
         }.bindenv(this))
     }
 
@@ -199,21 +167,9 @@ class Modbus485Master {
     // @param {function} callback - The function to be fired when it receives response regarding this request
     //
     function write(deviceAddress, targetType, startingAddress, quantity, values, callback = null) {
+        local _write = base.write;
         _enqueue(function() {
-            try {
-                _quantity = quantity;
-                switch (targetType) {
-                    case MODBUSRTU_TARGET_TYPE.COIL:
-                        return _writeCoils(deviceAddress, startingAddress, quantity, values, callback);
-                    case MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER:
-                        return _writeRegs(deviceAddress, startingAddress, quantity, values, callback);
-                    default:
-                        throw MODBUSRTU_EXCEPTION.INVALID_TARGET_TYPE;
-                }
-            } catch (error) {
-                _callbackHandler = callback;
-                _errorCb(error);
-            }
+            return _write(deviceAddress, targetType, startingAddress, quantity, values, callback);
         }.bindenv(this));
     }
 
@@ -225,7 +181,7 @@ class Modbus485Master {
     function _responseTimeoutFactory(timeout) {
         return imp.wakeup(timeout, function() {
             _responseTimer = null;
-            _errorCb(MODBUSRTU_EXCEPTION.RESPONSE_TIMEOUT);
+            _callbackHandler(MODBUSRTU_EXCEPTION.RESPONSE_TIMEOUT, null, _callback);
         }.bindenv(this));
     }
 
@@ -298,21 +254,15 @@ class Modbus485Master {
                 }
                 //  got a valid packet
                 if(_hasValidCRC(_receiveBuffer)) {
-                    _clearPreviousCommand();
-                    imp.wakeup(0, function() {
-                        if (_callbackHandler) {
-                            _callbackHandler(null, result);
-                        }
-                        _nextInQueue();
-                    }.bindenv(this));
+                    _callbackHandler(null, result, _callback);
                 } else {
                     throw MODBUSRTU_EXCEPTION.INVALID_CRC;
                 }
             }
         } catch (error) {
-            _errorCb(error);
+            _callbackHandler(error, null, _callback);
         }
-        _log(_receiveBuffer);
+        _log(_receiveBuffer, "Incoming ADU : ");
     }
 
     //
@@ -347,14 +297,15 @@ class Modbus485Master {
     //
     // send the ADU
     //
-    function _send(deviceAddress, PDU, responseLength, callback) {
+    function _send(deviceAddress, PDU, properties) {
         _receiveBuffer = blob();
         if (deviceAddress > 0x00) {
             _expectedResAddr = deviceAddress;
-            _expectedResType = PDU[0];
-            _expectedResLen  = responseLength;
+            _expectedResType = properties.expectedResType;
+            _expectedResLen  = properties.expectedResLen;
+            _quantity = ("quantity" in properties) ? properties.quantity : 0;
         }
-        _callbackHandler = callback;
+        _callback = properties.callback;
         local frame = _createADU(deviceAddress, PDU);
         local rw = _rts.write.bindenv(_rts);
         local uw = _uart.write.bindenv(_uart);
@@ -383,14 +334,14 @@ class Modbus485Master {
     //
     // fire the callback function provided by the user when there is an error
     //
-    function _errorCb(err) {
+    function _callbackHandler(error, result, callback) {
         _clearPreviousCommand();
         imp.wakeup(0, function() {
-            if (_callbackHandler) {
-                _callbackHandler(err, false);
+            if (callback) {
+                callback(error, result);
             }
             _nextInQueue();
-        }.bindenv(this))
+        }.bindenv(this));
     }
 
     //
@@ -413,79 +364,4 @@ class Modbus485Master {
         }
     }
 
-    //
-    // remove the function from a queue
-    //
-    function _log(message) {
-        if (_debug) {
-            server.log(message);
-        }
-    }
-
-    //
-    // construct the write coil ADU
-    //
-    function _writeCoils(deviceAddress, startingAddress, quantity, values, callback = null) {
-        local numBytes = math.ceil(quantity / 8.0);
-        local newvalues = blob(numBytes);
-        switch (typeof values) {
-            case "array":
-                if (quantity != values.len()) {
-                    throw MODBUSRTU_EXCEPTION.INVALID_ARG_LENGTH;
-                }
-                local byte, bitshift;
-                foreach (bit, val in values) {
-                    byte = bit / 8;
-                    bitshift = bit % 8;
-                    newvalues[byte] = newvalues[byte] | ((val ? 1 : 0) << bitshift);
-                }
-                values = newvalues;
-                break;
-            case "integer":
-                newvalues.writen(swap2(values), 'w');
-                values = newvalues;
-                break;
-            case "bool":
-                newvalues.writen(swap2(values ? 0xFF00 : 0x0000), 'w');
-                values = newvalues;
-                break;
-            case "blob":
-                break;
-            default:
-                throw MODBUSRTU_EXCEPTION.INVALID_VALUES;
-        }
-        local request = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleCoil : ModbusRTU.FUNCTION_CODES.writeMultipleCoils;
-        local PDU = ModbusRTU.createWritePDU(request, startingAddress, numBytes, quantity, values);
-        _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.writeMultipleCoils.resLen, callback);
-    }
-
-    //
-    // construct the write registers ADU
-    //
-    function _writeRegs(deviceAddress, startingAddress, quantity, values, callback = null) {
-        local numBytes = quantity * 2;
-        local newvalues = blob(numBytes);
-        switch (typeof values) {
-            case "array":
-                if (quantity != values.len()) {
-                    throw MODBUSRTU_EXCEPTION.INVALID_ARG_LENGTH;
-                }
-                foreach (val in values) {
-                    newvalues.writen(swap2(val), 'w');
-                }
-                values = newvalues;
-                break;
-            case "integer":
-                newvalues.writen(swap2(values), 'w');
-                values = newvalues;
-                break;
-            case "blob":
-                break;
-            default:
-                throw MODBUSRTU_EXCEPTION.INVALID_VALUES;
-        }
-        local request = (quantity == 1) ? ModbusRTU.FUNCTION_CODES.writeSingleReg : ModbusRTU.FUNCTION_CODES.writeMultipleRegs;
-        local PDU = ModbusRTU.createWritePDU(request, startingAddress, numBytes, quantity, values);
-        _send(deviceAddress, PDU, ModbusRTU.FUNCTION_CODES.writeMultipleRegs.resLen, callback);
-    }
 }

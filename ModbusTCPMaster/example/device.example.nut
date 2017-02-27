@@ -1,5 +1,6 @@
 #require "W5500.class.nut:1.0.0"
 #require "ModbusRTU.class.nut:1.0.0"
+#require "ModbusMaster.class.nut:1.0.0"
 #require "ModbusTCPMaster.class.nut:1.0.0"
 // this example shows how to use readWriteMultipleRegisters
 
@@ -9,9 +10,7 @@ spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
 
 local wiz = W5500(hardware.pinXC, spi, null, hardware.pinXA);
 // instantiate a modbus object
-local modbus = ModbusTCPMaster({
-    wiz = wiz
-});
+local modbus = ModbusTCPMaster(wiz);
 
 // the network setting
 local networkSettings = {

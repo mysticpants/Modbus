@@ -4,11 +4,7 @@
 // this example demonstrates how to write and read values into/from holding registers
 
 // instantiate the the Modbus485Master object
-local params = {
-    uart = hardware.uart2,
-    rts  = hardware.pinL
-};
-modbus <- Modbus485Master(params);
+modbus <- Modbus485Master(hardware.uart2, hardware.pinL);
 
 // write values into 3 holding registers starting at address 9
 modbus.write(0x01, MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER, 9, 3, [188, 80, 18], function(error, res) {

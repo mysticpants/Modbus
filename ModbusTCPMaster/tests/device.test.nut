@@ -22,9 +22,7 @@ class DeviceTestCase extends ImpTestCase {
     function setUp() {
         local spi = hardware.spi0;
         spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
-        _modbus = ModbusTCPMaster({
-            wiz = W5500(hardware.pinXC, spi, null, hardware.pinXA)
-        });
+        _modbus = ModbusTCPMaster(W5500(hardware.pinXC, spi, null, hardware.pinXA));
         _connection = Promise(function(resolve, reject) {
             _modbus.connect({
                 "gatewayIP" : "192.168.1.1",
@@ -53,20 +51,6 @@ class DeviceTestCase extends ImpTestCase {
                     } else {
                         this.assertTrue(result.len() == 2);
                         resolve(PASS_MESSAGE);
-                    }
-                }.bindenv(this));
-            }.bindenv(this));
-        }.bindenv(this));
-    }
-
-    function testReadExceptionStatus() {
-        return Promise(function(resolve, reject) {
-            _connection.then(function(value) {
-                _modbus.readExceptionStatus(function(error, result) {
-                    if (error) {
-                        errorMessage(error, resolve, reject);
-                    } else {
-                        resolve(result);
                     }
                 }.bindenv(this));
             }.bindenv(this));

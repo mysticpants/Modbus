@@ -11,6 +11,7 @@ class ModbusTCPMaster extends ModbusMaster {
     _connectionSettings = null;
     _shouldRetry = null;
     _connectCallback = null;
+    _reconnectCallback = null;
 
     //
     // Constructor for ModbusTCPMaster
@@ -30,11 +31,13 @@ class ModbusTCPMaster extends ModbusMaster {
     //
     // @param  {table} networkSettings - The network settings table. It entails sourceIP, subnet, gatewayIP
     // @param  {table} connectionSettings - The connection settings table. It entails device IP and port
-    // @param  {function} callback - The function to be fired when the connection is established
+    // @param  {function} connectCallback - The function to be fired when the connection is established
+    // @param  {function} reconnectCallback - The function to be fired when the connection is reestablished
     //
-    function connect(connectionSettings, callback = null) {
+    function connect(connectionSettings, connectCallback = null, reconnectCallback = null) {
         _shouldRetry = true;
-        _connectCallback = callback;
+        _connectCallback = connectCallback;
+        _reconnectCallback = reconnectCallback;
         _connectionSettings = connectionSettings;
         _wiz.onReady(function() {
             local destIP = connectionSettings.destIP;
@@ -72,7 +75,9 @@ class ModbusTCPMaster extends ModbusMaster {
     function _onDisconnect(conn) {
         _connection = null;
         if (_shouldRetry) {
-            _connectCallback = null;
+            if (_reconnectCallback != null) {
+                _connectCallback = _reconnectCallback;
+            }
             _wiz.openConnection(_connectionSettings.destIP, _connectionSettings.destPort, _onConnect.bindenv(this));
         }
     }

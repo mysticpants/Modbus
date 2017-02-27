@@ -58,16 +58,21 @@ modbus <- ModbusTCPMaster(wiz);
 ```
 
 
-### connect(*connectionSettings, [callback]*)
+### connect(*connectionSettings, [connectCallback], [reconnectCallback]*)
 
 This function configures the network and opens a TCP connection with the device. It will try to reconnect when the connection is not closed intentionally
 
 #### Parameters
 
-| Key                  | Data Type   | Required | Default Value | Description                                                  |
-| -------------------- | ----------- | -------- | ------------- | ------------------------------------------------------------ |
-| *connectionSettings* | `table`     | No       | Null          | The connection settings. It entails the device IP and port   |
-| *callback*           | `function`  | No       | Null          | The function to be fired when the connection is established  |
+| Key                  | Data Type   | Required | Default Value | Description                                                    |
+| -------------------- | ----------- | -------- | ------------- | -------------------------------------------------------------- |
+| *connectionSettings* | `table`     | No       | N/A           | The connection settings. It entails the device IP and port     |
+| *connectCallback*    | `function`  | No       | Null          | The function to be fired when the connection is established    |
+| *reconnectCallback*  | `function`  | No       | Null          | The function to be fired when the connection is re-established |
+
+##### Note
+
+If reconnectCallback is not supplied, when the connection is re-established, the connectCallback will be fired.
 
 #### Example
 

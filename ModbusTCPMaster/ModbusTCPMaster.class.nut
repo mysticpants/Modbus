@@ -62,10 +62,13 @@ class ModbusTCPMaster extends ModbusMaster {
     // The callback function to be fired when the connection is established
     //
     function _onConnect(error, conn) {
+        if (error) {
+            return _callbackHandler(error, null, _connectCallback);
+        }
         _connection = conn;
         _connection.onReceive(_parseADU.bindenv(this));
         _connection.onDisconnect(_onDisconnect.bindenv(this));
-        _callbackHandler(error, conn, _connectCallback);
+        _callbackHandler(null, conn, _connectCallback);
     }
 
     //

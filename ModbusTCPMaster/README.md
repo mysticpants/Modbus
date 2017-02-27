@@ -2,7 +2,7 @@
 
 This library enables an imp to communicate with other devices via TCP/IP. It requires the use of [Wiznet](https://github.com/electricimp/Wiznet_5500) to transmit the packets between devices via Ethernet.
 
-**To use this library, add `#require "ModbusRTU.class.nut:1.0.0"` , `#require "W5500.class.nut"`  and `#require "ModbusTCPMaster.class.nut:1.0.0"` to the top of your device code.**
+**To use this library, add `#require "ModbusRTU.class.nut:1.0.0"`, `#require "W5500.class.nut"`, `#require "ModbusMaster.class.nut:1.0.0"` and `#require "ModbusTCPMaster.class.nut:1.0.0"` to the top of your device code.**
 
 
 ## Hardware Setup
@@ -28,21 +28,16 @@ The following instructions are applicable to [impAccelerator™ Fieldbus Gateway
 
 This is the main library class. It implements most of the functions listed in the [Modbus specification](http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf).
 
-### Constructor: ModbusTCPMaster(*params*)
+### Constructor: ModbusTCPMaster(*wiz, debug*)
 
 Instantiate a new ModbusTCPMaster object and set the configuration of spi .
 
 #### Parameters
 
-The constructor expects a `table` which contains the following items :
 
 | Key          | Default     | Notes                                                                                                                       |
 | ------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------- |
-| spi          | N/A         | The spi object Wiznet uses                                                                                                  |
-| interruptPin | N/A         | The interrupt pin. It can be any digital input that supports a callback on pin state change                                 |
-| csPin        | N/A         | The Chip Select pin. If you are not using the Imp005, you must pass in the digital output pin to be used as the chip select |
-| resetPin     | N/A         | The reset pin                                                                                                               |
-| autoRetry    | false       | If enabled, it will reconnect automatically                                                                                 |
+| wiz          | N/A         | The W5500 object with network settings configured                                                                           |
 | debug        | false       | If enabled, the outgoing and incoming ADU will be printed for debugging purpose                                             |
 
 
@@ -51,16 +46,19 @@ The constructor expects a `table` which contains the following items :
 
 ```squirrel
 // configure spi
-spi <- hardware.spi0;
+local spi = hardware.spi0;
 spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
 
+local wiz = W5500(spi, hardware.pinXC, null, hardware.pinXA);
+wiz.configureNetworkSettings("192.168.1.30", "255.255.255.0", "192.168.1.1");
+
 // instantiate a modbus object
-modbus <- ModbusTCPMaster(spi, hardware.pinXC, null, hardware.pinXA);
+modbus <- ModbusTCPMaster(wiz);
 
 ```
 
 
-### connect(*networkSettings, connectionSettings, [callback]*)
+### connect(*connectionSettings, [callback]*)
 
 This function configures the network and opens a TCP connection with the device. It will try to reconnect when the connection is not closed intentionally
 
@@ -68,20 +66,12 @@ This function configures the network and opens a TCP connection with the device.
 
 | Key                  | Data Type   | Required | Default Value | Description                                                  |
 | -------------------- | ----------- | -------- | ------------- | ------------------------------------------------------------ |
-| *networkSettings*    | `table`     | No       | Null          | The network settings. It entails gatewayIP, subnet, sourceIP |
 | *connectionSettings* | `table`     | No       | Null          | The connection settings. It entails the device IP and port   |
 | *callback*           | `function`  | No       | Null          | The function to be fired when the connection is established  |
 
 #### Example
 
 ```squirrel
-// the network setting
-local networkSettings = {
-    "gatewayIP"  : [192, 168, 201, 1],
-    "subnet"     : [255, 255, 255, 0],
-    "sourceIP"   : [192, 168, 1, 30]
-};
-
 // the device address and port
 local connectionSettings = {
     "destIP"     : [192, 168, 1, 90],
@@ -90,7 +80,7 @@ local connectionSettings = {
 
 
 // open the connection
-modbus.connect(networkSettings, connectionSettings, function(error, conn){
+modbus.connect(connectionSettings, function(error, conn){
     if (error) {
         server.log(error);
     } else {
@@ -465,9 +455,6 @@ The table below enumerates all the exception codes that can be possibly encounte
 | 81            | Invalid CRC             |
 | 82            | Invalid Argument Length |
 | 83            | Invalid Device Address  |
-| 84            | Invalid Address         |
-| 85            | Invalid Address Range   |
-| 86            | Invalid Address Type    |
 | 87            | Invalid Target Type     |
 | 88            | Invalid Values          |
 | 89            | Invalid Quantity        |

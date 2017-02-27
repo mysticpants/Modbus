@@ -32,18 +32,13 @@ class ModbusTCPMaster extends ModbusMaster {
     // @param  {table} connectionSettings - The connection settings table. It entails device IP and port
     // @param  {function} callback - The function to be fired when the connection is established
     //
-    function connect(networkSettings, connectionSettings, callback = null) {
-        local sourceIP = networkSettings.sourceIP;
-        local subnet = ("subnet" in networkSettings) ? networkSettings.subnet : null;
-        local gatewayIP = ("gatewayIP" in networkSettings) ? networkSettings.gatewayIP : null;
-        local mac = ("mac" in networkSettings) ? networkSettings.mac : null;
+    function connect(connectionSettings, callback = null) {
         _shouldRetry = true;
         _connectCallback = callback;
         _connectionSettings = connectionSettings;
         _wiz.onReady(function() {
             local destIP = connectionSettings.destIP;
             local destPort = connectionSettings.destPort;
-            _wiz.configureNetworkSettings(sourceIP, subnet, gatewayIP, mac);
             _wiz.openConnection(destIP, destPort, _onConnect.bindenv(this));
         }.bindenv(this));
     }

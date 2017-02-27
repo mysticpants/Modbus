@@ -22,13 +22,11 @@ class DeviceTestCase extends ImpTestCase {
     function setUp() {
         local spi = hardware.spi0;
         spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
-        _modbus = ModbusTCPMaster(W5500(hardware.pinXC, spi, null, hardware.pinXA));
+        local wiz = W5500(hardware.pinXC, spi, null, hardware.pinXA);
+        wiz.configureNetworkSettings("192.168.1.30", "255.255.255.0", "192.168.1.1");
+        _modbus = ModbusTCPMaster(wiz);
         _connection = Promise(function(resolve, reject) {
             _modbus.connect({
-                "gatewayIP" : "192.168.1.1",
-                "subnet"    : "255.255.255.0",
-                "sourceIP"  : "192.168.1.30"
-            },{
                 "destIP"    : "192.168.1.90",
                 "destPort"  : 502
             },function(error, conn) {

@@ -93,7 +93,12 @@ class ModbusTCPMaster extends ModbusMaster {
         local header = ADU.readblob(7);
         local transactionID = swap2(header.readn('w'));
         local PDU = ADU.readblob(ADU.len() - 7);
-        local params = _transactions[transactionID];
+        local params = null;
+        try {
+            params = _transactions[transactionID];
+        } catch (error) {
+            return _callbackHandler(format("Error parsing the response, transactionID %d does not exist", transactionID), null, _connectCallback);
+        }
         local callback = params.callback;
         params.PDU <- PDU;
         try {

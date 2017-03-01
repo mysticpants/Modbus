@@ -131,7 +131,7 @@ class ModbusSlave {
     }
 
     static function write(targetType, address, value) {
-        if (0 < address && address <= 9999) {
+        if (0 < address && address < MAX_TABLE_ENTRY) {
             switch (targetType) {
                 case MODBUSSLAVE_TARGET_TYPE.COIL:
                     return COIL_TABLE[address] = value;
@@ -150,7 +150,7 @@ class ModbusSlave {
     }
 
     static function read(targetType, address) {
-        if (0 < address && address <= 9999) {
+        if (0 < address && address < MAX_TABLE_ENTRY) {
             switch (targetType) {
                 case MODBUSSLAVE_TARGET_TYPE.COIL:
                     return COIL_TABLE[address];
@@ -174,18 +174,7 @@ class ModbusSlave {
         return PDU;
     }
 
-    static function log(message, prefix) {
-        switch (typeof message) {
-            case "blob":
-                local mes = prefix;
-                foreach (value in message) {
-                    mes += format("%02X ", value);
-                }
-                return server.log(mes);
-            default:
-                return server.log(message);
-        }
-    }
+
 
     static function _getRequestLength(functionCode) {
         foreach (value in FUNCTION_CODES) {

@@ -1,6 +1,5 @@
 class Modbus485Slave {
     static VERSION = "1.0.0";
-    static MIN_REQUEST_LENGTH = 4;
     _slaveID = null;
     _uart = null;
     _rts = null;
@@ -52,7 +51,7 @@ class Modbus485Slave {
 
     function _onReceive() {
         local data = _uart.read();
-        while ((data != -1) && (_receiveBuffer.len() < 300)) {
+        while (data != -1) {
             if (_receiveBuffer.len() > 0 || data != 0x00) {
                 local interval = data >> 8;
                 if (interval > _minInterval) {
@@ -64,6 +63,7 @@ class Modbus485Slave {
             }
             data = _uart.read();
         }
+        const MIN_REQUEST_LENGTH = 4;
         if (_shouldParseADU && _receiveBuffer.len() >= MIN_REQUEST_LENGTH) {
             _processReceiveBuffer();
         }
@@ -71,7 +71,6 @@ class Modbus485Slave {
 
     function _processReceiveBuffer() {
         _receiveBuffer.seek(0);
-        server.log(_receiveBuffer);
         local bufferLength = _receiveBuffer.len();
         local slaveID = _receiveBuffer.readn('b');
         if (_slaveID != slaveID) {
@@ -86,8 +85,9 @@ class Modbus485Slave {
             return _receiveBuffer.seek(bufferLength);
         }
         if (!_hasValidCRC()) {
-            // response = _errorResponse(functionCode, MODBUSRTU_EXCEPTION.INVALID_CRC)
+             throw "Invalid CRC";
         }
+        _log(_receiveBuffer,"Incoming ADU : ");
         local input = null, response = null;
         local functionCode = result.functionCode;
         switch (functionCode) {
@@ -212,7 +212,22 @@ class Modbus485Slave {
         uw(ADU);
         uf();
         rw(0);
-        server.log(ADU);
+        _log(ADU,"Outgoing ADU : ");
+    }
+
+    function _log(message, prefix = "") {
+        if (_debug) {
+            switch (typeof message) {
+                case "blob":
+                    local mes = prefix;
+                    foreach (value in message) {
+                        mes += format("%02X ", value);
+                    }
+                    return server.log(mes);
+                default:
+                    return server.log(message);
+            }
+        }
     }
 
     function _hasValidCRC() {

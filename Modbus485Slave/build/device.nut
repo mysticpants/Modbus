@@ -44,13 +44,13 @@ enum MODBUSSLAVE_TARGET_TYPE {
 
 enum MODBUSSLAVE_EXCEPTION {
     ILLEGAL_FUNCTION = 0x01,
-        ILLEGAL_DATA_ADDR = 0x02,
-        ILLEGAL_DATA_VAL = 0x03,
-        SLAVE_DEVICE_FAIL = 0x04,
-        ACKNOWLEDGE = 0x05,
-        SLAVE_DEVICE_BUSY = 0x06,
-        NEGATIVE_ACKNOWLEDGE = 0x07,
-        MEMORY_PARITY_ERROR = 0x08,
+    ILLEGAL_DATA_ADDR = 0x02,
+    ILLEGAL_DATA_VAL = 0x03,
+    SLAVE_DEVICE_FAIL = 0x04,
+    ACKNOWLEDGE = 0x05,
+    SLAVE_DEVICE_BUSY = 0x06,
+    NEGATIVE_ACKNOWLEDGE = 0x07,
+    MEMORY_PARITY_ERROR = 0x08,
 }
 
 
@@ -221,7 +221,6 @@ class ModbusSlave {
 
 class Modbus485Slave {
     static VERSION = "1.0.0";
-    static MIN_REQUEST_LENGTH = 4;
     _slaveID = null;
     _uart = null;
     _rts = null;
@@ -273,7 +272,7 @@ class Modbus485Slave {
 
     function _onReceive() {
         local data = _uart.read();
-        while ((data != -1) && (_receiveBuffer.len() < 300)) {
+        while (data != -1) {
             if (_receiveBuffer.len() > 0 || data != 0x00) {
                 local interval = data >> 8;
                 if (interval > _minInterval) {
@@ -285,6 +284,7 @@ class Modbus485Slave {
             }
             data = _uart.read();
         }
+        const MIN_REQUEST_LENGTH = 4;
         if (_shouldParseADU && _receiveBuffer.len() >= MIN_REQUEST_LENGTH) {
             _processReceiveBuffer();
         }

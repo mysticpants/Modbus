@@ -10,13 +10,13 @@ enum MODBUSSLAVE_TARGET_TYPE {
 
 enum MODBUSSLAVE_EXCEPTION {
     ILLEGAL_FUNCTION = 0x01,
-        ILLEGAL_DATA_ADDR = 0x02,
-        ILLEGAL_DATA_VAL = 0x03,
-        SLAVE_DEVICE_FAIL = 0x04,
-        ACKNOWLEDGE = 0x05,
-        SLAVE_DEVICE_BUSY = 0x06,
-        NEGATIVE_ACKNOWLEDGE = 0x07,
-        MEMORY_PARITY_ERROR = 0x08,
+    ILLEGAL_DATA_ADDR = 0x02,
+    ILLEGAL_DATA_VAL = 0x03,
+    SLAVE_DEVICE_FAIL = 0x04,
+    ACKNOWLEDGE = 0x05,
+    SLAVE_DEVICE_BUSY = 0x06,
+    NEGATIVE_ACKNOWLEDGE = 0x07,
+    MEMORY_PARITY_ERROR = 0x08,
 }
 
 
@@ -167,14 +167,6 @@ class ModbusSlave {
         throw "Invalid address";
     }
 
-    static function _getRequestLength(functionCode) {
-        foreach (value in FUNCTION_CODES) {
-            if (value.fcode == functionCode) {
-                return value.reqLen
-            }
-        }
-    }
-
     static function createErrorPDU(functionCode, error) {
         local PDU = blob();
         PDU.writen(functionCode | 0x80, 'b');
@@ -182,4 +174,24 @@ class ModbusSlave {
         return PDU;
     }
 
+    static function log(message, prefix) {
+        switch (typeof message) {
+            case "blob":
+                local mes = prefix;
+                foreach (value in message) {
+                    mes += format("%02X ", value);
+                }
+                return server.log(mes);
+            default:
+                return server.log(message);
+        }
+    }
+
+    static function _getRequestLength(functionCode) {
+        foreach (value in FUNCTION_CODES) {
+            if (value.fcode == functionCode) {
+                return value.reqLen
+            }
+        }
+    }
 }

@@ -103,10 +103,12 @@ class ModbusSlave {
         local startingAddress = null;
         local quantity = null;
         local writeValues = null;
-        if (expectedReqLen == null) {
+        local byteNum = null;
+        if (expectedReqLen == null && length > 6) {
             startingAddress = swap2(PDU.readn('w'));
             quantity = swap2(PDU.readn('w'));
-            expectedReqLen = quantity * 2 + 6;
+            byteNum = PDU.readn('b');
+            expectedReqLen = byteNum + 6;
         }
         if (length < expectedReqLen) {
             
@@ -127,6 +129,20 @@ class ModbusSlave {
                 quantity = 1;
                 break;
             case FUNCTION_CODES.writeCoils.fcode:
+                local values = PDU.readblob(byteNum);
+                writeValues = [];
+                foreach (index, byte in values) {
+                    local position = 0;
+                    while(writeValues.len() != quantity) {
+                        local bit = (byte >> (position % 8)) & 1;
+                        writeValues.push((bit == 1 ?) true : false);
+                        position++;
+                        if (position % 8 == 0) {
+                            break;
+                        }
+                    }
+                }
+                break;
             case FUNCTION_CODES.writeRegisters.fcode:
                 PDU.seek(6);
                 local values = PDU.readblob(quantity * 2);
@@ -331,7 +347,7 @@ class Modbus485Slave {
 
     function _createWritePDU(request, input, isSingleWrite) {
         local PDU = blob();
-        if (input == true) {
+        if (input == true || input == null) {
             PDU.writen(request.functionCode, 'b');
             PDU.writen(swap2(request.startingAddress), 'w');
             if (isSingleWrite) {
@@ -441,4 +457,4 @@ modbus.onWrite(function(error, request){
 			server.log(key + " : " + value);
 		}
 	}
-});
+}.bindenv(this));

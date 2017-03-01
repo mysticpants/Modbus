@@ -126,7 +126,7 @@ class Modbus485Slave {
 
     function _createWritePDU(request, input, isSingleWrite) {
         local PDU = blob();
-        if (input == true) {
+        if (input == true || input == null) {
             PDU.writen(request.functionCode, 'b');
             PDU.writen(swap2(request.startingAddress), 'w');
             if (isSingleWrite) {

@@ -31,6 +31,7 @@ class Modbus485Slave extends ModbusSlave {
         local data = _uart.read();
         while (data != -1) {
             if (_receiveBuffer.len() > 0 || data != 0x00) {
+                // the first 22 bits are the information about interval between each character
                 local interval = data >> 8;
                 if (interval > _minInterval) {
                     // new frame, reset the _receiveBuffer
@@ -59,6 +60,7 @@ class Modbus485Slave extends ModbusSlave {
         if (result == false) {
             return _receiveBuffer.seek(bufferLength);
         }
+        // 2 bytes for CRC check and 1 byte for slaveID
         if (bufferLength < result.expectedReqLen + 3) {
             return _receiveBuffer.seek(bufferLength);
         }

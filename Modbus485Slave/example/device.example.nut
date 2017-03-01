@@ -1,4 +1,4 @@
-modbus <- Modbus485Slave(hardware.uart2, hardware.pinL, 1);
+modbus <- Modbus485Slave(hardware.uart2, hardware.pinL, 1, {debug = true});
 
 
 /*

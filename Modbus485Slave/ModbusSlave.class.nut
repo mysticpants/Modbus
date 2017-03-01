@@ -194,22 +194,22 @@ class ModbusSlave {
         switch (functionCode) {
             case ModbusSlave.FUNCTION_CODES.readCoil.fcode:
             case ModbusSlave.FUNCTION_CODES.readDiscreteInput.fcode:
-                input = _onReadCallback(null, result);
+                input = _onReadCallback ? _onReadCallback(null, result) : null;
                 PDU = _createReadCoilPDU(result, input);
                 break;
             case ModbusSlave.FUNCTION_CODES.readRegister.fcode:
             case ModbusSlave.FUNCTION_CODES.readInputRegister.fcode:
-                input = _onReadCallback(null, result);
+                input = _onReadCallback ? _onReadCallback(null, result) : null;
                 PDU = _createReadRegisterPDU(result, input);
                 break;
             case ModbusSlave.FUNCTION_CODES.writeCoil.fcode:
             case ModbusSlave.FUNCTION_CODES.writeRegister.fcode:
-                input = _onWriteCallback(null, result);
+                input = _onWriteCallback ? _onWriteCallback(null, result) : null;
                 PDU = _createWritePDU(result, input, true);
                 break;
             case ModbusSlave.FUNCTION_CODES.writeCoils.fcode:
             case ModbusSlave.FUNCTION_CODES.writeRegisters.fcode:
-                input = _onWriteCallback(null, result);
+                input = _onWriteCallback ? _onWriteCallback(null, result) : null;
                 PDU = _createWritePDU(result, input, false);
                 break;
         }
@@ -218,6 +218,7 @@ class ModbusSlave {
 
     function _createWritePDU(request, input, isSingleWrite) {
         local PDU = blob();
+        // todo: when input == null , automatically returns the value stored in the tables
         if (input == true || input == null) {
             PDU.writen(request.functionCode, 'b');
             PDU.writen(swap2(request.startingAddress), 'w');
@@ -259,11 +260,16 @@ class ModbusSlave {
                     }
                 }
                 PDU.writeblob(status);
+                break;
             case "bool":
                 PDU.writen((values ? 1 : 0), 'b');
                 break;
             case "blob":
                 PDU.writeblob(values);
+                break;
+            case "null":
+                PDU.writeblob(blob(byteNum));
+                break;
             default:
                 throw "Invalid Value Type";
         }
@@ -273,8 +279,9 @@ class ModbusSlave {
     function _createReadRegisterPDU(request, values) {
         local PDU = blob();
         local quantity = request.quantity;
+        local byteNum = 2 * quantity;
         PDU.writen(request.functionCode, 'b');
-        PDU.writen(2 * quantity, 'b');
+        PDU.writen(byteNum, 'b');
         switch (typeof values) {
             case "integer":
                 PDU.writen(swap2(values), 'w');
@@ -289,6 +296,9 @@ class ModbusSlave {
                 break;
             case "blob":
                 PDU.writeblob(values);
+                break;
+            case "null":
+                PDU.writeblob(blob(byteNum));
                 break;
             default:
                 throw "Invalid Value Type";

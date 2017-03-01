@@ -103,16 +103,15 @@ class Modbus485Slave {
                 break;
             case ModbusSlave.FUNCTION_CODES.writeCoil.fcode:
             case ModbusSlave.FUNCTION_CODES.writeRegister.fcode:
-                input = _onWriteCallback(null, input, result);
-                response = _createWritePDU(result, true);
+                input = _onWriteCallback(null, result);
+                response = _createWritePDU(result, input, true);
                 break;
             case ModbusSlave.FUNCTION_CODES.writeCoils.fcode:
             case ModbusSlave.FUNCTION_CODES.writeRegisters.fcode:
-                input = _onWriteCallback(null, input, result);
-                response = _createWritePDU(result, false);
+                input = _onWriteCallback(null, result);
+                response = _createWritePDU(result, input, false);
                 break;
         }
-
         local ADU = _createADU(response);
         _send(ADU);
     }
@@ -126,13 +125,17 @@ class Modbus485Slave {
     }
 
     function _createWritePDU(request, input, isSingleWrite) {
-        local PDU = blob(5);
-        PDU.writen(request.funcitonCode, 'b');
-        PDU.writen(swap2(request.startingAddress), 'w');
-        if (isSingleWrite) {
-            PDU.writen(swap2(request.writeValues, 'w'));
+        local PDU = blob();
+        if (input == true) {
+            PDU.writen(request.functionCode, 'b');
+            PDU.writen(swap2(request.startingAddress), 'w');
+            if (isSingleWrite) {
+                PDU.writen(swap2(request.writeValues), 'w');
+            } else {
+                PDU.writen(swap2(request.quantity), 'w');
+            }
         } else {
-            PDU.writen(swap2(request.quantity, 'w'));
+            PDU = ModbusSlave.createErrorPDU(request.functionCode, (input == false) ? 1 : input);
         }
         return PDU;
     }
@@ -200,8 +203,6 @@ class Modbus485Slave {
         }
         return PDU;
     }
-
-
 
     function _send(ADU) {
         local rw = _rts.write.bindenv(_rts);

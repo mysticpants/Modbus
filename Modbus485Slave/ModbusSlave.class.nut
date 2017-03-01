@@ -95,7 +95,7 @@ class ModbusSlave {
             case FUNCTION_CODES.writeCoils.fcode:
             case FUNCTION_CODES.writeRegisters.fcode:
                 PDU.seek(6);
-                local values = PDU.readblob(length - 6);
+                local values = PDU.readblob(quantity * 2);
                 writeValues = [];
                 while (!values.eos()) {
                     writeValues.push(swap2(values.readn('w')));
@@ -159,7 +159,7 @@ class ModbusSlave {
         }
     }
 
-    static function _errorResponse(functionCode, error) {
+    static function createErrorPDU(functionCode, error) {
         local PDU = blob();
         PDU.writen(functionCode | 0x80, 'b');
         PDU.writen(error, 'b');

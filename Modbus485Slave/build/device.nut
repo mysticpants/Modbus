@@ -129,7 +129,7 @@ class ModbusSlave {
             case FUNCTION_CODES.writeCoils.fcode:
             case FUNCTION_CODES.writeRegisters.fcode:
                 PDU.seek(6);
-                local values = PDU.readblob(length - 6);
+                local values = PDU.readblob(quantity * 2);
                 writeValues = [];
                 while (!values.eos()) {
                     writeValues.push(swap2(values.readn('w')));
@@ -193,7 +193,7 @@ class ModbusSlave {
         }
     }
 
-    static function _errorResponse(functionCode, error) {
+    static function createErrorPDU(functionCode, error) {
         local PDU = blob();
         PDU.writen(functionCode | 0x80, 'b');
         PDU.writen(error, 'b');
@@ -308,16 +308,15 @@ class Modbus485Slave {
                 break;
             case ModbusSlave.FUNCTION_CODES.writeCoil.fcode:
             case ModbusSlave.FUNCTION_CODES.writeRegister.fcode:
-                input = _onWriteCallback(null, input, result);
-                response = _createWritePDU(result, true);
+                input = _onWriteCallback(null, result);
+                response = _createWritePDU(result, input, true);
                 break;
             case ModbusSlave.FUNCTION_CODES.writeCoils.fcode:
             case ModbusSlave.FUNCTION_CODES.writeRegisters.fcode:
-                input = _onWriteCallback(null, input, result);
-                response = _createWritePDU(result, false);
+                input = _onWriteCallback(null, result);
+                response = _createWritePDU(result, input, false);
                 break;
         }
-
         local ADU = _createADU(response);
         _send(ADU);
     }
@@ -331,13 +330,17 @@ class Modbus485Slave {
     }
 
     function _createWritePDU(request, input, isSingleWrite) {
-        local PDU = blob(5);
-        PDU.writen(request.funcitonCode, 'b');
-        PDU.writen(swap2(request.startingAddress), 'w');
-        if (isSingleWrite) {
-            PDU.writen(swap2(request.writeValues, 'w'));
+        local PDU = blob();
+        if (input == true) {
+            PDU.writen(request.functionCode, 'b');
+            PDU.writen(swap2(request.startingAddress), 'w');
+            if (isSingleWrite) {
+                PDU.writen(swap2(request.writeValues), 'w');
+            } else {
+                PDU.writen(swap2(request.quantity), 'w');
+            }
         } else {
-            PDU.writen(swap2(request.quantity, 'w'));
+            PDU = ModbusSlave.createErrorPDU(request.functionCode, (input == false) ? 1 : input);
         }
         return PDU;
     }
@@ -406,8 +409,6 @@ class Modbus485Slave {
         return PDU;
     }
 
-
-
     function _send(ADU) {
         local rw = _rts.write.bindenv(_rts);
         local uw = _uart.write.bindenv(_uart);
@@ -430,14 +431,14 @@ class Modbus485Slave {
 modbus <- Modbus485Slave(hardware.uart2, hardware.pinL, 1);
 
 
-modbus.onRead(function(error, info){
+
+
+modbus.onWrite(function(error, request){
 	if (error) {
 		server.error(error);
 	} else {
-		foreach (key, value in info) {
-		    server.log(key + " : " + value);
+		foreach (key, value in request.writeValues) {
+			server.log(key + " : " + value);
 		}
 	}
-	return [true,false,false,true,true];
 });
-

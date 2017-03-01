@@ -44,18 +44,18 @@ enum MODBUSSLAVE_TARGET_TYPE {
 
 enum MODBUSSLAVE_EXCEPTION {
     ILLEGAL_FUNCTION = 0x01,
-    ILLEGAL_DATA_ADDR = 0x02,
-    ILLEGAL_DATA_VAL = 0x03,
-    SLAVE_DEVICE_FAIL = 0x04,
-    ACKNOWLEDGE = 0x05,
-    SLAVE_DEVICE_BUSY = 0x06,
-    NEGATIVE_ACKNOWLEDGE = 0x07,
-    MEMORY_PARITY_ERROR = 0x08,
+        ILLEGAL_DATA_ADDR = 0x02,
+        ILLEGAL_DATA_VAL = 0x03,
+        SLAVE_DEVICE_FAIL = 0x04,
+        ACKNOWLEDGE = 0x05,
+        SLAVE_DEVICE_BUSY = 0x06,
+        NEGATIVE_ACKNOWLEDGE = 0x07,
+        MEMORY_PARITY_ERROR = 0x08,
 }
 
 
 class ModbusSlave {
-
+    static VERSION = "1.0.0";
     static COIL_TABLE = array(MAX_TABLE_ENTRY, 0);
     static DISCRETE_INPUT_TABLE = array(MAX_TABLE_ENTRY, 0);
     static HOLDING_REGISTER_TABLE = array(MAX_TABLE_ENTRY, 0);
@@ -94,8 +94,16 @@ class ModbusSlave {
             reqLen = null
         }
     };
+    _debug = null;
+    _onReadCallback = null;
+    _onWriteCallback = null;
 
-    static function parse(PDU) {
+    constructor(debug) {
+        _debug = debug;
+    }
+
+
+    function parse(PDU) {
         PDU.seek(0);
         local length = PDU.len();
         local functionCode = PDU.readn('b');
@@ -133,7 +141,7 @@ class ModbusSlave {
                 writeValues = [];
                 foreach (index, byte in values) {
                     local position = 0;
-                    while(writeValues.len() != quantity) {
+                    while (writeValues.len() != quantity) {
                         local bit = (byte >> (position % 8)) & 1;
                         writeValues.push(bit == 1 ? true : false);
                         position++;
@@ -164,8 +172,8 @@ class ModbusSlave {
         return result;
     }
 
-    static function write(targetType, address, value) {
-        if (0 < address && address <= 9999) {
+    function write(targetType, address, value) {
+        if (0 < address && address < MAX_TABLE_ENTRY) {
             switch (targetType) {
                 case MODBUSSLAVE_TARGET_TYPE.COIL:
                     return COIL_TABLE[address] = value;
@@ -183,8 +191,8 @@ class ModbusSlave {
 
     }
 
-    static function read(targetType, address) {
-        if (0 < address && address <= 9999) {
+    function read(targetType, address) {
+        if (0 < address && address < MAX_TABLE_ENTRY) {
             switch (targetType) {
                 case MODBUSSLAVE_TARGET_TYPE.COIL:
                     return COIL_TABLE[address];
@@ -201,148 +209,47 @@ class ModbusSlave {
         throw "Invalid address";
     }
 
-    static function _getRequestLength(functionCode) {
-        foreach (value in FUNCTION_CODES) {
-            if (value.fcode == functionCode) {
-                return value.reqLen
-            }
-        }
-    }
-
-    static function createErrorPDU(functionCode, error) {
-        local PDU = blob();
-        PDU.writen(functionCode | 0x80, 'b');
-        PDU.writen(error, 'b');
-        return PDU;
-    }
-
-}
-
-
-class Modbus485Slave {
-    static VERSION = "1.0.0";
-    _slaveID = null;
-    _uart = null;
-    _rts = null;
-    _debug = null;
-    _receiveBuffer = null;
-    _shouldParseADU = null;
-    _minInterval = null;
-    _onReadCallback = null;
-    _onWriteCallback = null;
-
-    constructor(uart, rts, slaveID, params = {}) {
-        if (!("CRC16" in getroottable())) {
-            throw "Must include CRC16 library v1.0.0+";
-        }
-        if (!("ModbusSlave" in getroottable())) {
-            throw "Must include ModbusSlave library v1.0.0+";
-        }
-        _uart = uart;
-        _rts = rts;
-        _slaveID = slaveID;
-        _shouldParseADU = true;
-        _debug = ("debug" in params) ? params.debug : false;
-        local baudRate = ("baudRate" in params) ? params.baudRate : 19200;
-        local dataBits = ("dataBits" in params) ? params.dataBits : 8;
-        local parity = ("parity" in params) ? params.parity : PARITY_NONE;
-        local stopBits = ("stopBits" in params) ? params.stopBits : 1;
-        _receiveBuffer = blob();
-        
-        _minInterval = 45000000.0 / baudRate;
-        _uart.configure(baudRate, dataBits, parity, stopBits, TIMING_ENABLED, _onReceive.bindenv(this));
-        _rts.configure(DIGITAL_OUT, 0);
-    }
-
-    function read(targetType, address) {
-        return ModbusSlave.read(targetType, address);
-    }
-
     function onRead(callback) {
         _onReadCallback = callback;
-    }
-
-    function write(targetType, address, value) {
-        return ModbusSlave.write(targetType, address, value);
     }
 
     function onWrite(callback) {
         _onWriteCallback = callback;
     }
 
-    function _onReceive() {
-        local data = _uart.read();
-        while (data != -1) {
-            if (_receiveBuffer.len() > 0 || data != 0x00) {
-                local interval = data >> 8;
-                if (interval > _minInterval) {
-                    
-                    _receiveBuffer = blob();
-                    _shouldParseADU = true;
-                }
-                _receiveBuffer.writen(data, 'b');
-            }
-            data = _uart.read();
-        }
-        const MIN_REQUEST_LENGTH = 4;
-        if (_shouldParseADU && _receiveBuffer.len() >= MIN_REQUEST_LENGTH) {
-            _processReceiveBuffer();
-        }
+    function createErrorPDU(functionCode, error) {
+        local PDU = blob();
+        PDU.writen(functionCode | 0x80, 'b');
+        PDU.writen(error, 'b');
+        return PDU;
     }
 
-    function _processReceiveBuffer() {
-        _receiveBuffer.seek(0);
-        server.log(_receiveBuffer);
-        local bufferLength = _receiveBuffer.len();
-        local slaveID = _receiveBuffer.readn('b');
-        if (_slaveID != slaveID) {
-            return _shouldParseADU = false;
-        }
-        local PDU = _receiveBuffer.readblob(bufferLength - 1);
-        local result = ModbusSlave.parse(PDU);
-        if (result == false) {
-            return _receiveBuffer.seek(bufferLength);
-        }
-        if (bufferLength < result.expectedReqLen + 3) {
-            return _receiveBuffer.seek(bufferLength);
-        }
-        if (!_hasValidCRC()) {
-            
-        }
-        local input = null, response = null;
+    function _createPDU(result) {
+        local input = null, PDU = null;
         local functionCode = result.functionCode;
         switch (functionCode) {
             case ModbusSlave.FUNCTION_CODES.readCoil.fcode:
             case ModbusSlave.FUNCTION_CODES.readDiscreteInput.fcode:
                 input = _onReadCallback(null, result);
-                response = _createReadCoilPDU(result, input);
+                PDU = _createReadCoilPDU(result, input);
                 break;
             case ModbusSlave.FUNCTION_CODES.readRegister.fcode:
             case ModbusSlave.FUNCTION_CODES.readInputRegister.fcode:
                 input = _onReadCallback(null, result);
-                response = _createReadRegisterPDU(result, input);
+                PDU = _createReadRegisterPDU(result, input);
                 break;
             case ModbusSlave.FUNCTION_CODES.writeCoil.fcode:
             case ModbusSlave.FUNCTION_CODES.writeRegister.fcode:
                 input = _onWriteCallback(null, result);
-                response = _createWritePDU(result, input, true);
+                PDU = _createWritePDU(result, input, true);
                 break;
             case ModbusSlave.FUNCTION_CODES.writeCoils.fcode:
             case ModbusSlave.FUNCTION_CODES.writeRegisters.fcode:
                 input = _onWriteCallback(null, result);
-                response = _createWritePDU(result, input, false);
+                PDU = _createWritePDU(result, input, false);
                 break;
         }
-        local ADU = _createADU(response);
-        _send(ADU);
-    }
-
-    function _createADU(PDU) {
-        local ADU = blob();
-        ADU.writen(_slaveID, 'b');
-        ADU.writeblob(PDU);
-        ADU.writen(CRC16.calculate(ADU), 'w');
-        return ADU;
+        return PDU;
     }
 
     function _createWritePDU(request, input, isSingleWrite) {
@@ -425,6 +332,122 @@ class Modbus485Slave {
         return PDU;
     }
 
+
+
+    function _getRequestLength(functionCode) {
+        foreach (value in FUNCTION_CODES) {
+            if (value.fcode == functionCode) {
+                return value.reqLen
+            }
+        }
+    }
+
+    function _log(message, prefix = "") {
+        if (_debug) {
+            switch (typeof message) {
+                case "blob":
+                    local mes = prefix;
+                    foreach (value in message) {
+                        mes += format("%02X ", value);
+                    }
+                    return server.log(mes);
+                default:
+                    return server.log(message);
+            }
+        }
+    }
+
+    function _send(PDU);
+
+    function _createADU(PDU);
+
+
+}
+
+
+class Modbus485Slave extends ModbusSlave {
+
+    _slaveID = null;
+    _uart = null;
+    _rts = null;
+    _receiveBuffer = null;
+    _shouldParseADU = null;
+    _minInterval = null;
+
+
+    constructor(uart, rts, slaveID, params = {}) {
+        if (!("CRC16" in getroottable())) {
+            throw "Must include CRC16 library v1.0.0+";
+        }
+        base.constructor (("debug" in params) ? params.debug : false);
+        _uart = uart;
+        _rts = rts;
+        _slaveID = slaveID;
+        _shouldParseADU = true;
+        local baudRate = ("baudRate" in params) ? params.baudRate : 19200;
+        local dataBits = ("dataBits" in params) ? params.dataBits : 8;
+        local parity = ("parity" in params) ? params.parity : PARITY_NONE;
+        local stopBits = ("stopBits" in params) ? params.stopBits : 1;
+        _receiveBuffer = blob();
+        
+        _minInterval = 45000000.0 / baudRate;
+        _uart.configure(baudRate, dataBits, parity, stopBits, TIMING_ENABLED, _onReceive.bindenv(this));
+        _rts.configure(DIGITAL_OUT, 0);
+    }
+
+
+    function _onReceive() {
+        local data = _uart.read();
+        while (data != -1) {
+            if (_receiveBuffer.len() > 0 || data != 0x00) {
+                local interval = data >> 8;
+                if (interval > _minInterval) {
+                    
+                    _receiveBuffer = blob();
+                    _shouldParseADU = true;
+                }
+                _receiveBuffer.writen(data, 'b');
+            }
+            data = _uart.read();
+        }
+        const MIN_REQUEST_LENGTH = 4;
+        if (_shouldParseADU && _receiveBuffer.len() >= MIN_REQUEST_LENGTH) {
+            _processReceiveBuffer();
+        }
+    }
+
+    function _processReceiveBuffer() {
+        _receiveBuffer.seek(0);
+        local bufferLength = _receiveBuffer.len();
+        local slaveID = _receiveBuffer.readn('b');
+        if (_slaveID != slaveID) {
+            return _shouldParseADU = false;
+        }
+        local PDU = _receiveBuffer.readblob(bufferLength - 1);
+        local result = ModbusSlave.parse(PDU);
+        if (result == false) {
+            return _receiveBuffer.seek(bufferLength);
+        }
+        if (bufferLength < result.expectedReqLen + 3) {
+            return _receiveBuffer.seek(bufferLength);
+        }
+        if (!_hasValidCRC()) {
+             throw "Invalid CRC";
+        }
+        _log(_receiveBuffer,"Incoming ADU : ");
+        local ADU = _createADU(_createPDU(result));
+        _send(ADU);
+    }
+
+    function _createADU(PDU) {
+        local ADU = blob();
+        ADU.writen(_slaveID, 'b');
+        ADU.writeblob(PDU);
+        ADU.writen(CRC16.calculate(ADU), 'w');
+        return ADU;
+    }
+
+
     function _send(ADU) {
         local rw = _rts.write.bindenv(_rts);
         local uw = _uart.write.bindenv(_uart);
@@ -433,8 +456,10 @@ class Modbus485Slave {
         uw(ADU);
         uf();
         rw(0);
-        server.log(ADU);
+        _log(ADU,"Outgoing ADU : ");
     }
+
+
 
     function _hasValidCRC() {
         _receiveBuffer.seek(0);

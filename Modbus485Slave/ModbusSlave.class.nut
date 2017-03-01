@@ -21,7 +21,7 @@ enum MODBUSSLAVE_EXCEPTION {
 
 
 class ModbusSlave {
-
+    static VERSION = "1.0.0";
     static COIL_TABLE = array(MAX_TABLE_ENTRY, 0);
     static DISCRETE_INPUT_TABLE = array(MAX_TABLE_ENTRY, 0);
     static HOLDING_REGISTER_TABLE = array(MAX_TABLE_ENTRY, 0);
@@ -60,8 +60,15 @@ class ModbusSlave {
             reqLen = null
         }
     };
+    _debug = null;
+    _onReadCallback = null;
+    _onWriteCallback = null;
 
-    static function parse(PDU) {
+    constructor(debug) {
+        _debug = debug;
+    }
+
+    function parse(PDU) {
         PDU.seek(0);
         local length = PDU.len();
         local functionCode = PDU.readn('b');
@@ -99,7 +106,7 @@ class ModbusSlave {
                 writeValues = [];
                 foreach (index, byte in values) {
                     local position = 0;
-                    while(writeValues.len() != quantity) {
+                    while (writeValues.len() != quantity) {
                         local bit = (byte >> (position % 8)) & 1;
                         writeValues.push(bit == 1 ? true : false);
                         position++;
@@ -130,7 +137,7 @@ class ModbusSlave {
         return result;
     }
 
-    static function write(targetType, address, value) {
+    function write(targetType, address, value) {
         if (0 < address && address < MAX_TABLE_ENTRY) {
             switch (targetType) {
                 case MODBUSSLAVE_TARGET_TYPE.COIL:
@@ -146,10 +153,9 @@ class ModbusSlave {
             }
         }
         throw "Invalid address";
-
     }
 
-    static function read(targetType, address) {
+    function read(targetType, address) {
         if (0 < address && address < MAX_TABLE_ENTRY) {
             switch (targetType) {
                 case MODBUSSLAVE_TARGET_TYPE.COIL:
@@ -167,20 +173,154 @@ class ModbusSlave {
         throw "Invalid address";
     }
 
-    static function createErrorPDU(functionCode, error) {
+    function onRead(callback) {
+        _onReadCallback = callback;
+    }
+
+    function onWrite(callback) {
+        _onWriteCallback = callback;
+    }
+
+    function createErrorPDU(functionCode, error) {
         local PDU = blob();
         PDU.writen(functionCode | 0x80, 'b');
         PDU.writen(error, 'b');
         return PDU;
     }
 
+    function _createPDU(result) {
+        local input = null, PDU = null;
+        local functionCode = result.functionCode;
+        switch (functionCode) {
+            case ModbusSlave.FUNCTION_CODES.readCoil.fcode:
+            case ModbusSlave.FUNCTION_CODES.readDiscreteInput.fcode:
+                input = _onReadCallback(null, result);
+                PDU = _createReadCoilPDU(result, input);
+                break;
+            case ModbusSlave.FUNCTION_CODES.readRegister.fcode:
+            case ModbusSlave.FUNCTION_CODES.readInputRegister.fcode:
+                input = _onReadCallback(null, result);
+                PDU = _createReadRegisterPDU(result, input);
+                break;
+            case ModbusSlave.FUNCTION_CODES.writeCoil.fcode:
+            case ModbusSlave.FUNCTION_CODES.writeRegister.fcode:
+                input = _onWriteCallback(null, result);
+                PDU = _createWritePDU(result, input, true);
+                break;
+            case ModbusSlave.FUNCTION_CODES.writeCoils.fcode:
+            case ModbusSlave.FUNCTION_CODES.writeRegisters.fcode:
+                input = _onWriteCallback(null, result);
+                PDU = _createWritePDU(result, input, false);
+                break;
+        }
+        return PDU;
+    }
 
+    function _createWritePDU(request, input, isSingleWrite) {
+        local PDU = blob();
+        if (input == true || input == null) {
+            PDU.writen(request.functionCode, 'b');
+            PDU.writen(swap2(request.startingAddress), 'w');
+            if (isSingleWrite) {
+                PDU.writen(swap2(request.writeValues), 'w');
+            } else {
+                PDU.writen(swap2(request.quantity), 'w');
+            }
+        } else {
+            PDU = ModbusSlave.createErrorPDU(request.functionCode, (input == false) ? 1 : input);
+        }
+        return PDU;
+    }
 
-    static function _getRequestLength(functionCode) {
+    function _createReadCoilPDU(request, values) {
+        local byteNum = math.ceil(request.quantity / 8.0);
+        local PDU = blob();
+        PDU.writen(request.functionCode, 'b');
+        PDU.writen(byteNum, 'b');
+        switch (typeof values) {
+            case "integer":
+                PDU.writen((values == 1 ? 1 : 0), 'b');
+                break;
+            case "array":
+                if (request.quantity != values.len()) {
+                    throw "quantity is not equal to the length of values";
+                }
+                local status = blob(byteNum);
+                local mask = 1;
+                local byte = 0;
+                foreach (index, value in values) {
+                    if (value) {
+                        status[byte] = mask | status[byte];
+                    }
+                    mask = mask << 1;
+                    if (index % 8 == 7) {
+                        byte++;
+                        mask = 1;
+                    }
+                }
+                PDU.writeblob(status);
+            case "bool":
+                PDU.writen((values ? 1 : 0), 'b');
+                break;
+            case "blob":
+                PDU.writeblob(values);
+            default:
+                throw "Invalid Value Type";
+        }
+        return PDU;
+    }
+
+    function _createReadRegisterPDU(request, values) {
+        local PDU = blob();
+        local quantity = request.quantity;
+        PDU.writen(request.functionCode, 'b');
+        PDU.writen(2 * quantity, 'b');
+        switch (typeof values) {
+            case "integer":
+                PDU.writen(swap2(values), 'w');
+                break;
+            case "array":
+                if (quantity != values.len()) {
+                    throw "quantity is not equal to the length of values";
+                }
+                foreach (value in values) {
+                    PDU.writen(swap2(value), 'w');
+                }
+                break;
+            case "blob":
+                PDU.writeblob(values);
+                break;
+            default:
+                throw "Invalid Value Type";
+        }
+        return PDU;
+    }
+
+    function _getRequestLength(functionCode) {
         foreach (value in FUNCTION_CODES) {
             if (value.fcode == functionCode) {
                 return value.reqLen
             }
         }
     }
+
+    function _log(message, prefix = "") {
+        if (_debug) {
+            switch (typeof message) {
+                case "blob":
+                    local mes = prefix;
+                    foreach (value in message) {
+                        mes += format("%02X ", value);
+                    }
+                    return server.log(mes);
+                default:
+                    return server.log(message);
+            }
+        }
+    }
+
+    function _send(PDU);
+
+    function _createADU(PDU);
+
 }

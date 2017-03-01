@@ -1,27 +1,21 @@
-class Modbus485Slave {
-    static VERSION = "1.0.0";
+
+class Modbus485Slave extends ModbusSlave {
     _slaveID = null;
     _uart = null;
     _rts = null;
-    _debug = null;
     _receiveBuffer = null;
     _shouldParseADU = null;
     _minInterval = null;
-    _onReadCallback = null;
-    _onWriteCallback = null;
 
     constructor(uart, rts, slaveID, params = {}) {
         if (!("CRC16" in getroottable())) {
             throw "Must include CRC16 library v1.0.0+";
         }
-        if (!("ModbusSlave" in getroottable())) {
-            throw "Must include ModbusSlave library v1.0.0+";
-        }
+        base.constructor (("debug" in params) ? params.debug : false);
         _uart = uart;
         _rts = rts;
         _slaveID = slaveID;
         _shouldParseADU = true;
-        _debug = ("debug" in params) ? params.debug : false;
         local baudRate = ("baudRate" in params) ? params.baudRate : 19200;
         local dataBits = ("dataBits" in params) ? params.dataBits : 8;
         local parity = ("parity" in params) ? params.parity : PARITY_NONE;
@@ -31,22 +25,6 @@ class Modbus485Slave {
         _minInterval = 45000000.0 / baudRate;
         _uart.configure(baudRate, dataBits, parity, stopBits, TIMING_ENABLED, _onReceive.bindenv(this));
         _rts.configure(DIGITAL_OUT, 0);
-    }
-
-    function read(targetType, address) {
-        return ModbusSlave.read(targetType, address);
-    }
-
-    function onRead(callback) {
-        _onReadCallback = callback;
-    }
-
-    function write(targetType, address, value) {
-        return ModbusSlave.write(targetType, address, value);
-    }
-
-    function onWrite(callback) {
-        _onWriteCallback = callback;
     }
 
     function _onReceive() {
@@ -88,31 +66,7 @@ class Modbus485Slave {
              throw "Invalid CRC";
         }
         _log(_receiveBuffer,"Incoming ADU : ");
-        local input = null, response = null;
-        local functionCode = result.functionCode;
-        switch (functionCode) {
-            case ModbusSlave.FUNCTION_CODES.readCoil.fcode:
-            case ModbusSlave.FUNCTION_CODES.readDiscreteInput.fcode:
-                input = _onReadCallback(null, result);
-                response = _createReadCoilPDU(result, input);
-                break;
-            case ModbusSlave.FUNCTION_CODES.readRegister.fcode:
-            case ModbusSlave.FUNCTION_CODES.readInputRegister.fcode:
-                input = _onReadCallback(null, result);
-                response = _createReadRegisterPDU(result, input);
-                break;
-            case ModbusSlave.FUNCTION_CODES.writeCoil.fcode:
-            case ModbusSlave.FUNCTION_CODES.writeRegister.fcode:
-                input = _onWriteCallback(null, result);
-                response = _createWritePDU(result, input, true);
-                break;
-            case ModbusSlave.FUNCTION_CODES.writeCoils.fcode:
-            case ModbusSlave.FUNCTION_CODES.writeRegisters.fcode:
-                input = _onWriteCallback(null, result);
-                response = _createWritePDU(result, input, false);
-                break;
-        }
-        local ADU = _createADU(response);
+        local ADU = _createADU(_createPDU(result));
         _send(ADU);
     }
 
@@ -124,86 +78,6 @@ class Modbus485Slave {
         return ADU;
     }
 
-    function _createWritePDU(request, input, isSingleWrite) {
-        local PDU = blob();
-        if (input == true || input == null) {
-            PDU.writen(request.functionCode, 'b');
-            PDU.writen(swap2(request.startingAddress), 'w');
-            if (isSingleWrite) {
-                PDU.writen(swap2(request.writeValues), 'w');
-            } else {
-                PDU.writen(swap2(request.quantity), 'w');
-            }
-        } else {
-            PDU = ModbusSlave.createErrorPDU(request.functionCode, (input == false) ? 1 : input);
-        }
-        return PDU;
-    }
-
-    function _createReadCoilPDU(request, values) {
-        local byteNum = math.ceil(request.quantity / 8.0);
-        local PDU = blob();
-        PDU.writen(request.functionCode, 'b');
-        PDU.writen(byteNum, 'b');
-        switch (typeof values) {
-            case "integer":
-                PDU.writen((values == 1 ? 1 : 0), 'b');
-                break;
-            case "array":
-                if (request.quantity != values.len()) {
-                    throw "quantity is not equal to the length of values";
-                }
-                local status = blob(byteNum);
-                local mask = 1;
-                local byte = 0;
-                foreach (index, value in values) {
-                    if (value) {
-                        status[byte] = mask | status[byte];
-                    }
-                    mask = mask << 1;
-                    if (index % 8 == 7) {
-                        byte++;
-                        mask = 1;
-                    }
-                }
-                PDU.writeblob(status);
-            case "bool":
-                PDU.writen((values ? 1 : 0), 'b');
-                break;
-            case "blob":
-                PDU.writeblob(values);
-            default:
-                throw "Invalid Value Type";
-        }
-        return PDU;
-    }
-
-    function _createReadRegisterPDU(request, values) {
-        local PDU = blob();
-        local quantity = request.quantity;
-        PDU.writen(request.functionCode, 'b');
-        PDU.writen(2 * quantity, 'b');
-        switch (typeof values) {
-            case "integer":
-                PDU.writen(swap2(values), 'w');
-                break;
-            case "array":
-                if (quantity != values.len()) {
-                    throw "quantity is not equal to the length of values";
-                }
-                foreach (value in values) {
-                    PDU.writen(swap2(value), 'w');
-                }
-                break;
-            case "blob":
-                PDU.writeblob(values);
-                break;
-            default:
-                throw "Invalid Value Type";
-        }
-        return PDU;
-    }
-
     function _send(ADU) {
         local rw = _rts.write.bindenv(_rts);
         local uw = _uart.write.bindenv(_uart);
@@ -213,21 +87,6 @@ class Modbus485Slave {
         uf();
         rw(0);
         _log(ADU,"Outgoing ADU : ");
-    }
-
-    function _log(message, prefix = "") {
-        if (_debug) {
-            switch (typeof message) {
-                case "blob":
-                    local mes = prefix;
-                    foreach (value in message) {
-                        mes += format("%02X ", value);
-                    }
-                    return server.log(mes);
-                default:
-                    return server.log(message);
-            }
-        }
     }
 
     function _hasValidCRC() {

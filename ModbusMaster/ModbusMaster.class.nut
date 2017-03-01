@@ -266,11 +266,11 @@ class ModbusMaster {
     //
     // log the message
     //
-    function _log(message, ...) {
+    function _log(message, prefix = "") {
         if (_debug) {
             switch (typeof message) {
                 case "blob":
-                    local mes = vargv[0];
+                    local mes = prefix;
                     foreach (value in message) {
                         mes += format("%02X ", value);
                     }

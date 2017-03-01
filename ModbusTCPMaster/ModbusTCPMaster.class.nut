@@ -20,7 +20,7 @@ class ModbusTCPMaster extends ModbusMaster {
     // @param  {bool} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
     //
     constructor(wiz, debug = false) {
-        base(debug);
+        base.constructor(debug);
         _wiz = wiz;
         _transactionCount = 1;
         _transactions = {};

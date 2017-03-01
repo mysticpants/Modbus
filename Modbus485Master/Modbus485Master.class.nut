@@ -30,7 +30,7 @@ class Modbus485Master extends ModbusMaster {
     // @item  {bool} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
     //
     constructor(uart, rts, params = {}) {
-        base(("debug" in params) ? params.debug : false);
+        base.constructor(("debug" in params) ? params.debug : false);
         if (!("CRC16" in getroottable())) {
             throw "Must include CRC16 library v1.0.0+";
         }
@@ -321,7 +321,7 @@ class Modbus485Master extends ModbusMaster {
         uw(frame);
         uf();
         rw(0);
-        _log(frame);
+        _log(frame, "Outgoing ADU : ");
         _responseTimer = _responseTimeoutFactory(_timeout);
     }
 

@@ -135,7 +135,7 @@ class ModbusSlave {
                     local position = 0;
                     while(writeValues.len() != quantity) {
                         local bit = (byte >> (position % 8)) & 1;
-                        writeValues.push((bit == 1 ?) true : false);
+                        writeValues.push(bit == 1 ? true : false);
                         position++;
                         if (position % 8 == 0) {
                             break;

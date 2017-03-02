@@ -2,7 +2,7 @@
 
 This class is the abstract class for the following classes, it should NOT be instantiated and used.
 
-*Please proceed to one of the following libraries*
+**Please proceed to one of the following libraries**
 
 
 # [Modbus485Master](../Modbus485Master/)

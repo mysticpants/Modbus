@@ -3,7 +3,7 @@
 
 This is the base class for the following classes, and it should NOT be instantiated and used.
 
-*Please proceed to one of the following libraries*
+**Please proceed to one of the following libraries**
 
 # [Modbus485Slave](../Modbus485Slave/)
 

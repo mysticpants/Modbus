@@ -1,8 +1,8 @@
 # Modbus485Slave
 
-This library empowers an imp to communicate with Modbus Master as a slave via RS485. 
+This library empowers an imp to communicate the Modbus Master via the RS485 protocol.
 
-**To use this library, add `#require "ModbusRTU.class.nut:1.0.0"`, `#require "W5500.class.nut"`, `#require "ModbusMaster.class.nut:1.0.0"` and `#require "ModbusTCPMaster.class.nut:1.0.0"` to the top of your device code.**
+**To use this library, add `#require "CRC16.class.nut:1.0.0"`, `#require "ModbusSlave.class.nut:1.0.0"`  and `#require "Modbus485Slave.class.nut:1.0.0"` to the top of your device code.**
 
 
 ## Hardware Setup
@@ -11,436 +11,262 @@ The following instructions are applicable to [impAccelerator™ Fieldbus Gateway
 
 1. Screw the antenna onto the Imp
 
-2. Connect the Imp to a switch with an Ethernet cable
+2. Wire RS485 A on Imp to port A / positive(+) on the other device
 
-3. Connect the other device (e.g. PLC) to a switch with another Ethernet cable
+3. Wire RS485 B on Imp to port B / negative(-) on the other device
 
-4. Configure the network settings on your device
+4. Wire ground ports together between the two devices
 
-5. Power up the device
+5. Fit a jumper to enable RS485 chip on the Imp
 
 6. Power up the Imp
 
 7. Blink up the Imp
 
 
-## Class ModbusTCPMaster
+## Class Modbus485Slave
 
-This is the main library class. It implements most of the functions listed in the [Modbus specification](http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf).
+This is the main library class.
 
-### Constructor: ModbusTCPMaster(*wiz, debug*)
+### Constructor: Modbus485Slave(*uart, rts, slaveID, [params]*)
 
-Instantiate a new ModbusTCPMaster object and set the configuration of spi .
+Instantiate a new Modbus485Slave object and set the configuration of UART .
 
 #### Parameters
 
+| Key      | Default     | Notes                                                                           |
+| ------   | ----------- | ------------------------------------------------------------------------------- |
+| uart     | N/A         | The UART object connected to the Modbus Master                                  |
+| rts      | N/A         | A pin to be used for flow control                                               |
+| slaveID  | N/A         | An ID by which the master identifies this slave                                 |
+| params   | {}          | A table consists of the following items                                         |
 
-| Key          | Default     | Notes                                                                                                                       |
-| ------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------- |
-| wiz          | N/A         | The W5500 object with network settings configured                                                                           |
-| debug        | false       | If enabled, the outgoing and incoming ADU will be printed for debugging purpose                                             |
+##### Items
+
+| Key      | Default     | Notes                                                                           |
+| ------   | ----------- | ------------------------------------------------------------------------------- |
+| baudRate | 19200       | The baud rate of the UART connection                                            |
+| dataBits | 8           | The word size on the UART connection in bits (7 or 8 bits)                      |
+| parity   | PARITY_NONE | Parity configuration of the UART connection                                     |
+| stopBits | 1           | Number of stop bits (1 or 2) on the UART connection                             |
+| debug    | false       | If enabled, the outgoing and incoming ADU will be printed for debugging purpose |
 
 
 
 #### Example
 
 ```squirrel
-// configure spi
-local spi = hardware.spi0;
-spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
+modbus <- Modbus485Slave(hardware.uart2, hardware.pinL, 1);
+```
 
-local wiz = W5500(spi, hardware.pinXC, null, hardware.pinXA);
-wiz.configureNetworkSettings("192.168.1.30", "255.255.255.0", "192.168.1.1");
 
-// instantiate a modbus object
-modbus <- ModbusTCPMaster(wiz);
+### setSlaveID(*slaveID*)
+
+It changes the slave ID
+
+#### Parameters
+
+| Key             | Data Type | Required | Default Value | Description                                                               |
+| --------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
+| *slaveID*       | `integer` | Yes      | Null          | The new slave ID                                                          |
+
+
+#### Example
+
+```squirrel
+modbus.setSlaveID(2);
 
 ```
 
 
-### connect(*connectionSettings, [connectCallback], [reconnectCallback]*)
+### sniff(*isSniffer*)
 
-This function configures the network and opens a TCP connection with the device. It will try to reconnect when the connection is not closed intentionally
+It enables the slave to accept all requests (even those not addressed to this slave) if set to true;
+It only accepts requests addressed to this slave and ignores others if set to false . It is disabled by default
 
 #### Parameters
 
-| Key                  | Data Type   | Required | Default Value | Description                                                    |
-| -------------------- | ----------- | -------- | ------------- | -------------------------------------------------------------- |
-| *connectionSettings* | `table`     | No       | N/A           | The connection settings. It entails the device IP and port     |
-| *connectCallback*    | `function`  | No       | Null          | The function to be fired when the connection is established    |
-| *reconnectCallback*  | `function`  | No       | Null          | The function to be fired when the connection is re-established |
+| Key             | Data Type | Required | Default Value | Description                                                               |
+| --------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
+| *isSniffer*     | `bool`    | Yes      | Null          | To enable or disable sniffing                                             |
 
-##### Note
-
-If reconnectCallback is not supplied, when the connection is re-established, the connectCallback will be fired.
 
 #### Example
 
 ```squirrel
-// the device address and port
-local connectionSettings = {
-    "destIP"     : [192, 168, 1, 90],
-    "destPort"   : [0x01, 0xF6]
-};
+modbus.sniff(true);
+
+```
+
+### onWrite(*callback*)
+
+It sets the callback function for when there is a write request
+
+#### Parameters
+
+| Key             | Data Type | Required | Default Value | Description                                                               |
+| --------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
+| *callback*      | `function`| Yes      | Null          | The function to be fired on the receipt of a write request                |
+
+#### Callback Parameters
+
+| Key                | Data Type | Description                                                                                |
+| ------------------ | --------- | ------------------------------------------------------------------------------------------ |
+| *slaveID*          | `integer `| The ID of the slave the request is addressed to                                            |
+| *functionCode*     | `integer `| The function code. Please refer to the <a href="#functionCode">Supported Function Code</a> |
+| *startingAddress*  | `integer `| The address at which it starts writing values                                              |
+| *quantity*         | `integer `| The quantity of the values                                                                 |
+| *values*           | `array `, `bool`, `integer`| The values to be written                                                  |
 
 
-// open the connection
-modbus.connect(connectionSettings, function(error, conn){
-    if (error) {
-        server.log(error);
-    } else {
-        // do something here
+#### Accepted Return Value Type
+
+The callback function can return a value, which will be processed and sent back to the Master as a response
+
+| Type               | Description                                                                                                                            |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `bool`             | If true is returned, it will give a positive response. Otherwise, it will give an exception response back to the Master (Error code 1) |
+| `null`             | If null is returned, it is the same as returning true                                                                                  |
+| `integer`          | Any acceptable Modbus Exception Code can be returned                                                                                   |
+
+
+#### Example
+
+```squirrel
+// accept this write request
+modbus.onWrite(function(slaveID, functionCode, startingAddress, quantity, values) {
+    server.log("slaveID : " + slaveID);
+    server.log("functionCode : " + functionCode);
+    server.log("startingAddress : " + startingAddress);
+    server.log("Quantity : " + quantity);
+    server.log("Values : \n");
+    foreach (index, value in values) {
+    	server.log("\t" + index + " : " + value);
     }
-});
-
-```
-
-
-### disconnect(callback)
-
-This function closes the existing TCP connection.
-
-#### Parameters
-
-| Key                  | Data Type   | Required | Default Value | Description                                                  |
-| -------------------- | ----------- | -------- | ------------- | ------------------------------------------------------------ |
-| *callback*           | `function`  | No       | Null          | The function to be fired when the connection is dropped      |
-
-#### Example
-
-```squirrel
-
-modbus.disconnect();
-
-```
+    return true;
+}.bindenv(this));
 
 
 
-### read(*targetType, startingAddress, quantity, values, [callback]*)
-
-Function Code : 01, 02, 03, 04
-
-This is the generic function to read values from a single coil, register or multiple coils and registers .
-
-#### Parameters
-
-| Key               | Data Type | Required | Default Value | Description                                                               |
-| ----------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *targetType*      | `enum`    | Yes      | N/A           | Refer to **<a href='#target-type'>Target Type</a>**                       |
-| *startingAddress* | `integer` | Yes      | N/A           | The address from which it begins reading values                           |
-| *quantity*        | `integer` | Yes      | N/A           | The number of consecutive addresses the values are read from              |
-| *callback*        | `function`| No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
-
-
-<h4 id='target-type'>Target Type</h4>
-
-| Type               | Value                                  | Access        |
-| ------------------ | -------------------------------------- | ------------- |
-| Coil               | MODBUSRTU_TARGET_TYPE.COIL             | Read-Write    |
-| Discrete Input     | MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT   | Read-Only     |
-| Input Register     | MODBUSRTU_TARGET_TYPE.INPUT_REGISTER   | Read-Only     |
-| Holding Register   | MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER | Read-Write    |
-
-
-#### Example
-
-```squirrel
-// read from a single coil
-modbus.read(MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT, 0x01, 1, function(error, result) {
-    if (error) {
-        server.error(error);
-    } else {
-        server.log(result);
+// decline this write request
+modbus.onWrite(function(slaveID, functionCode, startingAddress, quantity, values) {
+    server.log("slaveID : " + slaveID);
+    server.log("functionCode : " + functionCode);
+    server.log("startingAddress : " + startingAddress);
+    server.log("Quantity : " + quantity);
+    server.log("Values : \n");
+    foreach (index, value in values) {
+    	server.log("\t" + index + " : " + value);
     }
+    // reject this request with the exception code of 2
+    return 2;
 }.bindenv(this));
 
-// read from multiple registers
-modbus.read(MODBUSRTU_TARGET_TYPE.INPUT_REGISTER, 0x01 , 5, function(error, results) {
-    if (error) {
-        server.error(error);
-    } else {
-        foreach(key, value in results) {
-          server.log(key + " : " + value);
-        }
-    }
-}.bindenv(this));
 ```
 
 
-### write(*targetType, startingAddress, quantity, values, [callback]*)
+### onRead(*callback*)
 
-Function Code : 05, 06, 15, 16
-
-This is the generic function to write values into coils or holding registers .
+It sets the callback function for when there is a read request
 
 #### Parameters
 
-| Key               | Data Type                         | Required | Default Value | Description                                                               |
-| ----------------- | --------------------------------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *targetType*      | `enum`                            | Yes      | N/A           | Refer to **<a href='#target-type'>Target Type</a>**                       |
-| *startingAddress* | `integer`                         | Yes      | N/A           | The address from which it begins writing values                           |
-| *quantity*        | `integer`                         | Yes      | N/A           | The number of consecutive addresses the values are written into           |
-| *values*          | `integer`, `array`, `bool`, `blob`| Yes      | N/A           | The values written into Coils or Registers. Please view Notes below       |
-| *callback*        | `function`                        | No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
+| Key             | Data Type | Required | Default Value | Description                                                               |
+| --------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
+| *callback*      | `function`| Yes      | Null          | The function to be fired on the receipt of a read request                 |
 
-##### Notes :
+#### Callback Parameters
 
-1.  `integer`, `blob`, `array[integer]` are applicable to MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER. `array[integer]` is only applicable when quantity is greater than 1.
+| Key                | Data Type | Description                                                                                |
+| ------------------ | --------- | ------------------------------------------------------------------------------------------ |
+| *slaveID*          | `integer `| The ID of the slave the request is addressed to                                            |
+| *functionCode*     | `integer `| The function code. Please refer to the <a href="#functionCode">Supported Function Code</a> |
+| *startingAddress*  | `integer `| The address at which it starts writing values                                              |
+| *quantity*         | `integer `| The quantity of the values                                                                 |
 
-2.  `integer`, `bool`, `blob`, `array[integer, bool]` are applicable to MODBUSRTU_TARGET_TYPE.COIL. `array[integer, bool]` is only applicable when quantity is greater than 1. Int value set to coils can be either 0x0000 or 0xFF00. Other values would be ignored.
+
+#### Accepted Return Value Type
+
+The callback function can return a value, which will be processed and sent back to the Master as a response
+
+| Type               | Description                                                                                                                            |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `bool`             | Only accepted when it is a coil or discrete input read                                                                                 |
+| `null`             | If null is returned, the value to be read will be 0                                                                                    |
+| `integer`          | 1 or 0 when it is a coil or discrete input read. Any number when it is a holding register or input register read                       |
+| `array`            | Array of 1, 0, true, false when it is a coil or discrete input read. Array of integers when it is a holding register or input register read |
+
 
 #### Example
 
 ```squirrel
-// write to a single coil
-modbus.write(MODBUSRTU_TARGET_TYPE.COIL, 0x01, 1, true, function(error, result) {
-    if (error){
-        server.error(error);
-    } else {
-        server.log(result);
-    }
+// a coil read example
+modbus.onRead(function(slaveID, functionCode, startingAddress, quantity){
+    server.log("slaveID : " + slaveID);
+    server.log("functionCode : " + functionCode);
+    server.log("startingAddress : " + startingAddress);
+    server.log("Quantity : " + quantity);
+	return [true,false,false,true,true];
 }.bindenv(this));
 
-// write to multiple registers
-modbus.write(MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER, 0x01, 5, [false, true, false, true, true], function(error, results) {
-    if (error) {
-        server.error(error);
-    } else {
-        foreach(key, value in results) {
-            server.log(key + " : " + value);
-        }
-    }
+// a holding register read example
+modbus.onRead(function(slaveID, functionCode, startingAddress, quantity){
+    server.log("slaveID : " + slaveID);
+    server.log("functionCode : " + functionCode);
+    server.log("startingAddress : " + startingAddress);
+    server.log("Quantity : " + quantity);
+	return [18,29,30, 59, 47];
 }.bindenv(this));
 
 ```
 
-### readExceptionStatus(*[callback]*)
 
-Function Code : 07
 
-This function reads the contents of eight Exception Status outputs in a remote device
+### onError(*callback*)
+
+It sets the callback function for when there is an error
 
 #### Parameters
 
-| Key             | Data Type   | Required | Default Value | Description                                                               |
-| --------------- | ----------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *callback*      | `function`  | No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
+| Key             | Data Type | Required | Default Value | Description                                                               |
+| --------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
+| *callback*      | `function`| Yes      | Null          | The function to be fired when there is an error                           |
+
+#### Callback Parameters
+
+| Key                | Data Type | Description                                                                       |
+| ------------------ | --------- | --------------------------------------------------------------------------------- |
+| *error*            | `string`  | The error message                                                                 |
+
 
 #### Example
 
 ```squirrel
-modbus.readExceptionStatus(function(error, result) {
-    if (error) {
-        server.error(error);
-    } else {
-        server.log(result);
-    }
+// a coil read example
+modbus.onError(function(error){
+    server.error(error);
 }.bindenv(this));
 
 ```
 
 
+<h2 id="functionCode"> Supported Function Codes </h2>
 
-### diagnostics(*subFunctionCode, data, [callback]*)
+The following table presents a list of function codes the slave can support and process. Other requests with unsupported function codes will be rejected with the exception code of 1.
 
-Function Code : 08
-
-This function provides a series of tests for checking the communication system between a client ( Master) device and a server ( Slave), or for checking various internal error conditions within a server.
-
-#### Parameters
-
-
-| Key               | Data Type   | Required | Default Value | Description                                                               |
-| ----------------- | ----------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *subFunctionCode* | `enum`      | Yes      | N/A           | Refer to **Sub-function Code**                                            |
-| *data*            | `blob`      | Yes      | N/A           | The data field required by Modbus request                                 |
-| *callback*        | `function`  | No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
-
-
-### Sub-function Codes
-
-| Code (Hex)         | Value                                                             |
-| ------------------ | ----------------------------------------------------------------- |
-| 0x0000             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_QUERY_DATA                        |
-| 0x0001             | MODBUSRTU_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION             |
-| 0x0002             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_DIAGNOSTICS_REGISTER              |
-| 0x0003             | MODBUSRTU_SUB_FUNCTION_CODE.CHANGE_ASCII_INPUT_DELIMITER             |
-| 0x0004             | MODBUSRTU_SUB_FUNCTION_CODE.FORCE_LISTEN_ONLY_MODE                   |
-| 0x000A             | MODBUSRTU_SUB_FUNCTION_CODE.CLEAR_COUNTERS_AND_DIAGNOSTICS_REGISTER  |
-| 0x000B             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_MESSAGE_COUNT                 |
-| 0x000C             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_COMMUNICATION_ERROR_COUNT     |
-| 0x000D             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_EXCEPTION_ERROR_COUNT         |
-| 0x000E             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_MESSAGE_COUNT               |
-| 0x000F             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_NO_RESPONSE_COUNT           |
-| 0x0010             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_NAK_COUNT                   |
-| 0x0011             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_BUSY_COUNT                  |
-| 0x0012             | MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_CHARACTER_OVERRUN_COUNT       |
-| 0x0014             | MODBUSRTU_SUB_FUNCTION_CODE.CLEAR_OVERRUN_COUNTER_AND_FLAG           |
-
-#### Example
-
-```squirrel
-local data = blob(2);
-data.writen(0xFF00, 'w');
-data.swap2();
-
-modbus.diagnostics(MODBUSRTU_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION, data, function(error, result) {
-    if (error) {
-        server.error(error);
-    } else {
-        server.log(result);
-    }
-}.bindenv(this));
-
-
-```
-
-
-### reportSlaveID(*[callback]*)
-
-Function Code : 17
-
-This function reads the description of the type, the current status, and other information specific to a remote device.
-
-#### Parameters
-
-| Key             | Data Type   | Required | Default Value | Description                                                               |
-| --------------- | ----------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *callback*      | `function`  | No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
-
-#### Example
-
-```squirrel
-modbus.reportSlaveID(function(error, result) {
-    if (error) {
-        server.error(error);
-    } else {
-        server.log("Run indicator : " + result.runIndicator);
-        server.log(result.slaveId);
-    }        
-}.bindenv(this));
-
-
-```
+| Code          | Name                     |
+| ------------- | ------------------------ |
+| 0x01          | Read Coils               |
+| 0x02          | Read Discrete Inputs     |
+| 0x03          | Read Holding Registers   |
+| 0x04          | Read Input Registers     |
+| 0x05          | Write Single Coil        |
+| 0x06          | Write Single Register    |
+| 0x0F          | Write Multiple Coils     |
+| 0x01          | Write Multiple Registers |
 
 
 
-### maskWriteRegister(*referenceAddress, AND_Mask , OR_Mask, [callback]*)
-
-Function Code : 22
-
-This function modifies the contents of a specified holding register using a combination of an AND mask, an OR mask, and the register's current contents. The function can be used to set or clear individual bits in the register.
-
-#### Parameters
-
-| Key                | Data Type | Required | Default Value | Description                                                               |
-| ------------------ | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *referenceAddress* | `integer` | Yes      | N/A           | The address of the holding register the value is written into             |
-| *AND_mask*         | `integer` | Yes      | N/A           | The AND mask                                                              |
-| *OR_mask*          | `integer` | Yes      | N/A           | The OR mask                                                               |
-| *callback*         | `function`| No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
-
-#### Example
-
-```squirrel
-modbus.maskWriteRegister(0x10, 0xFFFF, 0x0000, function(error, result) {
-    if (error) {
-        server.error(error);
-    } else {
-        server.log(result);
-    }        
-}.bindenv(this));
-
-
-```
-
-
-### readWriteMultipleRegisters(*readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, [callback]*)
-
-Function Code : 23
-
-This function performs a combination of one read operation and one write operation in a single MODBUS transaction. The write operation is performed before the read.
-
-#### Parameters
-
-| Key                   | Data Type | Required | Default Value | Description |
-| --------------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *readingStartAddress* | `integer` | Yes      | N/A           | The address from which it begins reading values                           |
-| *readQuantity*        | `integer` | Yes      | N/A           | The number of consecutive addresses values are read from                  |
-| *writeStartAddress*   | `integer` | Yes      | N/A           | The address from which it begins writing values                           |
-| *writeQuantity*       | `integer` | Yes      | N/A           | The number of consecutive addresses values are written into               |
-| *writeValue*          | `blob`    | Yes      | N/A           | The value written into the holding register                               |
-| *callback*            | `function`| No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
-
-#### Example
-
-```squirrel
-modbus.readWriteMultipleRegisters(0x10, 0xFFFF, 0x0000, function(error, result) {
-    if (error) {
-        server.error(error);
-    } else {
-        server.log(result);
-    }        
-}.bindenv(this));
-
-```
-
-
-
-### readDeviceIdentification(*readDeviceIdCode, objectId, [callback]*)
-
-Function Code : 43/14
-
-This function allows reading the identification and additional information relative to the physical and functional description of a remote device only.
-
-#### Parameters
-
-| Key                | Data Type | Required | Default Value | Description                                                               |
-| ------------------ | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *readDeviceIdCode* | `enum`    | Yes      | N/A           | Refer to **Read Device ID Code**                                          |
-| *objectId*         | `enum`    | Yes      | N/A           | Refer to **Object ID**                                                    |
-| *callback*         | `function`| No       | Null          | The function to be fired when it receives response regarding this request. It takes two parameters, error and result respectively |
-
-
-##### Read Device ID Codes
-
-| Value                              | Description                                                |
-| ---------------------------------- | ---------------------------------------------------------- |
-| MODBUSRTU_READ_DEVICE_CODE.BASIC      | Get the basic device identification (stream access)        |
-| MODBUSRTU_READ_DEVICE_CODE.REGULAR    | Get the regular device identification (stream access)      |
-| MODBUSRTU_READ_DEVICE_CODE.EXTENDED   | Get the extended device identification (stream access)     |
-| MODBUSRTU_READ_DEVICE_CODE.SPECIFIC   | Get one specific identification object (individual access) |
-
-
-##### Object ID
-
-| Value                                  | Category  |
-| -------------------------------------- | --------- |
-| MODBUSRTU_OBJECT_ID.VENDOR_NAME           | Basic     |
-| MODBUSRTU_OBJECT_ID.PRODUCT_CODE          | Basic     |
-| MODBUSRTU_OBJECT_ID.MAJOR_MINOR_REVISION  | Basic     |
-| MODBUSRTU_OBJECT_ID.VENDOR_URL            | Regular   |
-| MODBUSRTU_OBJECT_ID.PRODUCT_NAME          | Regular   |
-| MODBUSRTU_OBJECT_ID.MODEL_NAME            | Regular   |
-| MODBUSRTU_OBJECT_ID.USER_APPLICATION_NAME | Regular   |
-
-#### Example
-
-```squirrel
-modbus.readDeviceIdentification(MODBUSRTU_READ_DEVICE_CODE.BASIC, MODBUSRTU_OBJECT_ID.VENDOR_NAME, function(error, objects) {
-    if (error) {
-        server.error("Error: " + error + ", Objects: " + objects);
-    } else {
-        local info = "DeviceId: ";
-        foreach (id, val in objects) {
-            info += format("[%d] %s, ", id, val.tostring());
-        }
-        server.log(info);
-    }
-}.bindenv(this));
-
-
-```
 
 ## Exception Codes
 
@@ -456,14 +282,7 @@ The table below enumerates all the exception codes that can be possibly encounte
 | 6             | Slave Device Busy       |
 | 7             | Negative Acknowledge    |
 | 8             | Memory Parity Error     |
-| 80            | Response Timeout        |
-| 81            | Invalid CRC             |
-| 82            | Invalid Argument Length |
-| 83            | Invalid Device Address  |
-| 87            | Invalid Target Type     |
-| 88            | Invalid Values          |
-| 89            | Invalid Quantity        |
 
 # License
 
-The ModbusTCPMaster library is licensed under the [MIT License](https://github.com/electricimp/thethingsapi/tree/master/LICENSE).
+The Modbus485Slave library is licensed under the [MIT License](https://github.com/electricimp/thethingsapi/tree/master/LICENSE).

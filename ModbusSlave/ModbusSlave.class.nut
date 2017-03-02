@@ -1,4 +1,3 @@
-
 enum MODBUSSLAVE_TARGET_TYPE {
     COIL,
     DISCRETE_INPUT,
@@ -8,13 +7,13 @@ enum MODBUSSLAVE_TARGET_TYPE {
 
 enum MODBUSSLAVE_EXCEPTION {
     ILLEGAL_FUNCTION = 0x01,
-    ILLEGAL_DATA_ADDR = 0x02,
-    ILLEGAL_DATA_VAL = 0x03,
-    SLAVE_DEVICE_FAIL = 0x04,
-    ACKNOWLEDGE = 0x05,
-    SLAVE_DEVICE_BUSY = 0x06,
-    NEGATIVE_ACKNOWLEDGE = 0x07,
-    MEMORY_PARITY_ERROR = 0x08,
+        ILLEGAL_DATA_ADDR = 0x02,
+        ILLEGAL_DATA_VAL = 0x03,
+        SLAVE_DEVICE_FAIL = 0x04,
+        ACKNOWLEDGE = 0x05,
+        SLAVE_DEVICE_BUSY = 0x06,
+        NEGATIVE_ACKNOWLEDGE = 0x07,
+        MEMORY_PARITY_ERROR = 0x08,
 }
 
 
@@ -57,6 +56,7 @@ class ModbusSlave {
     _debug = null;
     _onReadCallback = null;
     _onWriteCallback = null;
+    _onErrorCallback = null;
 
     constructor(debug) {
         _debug = debug;
@@ -71,7 +71,12 @@ class ModbusSlave {
         local quantity = null;
         local writeValues = null;
         local byteNum = null;
-        if (expectedReqLen == null && length > 6) {
+        if (expectedReqLen == -1) {
+            throw {
+                error = MODBUSSLAVE_EXCEPTION.ILLEGAL_FUNCTION,
+                functionCode = functionCode
+            };
+        } else if (expectedReqLen == null && length > 6) {
             startingAddress = swap2(PDU.readn('w'));
             quantity = swap2(PDU.readn('w'));
             byteNum = PDU.readn('b');
@@ -140,6 +145,10 @@ class ModbusSlave {
 
     function onWrite(callback) {
         _onWriteCallback = callback;
+    }
+
+    function onError(callback) {
+        _onErrorCallback = callback;
     }
 
     function _createErrorPDU(functionCode, error) {
@@ -274,6 +283,7 @@ class ModbusSlave {
                 return value.reqLen
             }
         }
+        return -1;
     }
 
     function _log(message, prefix = "") {

@@ -36,7 +36,7 @@ class Modbus485Slave extends ModbusSlave {
         _slaveID = slaveID;
     }
 
-    function sniffer(isSniffer) {
+    function sniff(isSniffer) {
         _isSniffer = isSniffer;
     }
 
@@ -61,30 +61,43 @@ class Modbus485Slave extends ModbusSlave {
     }
 
     function _processReceiveBuffer() {
-        _receiveBuffer.seek(0);
-        local bufferLength = _receiveBuffer.len();
-        local slaveID = _receiveBuffer.readn('b');
-        if (_slaveID != slaveID) {
-            _shouldParseADU = false || _isSniffer;
-        }
-        if (!_shouldParseADU) {
-            return _receiveBuffer.seek(bufferLength);
-        }
-        local PDU = _receiveBuffer.readblob(bufferLength - 1);
-        local result = ModbusSlave.parse(PDU);
-        if (result == false) {
-            return _receiveBuffer.seek(bufferLength);
-        }
-        // 2 bytes for CRC check and 1 byte for slaveID
-        if (bufferLength < result.expectedReqLen + 3) {
-            return _receiveBuffer.seek(bufferLength);
-        }
-        if (!_hasValidCRC()) {
-            // throw "Invalid CRC";
-            return;
+        local ADU = null;
+        try {
+            _receiveBuffer.seek(0);
+            local bufferLength = _receiveBuffer.len();
+            local slaveID = _receiveBuffer.readn('b');
+            if (_slaveID != slaveID) {
+                _shouldParseADU = false || _isSniffer;
+            }
+            if (!_shouldParseADU) {
+                return _receiveBuffer.seek(bufferLength);
+            }
+            local PDU = _receiveBuffer.readblob(bufferLength - 1);
+            local result = ModbusSlave.parse(PDU);
+            if (result == false) {
+                return _receiveBuffer.seek(bufferLength);
+            }
+            // 2 bytes for CRC check and 1 byte for slaveID
+            if (bufferLength < result.expectedReqLen + 3) {
+                return _receiveBuffer.seek(bufferLength);
+            }
+            if (!_hasValidCRC()) {
+                throw "Invalid CRC";
+            }
+             ADU = _createADU(_createPDU(result, slaveID));
+        } catch (error) {
+            if (typeof error == "table") {
+                ADU = _createADU(_createErrorPDU(error.functionCode, error.error));
+            } else {
+                if (_onErrorCallback) {
+                    _onErrorCallback(error);
+                } else {
+                    server.error(error);
+                }
+                return ;
+            }
         }
         _log(_receiveBuffer, "Incoming ADU : ");
-        local ADU = _createADU(_createPDU(result, slaveID));
         _send(ADU);
     }
 

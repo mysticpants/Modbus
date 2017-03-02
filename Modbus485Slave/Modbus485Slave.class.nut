@@ -1,21 +1,23 @@
-
 class Modbus485Slave extends ModbusSlave {
+    static MIN_REQUEST_LENGTH = 4;
     _slaveID = null;
     _uart = null;
     _rts = null;
     _receiveBuffer = null;
     _shouldParseADU = null;
     _minInterval = null;
+    _isSniffer = null;
 
     constructor(uart, rts, slaveID, params = {}) {
         if (!("CRC16" in getroottable())) {
             throw "Must include CRC16 library v1.0.0+";
         }
-        base.constructor (("debug" in params) ? params.debug : false);
+        base.constructor(("debug" in params) ? params.debug : false);
         _uart = uart;
         _rts = rts;
         _slaveID = slaveID;
         _shouldParseADU = true;
+        _isSniffer = false;
         local baudRate = ("baudRate" in params) ? params.baudRate : 19200;
         local dataBits = ("dataBits" in params) ? params.dataBits : 8;
         local parity = ("parity" in params) ? params.parity : PARITY_NONE;
@@ -25,6 +27,17 @@ class Modbus485Slave extends ModbusSlave {
         _minInterval = 45000000.0 / baudRate;
         _uart.configure(baudRate, dataBits, parity, stopBits, TIMING_ENABLED, _onReceive.bindenv(this));
         _rts.configure(DIGITAL_OUT, 0);
+    }
+
+    function setSlaveID(slaveID) {
+        if (typeof slaveID != "integer") {
+            throw "Slave ID must be an integer";
+        }
+        _slaveID = slaveID;
+    }
+
+    function sniffer(isSniffer) {
+        _isSniffer = isSniffer;
     }
 
     function _onReceive() {
@@ -42,7 +55,6 @@ class Modbus485Slave extends ModbusSlave {
             }
             data = _uart.read();
         }
-        const MIN_REQUEST_LENGTH = 4;
         if (_shouldParseADU && _receiveBuffer.len() >= MIN_REQUEST_LENGTH) {
             _processReceiveBuffer();
         }
@@ -53,7 +65,10 @@ class Modbus485Slave extends ModbusSlave {
         local bufferLength = _receiveBuffer.len();
         local slaveID = _receiveBuffer.readn('b');
         if (_slaveID != slaveID) {
-            return _shouldParseADU = false;
+            _shouldParseADU = false || _isSniffer;
+        }
+        if (!_shouldParseADU) {
+            return _receiveBuffer.seek(bufferLength);
         }
         local PDU = _receiveBuffer.readblob(bufferLength - 1);
         local result = ModbusSlave.parse(PDU);
@@ -65,10 +80,11 @@ class Modbus485Slave extends ModbusSlave {
             return _receiveBuffer.seek(bufferLength);
         }
         if (!_hasValidCRC()) {
-             throw "Invalid CRC";
+            // throw "Invalid CRC";
+            return;
         }
-        _log(_receiveBuffer,"Incoming ADU : ");
-        local ADU = _createADU(_createPDU(result));
+        _log(_receiveBuffer, "Incoming ADU : ");
+        local ADU = _createADU(_createPDU(result, slaveID));
         _send(ADU);
     }
 
@@ -88,7 +104,7 @@ class Modbus485Slave extends ModbusSlave {
         uw(ADU);
         uf();
         rw(0);
-        _log(ADU,"Outgoing ADU : ");
+        _log(ADU, "Outgoing ADU : ");
     }
 
     function _hasValidCRC() {

@@ -1,4 +1,4 @@
-modbus <- Modbus485Slave(hardware.uart2, hardware.pinL, 1, {debug = true});
+modbus <- Modbus485Slave(hardware.uart2, hardware.pinL, 1, { debug = true });
 
 
 /*
@@ -26,12 +26,13 @@ modbus.onRead(function(error, request){
 }.bindenv(this));
 */
 
-modbus.onWrite(function(error, request){
-	if (error) {
-		server.error(error);
-	} else {
-		foreach (key, value in request.writeValues) {
-			server.log(key + " : " + value);
-		}
-	}
+modbus.onWrite(function(slaveID, functionCode, startingAddress, quantity, values) {
+    server.log("slaveID : " + slaveID);
+    server.log("functionCode : " + functionCode);
+    server.log("startingAddress : " + startingAddress);
+    server.log("Quantity : " + quantity);
+    server.log("Values : \n");
+    foreach (index, value in values) {
+    	server.log("\t" + index + " : " + value);
+    }
 }.bindenv(this));

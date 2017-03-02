@@ -1,3 +1,7 @@
+// Copyright (c) 2017 Electric Imp
+// This file is licensed under the MIT License
+// http://opensource.org/licenses/MIT
+
 enum MODBUSSLAVE_TARGET_TYPE {
     COIL,
     DISCRETE_INPUT,
@@ -7,15 +11,14 @@ enum MODBUSSLAVE_TARGET_TYPE {
 
 enum MODBUSSLAVE_EXCEPTION {
     ILLEGAL_FUNCTION = 0x01,
-        ILLEGAL_DATA_ADDR = 0x02,
-        ILLEGAL_DATA_VAL = 0x03,
-        SLAVE_DEVICE_FAIL = 0x04,
-        ACKNOWLEDGE = 0x05,
-        SLAVE_DEVICE_BUSY = 0x06,
-        NEGATIVE_ACKNOWLEDGE = 0x07,
-        MEMORY_PARITY_ERROR = 0x08,
+    ILLEGAL_DATA_ADDR = 0x02,
+    ILLEGAL_DATA_VAL = 0x03,
+    SLAVE_DEVICE_FAIL = 0x04,
+    ACKNOWLEDGE = 0x05,
+    SLAVE_DEVICE_BUSY = 0x06,
+    NEGATIVE_ACKNOWLEDGE = 0x07,
+    MEMORY_PARITY_ERROR = 0x08,
 }
-
 
 class ModbusSlave {
     static VERSION = "1.0.0";
@@ -58,10 +61,20 @@ class ModbusSlave {
     _onWriteCallback = null;
     _onErrorCallback = null;
 
+    //
+    // Constructor for ModbusSlave
+    //
+    // @param  {bool} debug - the debug flag
+    //
     constructor(debug) {
         _debug = debug;
     }
 
+    //
+    // the parse the request PDU
+    //
+    // @params {blob} PDU  the PDU extracted from the request ADU
+    //
     function parse(PDU) {
         PDU.seek(0);
         local length = PDU.len();
@@ -71,6 +84,7 @@ class ModbusSlave {
         local quantity = null;
         local writeValues = null;
         local byteNum = null;
+        // if it is a function code we do not support
         if (expectedReqLen == -1) {
             throw {
                 error = MODBUSSLAVE_EXCEPTION.ILLEGAL_FUNCTION,
@@ -82,6 +96,7 @@ class ModbusSlave {
             byteNum = PDU.readn('b');
             expectedReqLen = byteNum + 6;
         } else {
+            // not enough data
             return false;
         }
         if (length < expectedReqLen) {
@@ -138,19 +153,39 @@ class ModbusSlave {
         return result;
     }
 
-
+    //
+    // set the onRead callback
+    //
+    // @params {function} callback  the callback to be fired on the receipt of a read request
+    //
     function onRead(callback) {
         _onReadCallback = callback;
     }
 
+    //
+    // set the onWrite callback
+    //
+    // @params {function} callback  the callback to be fired on the receipt of a write request
+    //
     function onWrite(callback) {
         _onWriteCallback = callback;
     }
 
+    //
+    // set the onError callback
+    //
+    // @params {function} callback  the callback to be fired when there is an error
+    //
     function onError(callback) {
         _onErrorCallback = callback;
     }
 
+    //
+    // create the PDU for the error response
+    //
+    // @params {integer} functionCode  the function code
+    // @params {integer} error  the Modbus exception code
+    //
     function _createErrorPDU(functionCode, error) {
         local PDU = blob();
         PDU.writen(functionCode | 0x80, 'b');
@@ -158,36 +193,49 @@ class ModbusSlave {
         return PDU;
     }
 
-    function _createPDU(result, slaveID) {
+    //
+    // create the PDU for normal response
+    //
+    // @params {table} request  it contains information about the parsed request
+    // @params {integer} slaveID  the slave ID
+    //
+    function _createPDU(request, slaveID) {
         local input = null, PDU = null;
-        local functionCode = result.functionCode;
-        local startingAddress = result.startingAddress;
-        local quantity = result.quantity;
+        local functionCode = request.functionCode;
+        local startingAddress = request.startingAddress;
+        local quantity = request.quantity;
         switch (functionCode) {
             case ModbusSlave.FUNCTION_CODES.readCoil.fcode:
             case ModbusSlave.FUNCTION_CODES.readDiscreteInput.fcode:
                 input = _onReadCallback ? _onReadCallback(slaveID, functionCode, startingAddress, quantity) : null;
-                PDU = _createReadCoilPDU(result, input);
+                PDU = _createReadCoilPDU(request, input);
                 break;
             case ModbusSlave.FUNCTION_CODES.readRegister.fcode:
             case ModbusSlave.FUNCTION_CODES.readInputRegister.fcode:
                 input = _onReadCallback ? _onReadCallback(slaveID, functionCode, startingAddress, quantity) : null;
-                PDU = _createReadRegisterPDU(result, input);
+                PDU = _createReadRegisterPDU(request, input);
                 break;
             case ModbusSlave.FUNCTION_CODES.writeCoil.fcode:
             case ModbusSlave.FUNCTION_CODES.writeRegister.fcode:
-                input = _onWriteCallback ? _onWriteCallback(slaveID, functionCode, startingAddress, quantity, result.writeValues) : null;
-                PDU = _createWritePDU(result, input, true);
+                input = _onWriteCallback ? _onWriteCallback(slaveID, functionCode, startingAddress, quantity, request.writeValues) : null;
+                PDU = _createWritePDU(request, input, true);
                 break;
             case ModbusSlave.FUNCTION_CODES.writeCoils.fcode:
             case ModbusSlave.FUNCTION_CODES.writeRegisters.fcode:
-                input = _onWriteCallback ? _onWriteCallback(slaveID, functionCode, startingAddress, quantity, result.writeValues) : null;
-                PDU = _createWritePDU(result, input, false);
+                input = _onWriteCallback ? _onWriteCallback(slaveID, functionCode, startingAddress, quantity, request.writeValues) : null;
+                PDU = _createWritePDU(request, input, false);
                 break;
         }
         return PDU;
     }
 
+    //
+    // create the PDU for write response
+    //
+    // @params {table} request  it contains information about the parsed request
+    // @params {bool, null, integer} input  the returned value from the onWrite callback
+    // @params {bool} isSingleWrite  an indicator if it is a single write
+    //
     function _createWritePDU(request, input, isSingleWrite) {
         local PDU = blob();
         if (input == true || input == null) {
@@ -204,6 +252,12 @@ class ModbusSlave {
         return PDU;
     }
 
+    //
+    // create the PDU for read coil response
+    //
+    // @params {table} request  it contains information about the parsed request
+    // @params {bool, null, integer, array, blob} input  the returned value from the onRead callback
+    //
     function _createReadCoilPDU(request, values) {
         local byteNum = math.ceil(request.quantity / 8.0);
         local PDU = blob();
@@ -247,6 +301,12 @@ class ModbusSlave {
         return PDU;
     }
 
+    //
+    // create the PDU for read register response
+    //
+    // @params {table} request  it contains information about the parsed request
+    // @params {null, integer, array, blob} input  the returned value from the onRead callback
+    //
     function _createReadRegisterPDU(request, values) {
         local PDU = blob();
         local quantity = request.quantity;
@@ -277,6 +337,11 @@ class ModbusSlave {
         return PDU;
     }
 
+    //
+    // return the expected length of the PDU according to its function code
+    //
+    // @params {integer} functionCode  the function code
+    //
     function _getRequestLength(functionCode) {
         foreach (value in FUNCTION_CODES) {
             if (value.fcode == functionCode) {
@@ -285,6 +350,13 @@ class ModbusSlave {
         }
         return -1;
     }
+
+    //
+    // log the message
+    //
+    // @params {blob, string} message  the message to be logged
+    // @params {string} prefix  the optional prefix to be pre-pend to the message
+    //
 
     function _log(message, prefix = "") {
         if (_debug) {
@@ -301,8 +373,13 @@ class ModbusSlave {
         }
     }
 
+    //
+    // abstract function to send a packet
+    //
     function _send(PDU);
 
+    //
+    // abstract function to create an ADU
+    //
     function _createADU(PDU);
-
 }

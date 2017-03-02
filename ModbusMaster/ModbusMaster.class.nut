@@ -1,3 +1,7 @@
+// Copyright (c) 2017 Electric Imp
+// This file is licensed under the MIT License
+// http://opensource.org/licenses/MIT
+
 class ModbusMaster {
     static VERSION = "1.0.0";
     _debug = null;
@@ -282,16 +286,19 @@ class ModbusMaster {
     }
 
     //
+    // abstract function
     // send the ADU
     //
     function _send(PDU, properties);
 
     //
+    // abstract function
     // fire the callback
     //
     function _callbackHandler(error, result, callback);
 
     //
+    // abstract function
     // create an ADU
     //
     function _createADU(PDU);

@@ -242,7 +242,6 @@ It sets the callback function for when there is an error
 #### Example
 
 ```squirrel
-// a coil read example
 modbus.onError(function(error){
     server.error(error);
 }.bindenv(this));

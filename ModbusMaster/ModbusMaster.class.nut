@@ -6,10 +6,20 @@ class ModbusMaster {
     static VERSION = "1.0.0";
     _debug = null;
 
+    //
+    // Constructor for ModbusMaster
+    //
+    // @param  {bool} debug - the debug flag
+    //
     constructor(debug) {
         _debug = debug;
     }
 
+    //
+    // This function reads the description of the type, the current status, and other information specific to a remote device.
+    //
+    // @param {function} callback - The function to be fired when it receives response regarding this request
+    //
     function reportSlaveID(callback = null) {
         local properties = {
             expectedResLen = ModbusRTU.FUNCTION_CODES.reportSlaveID.resLen,

@@ -262,7 +262,7 @@ The following table presents a list of function codes the slave can support and 
 | 0x05          | Write Single Coil        |
 | 0x06          | Write Single Register    |
 | 0x0F          | Write Multiple Coils     |
-| 0x01          | Write Multiple Registers |
+| 0x10          | Write Multiple Registers |
 
 
 

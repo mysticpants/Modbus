@@ -1,7 +1,8 @@
-
+#require "CRC16.class.nut:1.0.0"
+#require "ModbusSlave.class.nut:1.0.0"
+#require "Modbus485Slave.class.nut:1.0.0"
 
 modbus <- Modbus485Slave(hardware.uart2, hardware.pinL, 1, { debug = true });
-
 
 modbus.onError(function(error) {
     server.error(error);
@@ -15,7 +16,6 @@ modbus.onRead(function(slaveID, functionCode, startingAddress, quantity) {
     server.log("Quantity : " + quantity);
     return [18, 29, 30, 59, 47];
 }.bindenv(this));
-
 
 modbus.onWrite(function(slaveID, functionCode, startingAddress, quantity, values) {
     server.log("slaveID : " + slaveID);

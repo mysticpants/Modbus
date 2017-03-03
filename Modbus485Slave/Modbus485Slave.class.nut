@@ -92,7 +92,7 @@ class Modbus485Slave extends ModbusSlave {
             }
             data = _uart.read();
         }
-        if (_shouldParseADU && _receiveBuffer.len() >= MIN_REQUEST_LENGTH) {
+        if (_shouldParseADU && _receiveBuffer.len >= MIN_REQUEST_LENGTH) {
             _processReceiveBuffer();
         }
     }
@@ -113,7 +113,7 @@ class Modbus485Slave extends ModbusSlave {
                 return _receiveBuffer.seek(bufferLength);
             }
             local PDU = _receiveBuffer.readblob(bufferLength - 1);
-            local result = ModbusSlave.parse(PDU);
+            local result = ModbusSlave._parse(PDU);
             if (result == false) {
                 return _receiveBuffer.seek(bufferLength);
             }
@@ -138,7 +138,8 @@ class Modbus485Slave extends ModbusSlave {
             }
         }
         _log(_receiveBuffer, "Incoming ADU : ");
-        _send(ADU);
+        // return ADU to help with testing
+        return _send(ADU);
     }
 
     //
@@ -164,6 +165,8 @@ class Modbus485Slave extends ModbusSlave {
         uf();
         rw(0);
         _log(ADU, "Outgoing ADU : ");
+        // return ADU to help with testing
+        return ADU;
     }
 
     //

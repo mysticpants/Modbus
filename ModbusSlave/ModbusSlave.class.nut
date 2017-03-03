@@ -11,13 +11,13 @@ enum MODBUSSLAVE_TARGET_TYPE {
 
 enum MODBUSSLAVE_EXCEPTION {
     ILLEGAL_FUNCTION = 0x01,
-    ILLEGAL_DATA_ADDR = 0x02,
-    ILLEGAL_DATA_VAL = 0x03,
-    SLAVE_DEVICE_FAIL = 0x04,
-    ACKNOWLEDGE = 0x05,
-    SLAVE_DEVICE_BUSY = 0x06,
-    NEGATIVE_ACKNOWLEDGE = 0x07,
-    MEMORY_PARITY_ERROR = 0x08,
+        ILLEGAL_DATA_ADDR = 0x02,
+        ILLEGAL_DATA_VAL = 0x03,
+        SLAVE_DEVICE_FAIL = 0x04,
+        ACKNOWLEDGE = 0x05,
+        SLAVE_DEVICE_BUSY = 0x06,
+        NEGATIVE_ACKNOWLEDGE = 0x07,
+        MEMORY_PARITY_ERROR = 0x08,
 }
 
 class ModbusSlave {
@@ -75,7 +75,7 @@ class ModbusSlave {
     //
     // @params {blob} PDU  the PDU extracted from the request ADU
     //
-    function parse(PDU) {
+    function _parse(PDU) {
         PDU.seek(0);
         local length = PDU.len();
         local functionCode = PDU.readn('b');
@@ -90,14 +90,15 @@ class ModbusSlave {
                 error = MODBUSSLAVE_EXCEPTION.ILLEGAL_FUNCTION,
                 functionCode = functionCode
             };
-        } else if (expectedReqLen == null && length > 6) {
-            startingAddress = swap2(PDU.readn('w'));
-            quantity = swap2(PDU.readn('w'));
-            byteNum = PDU.readn('b');
-            expectedReqLen = byteNum + 6;
-        } else {
-            // not enough data
-            return false;
+        } else if (expectedReqLen == null) {
+            if (length > 6) {
+                startingAddress = swap2(PDU.readn('w'));
+                quantity = swap2(PDU.readn('w'));
+                byteNum = PDU.readn('b');
+                expectedReqLen = byteNum + 6;
+            } else {
+                return false;
+            }
         }
         if (length < expectedReqLen) {
             // not enough data
@@ -247,7 +248,7 @@ class ModbusSlave {
                 PDU.writen(swap2(request.quantity), 'w');
             }
         } else {
-            PDU = ModbusSlave._createErrorPDU(request.functionCode, (input == false) ? 1 : input);
+            PDU = ModbusSlave._createErrorPDU(request.functionCode, (input == false) ? MODBUSSLAVE_EXCEPTION.ILLEGAL_FUNCTION : input);
         }
         return PDU;
     }

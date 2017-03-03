@@ -102,10 +102,11 @@ class Modbus485Slave extends ModbusSlave {
     //
     function _processReceiveBuffer() {
         local ADU = null;
+        local slaveID = null;
         try {
             _receiveBuffer.seek(0);
             local bufferLength = _receiveBuffer.len();
-            local slaveID = _receiveBuffer.readn('b');
+            slaveID = _receiveBuffer.readn('b');
             if (_slaveID != slaveID) {
                 _shouldParseADU = false || _isSniffer;
             }
@@ -124,10 +125,10 @@ class Modbus485Slave extends ModbusSlave {
             if (!_hasValidCRC()) {
                 throw "Invalid CRC";
             }
-            ADU = _createADU(_createPDU(result, slaveID));
+            ADU = _createADU(_createPDU(result, slaveID), slaveID);
         } catch (error) {
             if (typeof error == "table") {
-                ADU = _createADU(_createErrorPDU(error.functionCode, error.error));
+                ADU = _createADU(_createErrorPDU(error.functionCode, error.error), slaveID);
             } else {
                 if (_onErrorCallback) {
                     _onErrorCallback(error);
@@ -145,9 +146,9 @@ class Modbus485Slave extends ModbusSlave {
     //
     // the concrete function to create an ADU
     //
-    function _createADU(PDU) {
+    function _createADU(PDU, slaveID) {
         local ADU = blob();
-        ADU.writen(_slaveID, 'b');
+        ADU.writen(slaveID, 'b');
         ADU.writeblob(PDU);
         ADU.writen(CRC16.calculate(ADU), 'w');
         return ADU;

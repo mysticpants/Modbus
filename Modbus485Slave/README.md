@@ -39,11 +39,9 @@ Instantiate a new Modbus485Slave object and set the configuration of UART .
 | uart     | N/A         | The UART object connected to the Modbus Master                                  |
 | rts      | N/A         | A pin to be used for flow control                                               |
 | slaveID  | N/A         | An ID by which the master identifies this slave                                 |
-| params   | {}          | A table consists of the following items                                         |
+| params   | {}          | A table consists of the following <a href="#items">items</a>                    |
 
-##### Items
-
-*params* is a table accepting the following items:
+<h5 id="items">Items</h5>
 
 | Key      | Default     | Notes                                                                           |
 | ------   | ----------- | ------------------------------------------------------------------------------- |

@@ -43,6 +43,8 @@ Instantiate a new Modbus485Slave object and set the configuration of UART .
 
 ##### Items
 
+*params* is a table accepting the following items:
+
 | Key      | Default     | Notes                                                                           |
 | ------   | ----------- | ------------------------------------------------------------------------------- |
 | baudRate | 19200       | The baud rate of the UART connection                                            |

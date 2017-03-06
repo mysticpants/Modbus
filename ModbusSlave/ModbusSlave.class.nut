@@ -57,9 +57,9 @@ class ModbusSlave {
         }
     };
     _debug = null;
+    _callbacks = null;
     _onReadCallback = null;
     _onWriteCallback = null;
-    _onErrorCallback = null;
 
     //
     // Constructor for ModbusSlave
@@ -68,6 +68,7 @@ class ModbusSlave {
     //
     constructor(debug) {
         _debug = debug;
+        _callbacks = {};
     }
 
     //
@@ -160,7 +161,7 @@ class ModbusSlave {
     // @params {function} callback  the callback to be fired on the receipt of a read request
     //
     function onRead(callback) {
-        _onReadCallback = callback;
+        ("onRequestRead" in _callbacks) ? _callbacks["onRequestRead"] = callback : _callbacks["onRequestRead"] <- callback;
     }
 
     //
@@ -169,7 +170,7 @@ class ModbusSlave {
     // @params {function} callback  the callback to be fired on the receipt of a write request
     //
     function onWrite(callback) {
-        _onWriteCallback = callback;
+        ("onRequestWrite" in _callbacks) ? _callbacks["onRequestWrite"] = callback : _callbacks["onRequestWrite"] <- callback;
     }
 
     //
@@ -178,7 +179,7 @@ class ModbusSlave {
     // @params {function} callback  the callback to be fired when there is an error
     //
     function onError(callback) {
-        _onErrorCallback = callback;
+        ("onError" in _callbacks) ? _callbacks["onError"] = callback : _callbacks["onError"] <- callback;
     }
 
     //
@@ -205,25 +206,27 @@ class ModbusSlave {
         local functionCode = request.functionCode;
         local startingAddress = request.startingAddress;
         local quantity = request.quantity;
+        local onReadCallback = _callbacks["onRequestRead"];
+        local onWriteCallback = _callbacks["onRequestWrite"];
         switch (functionCode) {
             case ModbusSlave.FUNCTION_CODES.readCoil.fcode:
             case ModbusSlave.FUNCTION_CODES.readDiscreteInput.fcode:
-                input = _onReadCallback ? _onReadCallback(slaveID, functionCode, startingAddress, quantity) : null;
+                input = onReadCallback ? onReadCallback(slaveID, functionCode, startingAddress, quantity) : null;
                 PDU = _createReadCoilPDU(request, input);
                 break;
             case ModbusSlave.FUNCTION_CODES.readRegister.fcode:
             case ModbusSlave.FUNCTION_CODES.readInputRegister.fcode:
-                input = _onReadCallback ? _onReadCallback(slaveID, functionCode, startingAddress, quantity) : null;
+                input = onReadCallback ? onReadCallback(slaveID, functionCode, startingAddress, quantity) : null;
                 PDU = _createReadRegisterPDU(request, input);
                 break;
             case ModbusSlave.FUNCTION_CODES.writeCoil.fcode:
             case ModbusSlave.FUNCTION_CODES.writeRegister.fcode:
-                input = _onWriteCallback ? _onWriteCallback(slaveID, functionCode, startingAddress, quantity, request.writeValues) : null;
+                input = onWriteCallback ? onWriteCallback(slaveID, functionCode, startingAddress, quantity, request.writeValues) : null;
                 PDU = _createWritePDU(request, input, true);
                 break;
             case ModbusSlave.FUNCTION_CODES.writeCoils.fcode:
             case ModbusSlave.FUNCTION_CODES.writeRegisters.fcode:
-                input = _onWriteCallback ? _onWriteCallback(slaveID, functionCode, startingAddress, quantity, request.writeValues) : null;
+                input = onWriteCallback ? onWriteCallback(slaveID, functionCode, startingAddress, quantity, request.writeValues) : null;
                 PDU = _createWritePDU(request, input, false);
                 break;
         }

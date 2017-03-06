@@ -92,7 +92,7 @@ class Modbus485Slave extends ModbusSlave {
             }
             data = _uart.read();
         }
-        if (_shouldParseADU && _receiveBuffer.len() >= MIN_REQUEST_LENGTH) {
+        if (_shouldParseADU && _receiveBuffer.len >= MIN_REQUEST_LENGTH) {
             _processReceiveBuffer();
         }
     }

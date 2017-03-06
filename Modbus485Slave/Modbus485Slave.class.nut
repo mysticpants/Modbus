@@ -130,8 +130,8 @@ class Modbus485Slave extends ModbusSlave {
             if (typeof error == "table") {
                 ADU = _createADU(_createErrorPDU(error.functionCode, error.error), slaveID);
             } else {
-                if ("onError" in _callbacks) {
-                    _callbacks["onError"](error);
+                if (_onErrorCallback) {
+                    _onErrorCallback(error);
                 } else {
                     server.error(error);
                 }

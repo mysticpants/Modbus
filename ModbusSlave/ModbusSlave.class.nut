@@ -68,7 +68,13 @@ class ModbusSlave {
     //
     constructor(debug) {
         _debug = debug;
-        _callbacks = {};
+        _callbacks = {
+            onRequestWrite = null,
+            onRequestRead = null,
+            onError = null,
+            onResponseWrite = null,
+            onResponseRead = null
+        };
     }
 
     //
@@ -161,7 +167,7 @@ class ModbusSlave {
     // @params {function} callback  the callback to be fired on the receipt of a read request
     //
     function onRead(callback) {
-        ("onRequestRead" in _callbacks) ? _callbacks["onRequestRead"] = callback : _callbacks["onRequestRead"] <- callback;
+        _callbacks["onRequestRead"] = callback;
     }
 
     //
@@ -170,7 +176,7 @@ class ModbusSlave {
     // @params {function} callback  the callback to be fired on the receipt of a write request
     //
     function onWrite(callback) {
-        ("onRequestWrite" in _callbacks) ? _callbacks["onRequestWrite"] = callback : _callbacks["onRequestWrite"] <- callback;
+        _callbacks["onRequestWrite"] = callback;
     }
 
     //
@@ -179,7 +185,7 @@ class ModbusSlave {
     // @params {function} callback  the callback to be fired when there is an error
     //
     function onError(callback) {
-        ("onError" in _callbacks) ? _callbacks["onError"] = callback : _callbacks["onError"] <- callback;
+        _callbacks["onError"] = callback;
     }
 
     //

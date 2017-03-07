@@ -78,26 +78,6 @@ modbus.setSlaveID(2);
 
 ```
 
-
-### sniff(*isSniffer*)
-
-It enables the slave to accept all requests (even those not addressed to this slave) if set to true;
-It only accepts requests addressed to this slave and ignores others if set to false . It is disabled by default
-
-#### Parameters
-
-| Key             | Data Type | Required | Default Value | Description                                                               |
-| --------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------- |
-| *isSniffer*     | `bool`    | Yes      | Null          | To enable or disable sniffing                                             |
-
-
-#### Example
-
-```squirrel
-modbus.sniff(true);
-
-```
-
 ### onWrite(*callback*)
 
 It sets the callback function for when there is a write request

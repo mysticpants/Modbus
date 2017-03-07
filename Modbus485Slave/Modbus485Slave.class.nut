@@ -10,7 +10,6 @@ class Modbus485Slave extends ModbusSlave {
     _receiveBuffer = null;
     _shouldParseADU = null;
     _minInterval = null;
-    _isSniffer = null;
 
     //
     // Constructor for Modbus485Slave
@@ -36,7 +35,6 @@ class Modbus485Slave extends ModbusSlave {
         _rts = rts;
         _slaveID = slaveID;
         _shouldParseADU = true;
-        _isSniffer = false;
         local baudRate = ("baudRate" in params) ? params.baudRate : 19200;
         local dataBits = ("dataBits" in params) ? params.dataBits : 8;
         local parity = ("parity" in params) ? params.parity : PARITY_NONE;
@@ -58,18 +56,6 @@ class Modbus485Slave extends ModbusSlave {
             throw "Slave ID must be an integer";
         }
         _slaveID = slaveID;
-    }
-
-    //
-    // enable or disable sniffing
-    //
-    // @params {bool} isSniffer  if enable or disable sniffing
-    //
-    function sniff(isSniffer) {
-        if (typeof isSniffer != "bool") {
-            throw "It must take an integer";
-        }
-        _isSniffer = isSniffer;
     }
 
     //
@@ -108,7 +94,7 @@ class Modbus485Slave extends ModbusSlave {
             local bufferLength = _receiveBuffer.len();
             slaveID = _receiveBuffer.readn('b');
             if (_slaveID != slaveID) {
-                _shouldParseADU = false || _isSniffer;
+                _shouldParseADU = false;
             }
             if (!_shouldParseADU) {
                 return _receiveBuffer.seek(bufferLength);

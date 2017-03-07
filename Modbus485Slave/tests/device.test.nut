@@ -39,21 +39,6 @@ class DeviceTestCase extends ImpTestCase {
         this.assertTrue(false);
     }
 
-    function testSniff() {
-        this.assertTrue(_modbus._isSniffer == false);
-        _modbus.sniff(true);
-        this.assertTrue(_modbus._isSniffer);
-    }
-
-    function testSniffWithWrongType() {
-        try {
-            _modbus.sniff(1);
-        } catch (error) {
-            return this.assertTrue(true);
-        }
-        this.assertTrue(false);
-    }
-
     function testOnReadCoilsWithArrayOfBooleanReturned() {
         setUp();
         local fakeBuffer = blob();
@@ -606,73 +591,6 @@ class DeviceTestCase extends ImpTestCase {
         expectedADU.writen(swap2(expectedQuantity), 'w');
         expectedADU.writen(CRC16.calculate(expectedADU), 'w');
         this.assertTrue(ADU.tostring() == expectedADU.tostring());
-        return PASS_MESSAGE;
-    }
-
-    function testEnableSniffing() {
-        setUp();
-        _modbus.sniff(true);
-        local fakeBuffer = blob();
-        local expectedFunctionCode = 0x10;
-        local expectedStartingAddress = 0x0A;
-        local expectedWriteValues = [88, 188];
-        local expectedQuantity = expectedWriteValues.len();
-        local returnValue = true;
-        local anotherSlaveID = 2;
-        fakeBuffer.writen(anotherSlaveID, 'b');
-        fakeBuffer.writen(expectedFunctionCode, 'b');
-        fakeBuffer.writen(swap2(expectedStartingAddress), 'w');
-        fakeBuffer.writen(swap2(expectedQuantity), 'w');
-        fakeBuffer.writen(expectedQuantity * 2, 'b');
-        foreach (value in expectedWriteValues) {
-            fakeBuffer.writen(swap2(value), 'w');
-        }
-        fakeBuffer.writen(CRC16.calculate(fakeBuffer), 'w');
-        fakeBuffer.seek(0);
-        _modbus.onWrite(function(slaveID, functionCode, startingAddress, quantity, writeValues) {
-            this.assertTrue(slaveID == anotherSlaveID);
-            this.assertTrue(functionCode == expectedFunctionCode);
-            this.assertTrue(startingAddress == expectedStartingAddress);
-            this.assertTrue(quantity == expectedQuantity);
-            this.assertDeepEqual(writeValues, expectedWriteValues);
-            return returnValue;
-        }.bindenv(this));
-        local ADU = onReceive(_modbus, fakeBuffer);
-        local expectedADU = blob();
-        expectedADU.writen(anotherSlaveID, 'b');
-        expectedADU.writen(expectedFunctionCode, 'b');
-        expectedADU.writen(swap2(expectedStartingAddress), 'w');
-        expectedADU.writen(swap2(expectedQuantity), 'w');
-        expectedADU.writen(CRC16.calculate(expectedADU), 'w');
-        this.assertTrue(ADU.tostring() == expectedADU.tostring());
-        return PASS_MESSAGE;
-    }
-
-    function testDisableSniffing() {
-        setUp();
-        local fakeBuffer = blob();
-        local expectedFunctionCode = 0x10;
-        local expectedStartingAddress = 0x0A;
-        local expectedWriteValues = [88, 188];
-        local expectedQuantity = expectedWriteValues.len();
-        local returnValue = true;
-        local anotherSlaveID = 2;
-        fakeBuffer.writen(anotherSlaveID, 'b');
-        fakeBuffer.writen(expectedFunctionCode, 'b');
-        fakeBuffer.writen(swap2(expectedStartingAddress), 'w');
-        fakeBuffer.writen(swap2(expectedQuantity), 'w');
-        fakeBuffer.writen(expectedQuantity * 2, 'b');
-        foreach (value in expectedWriteValues) {
-            fakeBuffer.writen(swap2(value), 'w');
-        }
-        fakeBuffer.writen(CRC16.calculate(fakeBuffer), 'w');
-        fakeBuffer.seek(0);
-        _modbus.onWrite(function(slaveID, functionCode, startingAddress, quantity, writeValues) {
-            // this should not be called
-            this.assertTrue(false);
-        }.bindenv(this));
-        local ADU = onReceive(_modbus, fakeBuffer);
-        this.assertTrue(!ADU);
         return PASS_MESSAGE;
     }
 

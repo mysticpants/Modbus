@@ -56,12 +56,12 @@ This is a generic method used to read values from a single coil, register, or mu
 | *quantity* | Integer | Yes | N/A  | The number of consecutive addresses the values are read from |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
 
-| Target Type        | Value                                  | Access        |
-| ------------------ | -------------------------------------- | ------------- |
-| Coil               | *MODBUSRTU_TARGET_TYPE.COIL*             | Read-Write    |
-| Discrete Input     | *MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT*   | Read-Only     |
-| Input Register     | *MODBUSRTU_TARGET_TYPE.INPUT_REGISTER*   | Read-Only     |
-| Holding Register   | *MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER* | Read-Write    |
+| Target Type | Value | Access |
+| --- | --- | --- |
+| Coil | *MODBUSRTU_TARGET_TYPE.COIL* | Read-Write |
+| Discrete Input | *MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT* | Read-Only |
+| Input Register | *MODBUSRTU_TARGET_TYPE.INPUT_REGISTER* | Read-Only |
+| Holding Register | *MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER* | Read-Write |
 
 #### Example
 
@@ -149,7 +149,6 @@ modbus.readExceptionStatus(0x01, function(error, result) {
         server.log(result);
     }
 }.bindenv(this));
-
 ```
 
 ### diagnostics(*deviceAddress, subFunctionCode, data[, callback]*)
@@ -162,11 +161,8 @@ This method provides a series of tests for checking the communication system bet
 | --- | --- | --- | --- | --- |
 | *deviceAddress* | Integer| Yes | N/A | The unique address that identifies a device |
 | *subFunctionCode* | Constant | Yes | N/A | Refer to the Sub-function Code table, below |
-| *data* | `blob`      | Yes | N/A | The data field required by Modbus request |
-| *callback* | `function`  | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
-
-
-### Sub-function Codes
+| *data* | Blob | Yes | N/A | The data field required by Modbus request |
+| *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
 
 | Sub-function Code | Value (Hex) |
 | --- | --- |

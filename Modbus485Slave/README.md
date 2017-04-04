@@ -63,7 +63,7 @@ This method sets the callback function that will be triggered when there is a wr
 | Parameter | Data Type | Description |
 | --- | --- | --- |
 | *slaveID* | Integer | The ID of the slave the request is addressed to |
-| *functionCode* | Integer | The function code. Please refer to the <a href="#functionCode">Supported Function Code</a> |
+| *functionCode* | Integer | The function code. Please refer to ‘<a href="#functionCode">Supported Function Codes</a>’ |
 | *startingAddress* | Integer | The address at which it starts writing values |
 | *quantity* | Integer | The quantity of the values |
 | *values* | Integer, bool, array | The values to be written |

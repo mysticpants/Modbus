@@ -58,7 +58,7 @@ This is a generic method used to read values from a single coil, register, or mu
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
 | *deviceAddress* | Integer | Yes | N/A | The unique address that identifies a device |
-| *targetType* | Constant | Yes | N/A | Refer to the Target Type table, below |
+| *targetType* | Constant | Yes | N/A | Refer to the ‘Target Type’ table, below |
 | *startingAddress* | Integer | Yes | N/A | The address from which it begins reading values |
 | *quantity* | Integer | Yes | N/A  | The number of consecutive addresses the values are read from |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
@@ -105,7 +105,7 @@ This is a generic method used to write values to multiple coils and registers. I
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
 | *deviceAddress* | Integer| Yes | N/A | The unique address that identifies a device |
-| *targetType* | Constant | Yes | N/A | Refer to the Target Type table, above |
+| *targetType* | Constant | Yes | N/A | Refer to the ‘Target Type’ table, above |
 | *startingAddress* | Integer | Yes | N/A | The address from which it begins writing values |
 | *quantity* | Integer | Yes | N/A | The number of consecutive addresses the values are written into |
 | *values* | Integer, array of integers, bool, Blob | Yes | N/A | The values written into Coils or Registers. Please view Notes below |
@@ -167,7 +167,7 @@ This method provides a series of tests for checking the communication system bet
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
 | *deviceAddress* | Integer| Yes | N/A | The unique address that identifies a device |
-| *subFunctionCode* | Constant | Yes | N/A | Refer to the Sub-function Code table, below |
+| *subFunctionCode* | Constant | Yes | N/A | Refer to the ‘Sub-function Code’ table, below |
 | *data* | Blob | Yes | N/A | The data field required by Modbus request |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
 
@@ -287,8 +287,8 @@ This method lets you read the identification and additional information relative
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
 | *deviceAddress* | Integer | Yes | N/A | The unique address that identifies a device |
-| *readDeviceIdCode* | Constant| Yes | N/A | Refer to the Read Device ID Code table, below |
-| *objectId* | Constant | Yes | N/A | Refer to the Object ID table, below |
+| *readDeviceIdCode* | Constant| Yes | N/A | Refer to the ‘Read Device ID Code’ table, below |
+| *objectId* | Constant | Yes | N/A | Refer to the ‘Object ID’ table, below |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
 
 | Read Device ID Code | Description |
@@ -298,7 +298,7 @@ This method lets you read the identification and additional information relative
 | *MODBUSRTU_READ_DEVICE_CODE.EXTENDED* | Get the extended device identification (stream access) |
 | *MODBUSRTU_READ_DEVICE_CODE.SPECIFIC* | Get one specific identification object (individual access) |
 
-| Object ID Value | Category  |
+| Object ID | Category  |
 | --- | --- |
 | *MODBUSRTU_OBJECT_ID.VENDOR_NAME* | Basic |
 | *MODBUSRTU_OBJECT_ID.PRODUCT_CODE* | Basic |

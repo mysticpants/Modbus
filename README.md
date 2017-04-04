@@ -8,13 +8,13 @@ This library creates and parses Modbus Protocol Data Unit (PDU). This library is
 
 This library allows an imp to communicate with other Modbus devices via the Modbus-RS485 protocol.
 
-### [ModbusTCPMaster](./ModbusTCPMaster/)
-
-This library enables an imp to communicate with other Modbus devices via TCP/IP.
-
 ### [Modbus485Slave](./Modbus485Slave/)
 
 This library empowers an imp to communicate with a Modbus Master via the RS485 protocol.
+
+### [ModbusTCPMaster](./ModbusTCPMaster/)
+
+This library enables an imp to communicate with other Modbus devices via TCP/IP.
 
 ## License
 

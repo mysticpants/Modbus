@@ -10,7 +10,7 @@ This is the main library class. All methods and variables inside this class are 
 
 ### createReadPDU(*targetType, startingAddress, quantity*)
 
-This method creates a [PDU](#PDU) for *readData* operations. It takes the following parameters:
+This method creates a PDU for *readData* operations. It takes the following parameters:
 
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
@@ -38,7 +38,7 @@ server.log(pdu);
 
 ### createWritePDU(*targetType, startingAddress, quantity, values*)
 
-This method creates a [PDU](#PDU) for *writeData* operations. It takes the following parameters:
+This method creates a PDU for *writeData* operations. It takes the following parameters:
 
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
@@ -61,7 +61,7 @@ server.log(pdu);
 
 ### createReadExceptionStatusPDU()
 
-This method creates a [PDU](#PDU) for *readExceptionStatus* operations. It takes no parameters.
+This method creates a PDU for *readExceptionStatus* operations. It takes no parameters.
 
 #### Example
 
@@ -72,7 +72,7 @@ server.log(pdu);
 
 ### createDiagnosticsPDU(*subFunctionCode, data*)
 
-This method creates a [PDU](#PDU) for diagnostics operations. It takes the following parameters:
+This method creates a PDU for diagnostics operations. It takes the following parameters:
 
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
@@ -108,7 +108,7 @@ server.log(pdu);
 
 ### createReportSlaveIdPDU()
 
-This method creates a [PDU](#PDU) for *reportSlaveId* operations. It has no parameters.
+This method creates a PDU for *reportSlaveId* operations. It has no parameters.
 
 #### Example
 
@@ -119,7 +119,7 @@ server.log(pdu);
 
 ### createMaskWriteRegisterPDU(*referenceAddress, AND_Mask, OR_Mask*)
 
-This method creates a [PDU](#PDU) for *maskWriteRegister* operations. It takes the following parameters:
+This method creates a PDU for *maskWriteRegister* operations. It takes the following parameters:
 
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
@@ -139,7 +139,7 @@ server.log(pdu);
 
 ### createReadWriteMultipleRegistersPDU(*readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue*)
 
-This method creates a [PDU](#PDU) for *readWriteMultipleRegisters* operations. It takes the following parameters:
+This method creates a PDU for *readWriteMultipleRegisters* operations. It takes the following parameters:
 
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
@@ -164,7 +164,7 @@ server.log(pdu);
 
 ### createReadDeviceIdentificationPDU(*readDeviceIdCode, objectId*)
 
-This method creates a [PDU](#PDU) for *readDeviceIdentificationPDU* operations. It takes the following parameters:
+This method creates a PDU for *readDeviceIdentificationPDU* operations. It takes the following parameters:
 
 | Key | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |

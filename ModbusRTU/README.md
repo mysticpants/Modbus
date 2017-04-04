@@ -2,7 +2,14 @@
 
 This library creates and parses Modbus Protocol Data Units (PDU).
 
-**To use this library, add** `#require "CRC16.class.nut:1.0.0"` **and** `#require "ModbusRTU.class.nut:1.0.0"` **to the top of your device code.**
+**To use this library, add**
+
+```
+#require "CRC16.class.nut:1.0.0"
+#require "ModbusRTU.class.nut:1.0.0"
+```
+
+**to the top of your device code.**
 
 ## ModbusRTU Class Usage
 
@@ -76,26 +83,26 @@ This method creates a PDU for diagnostics operations. It takes the following par
 
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
-| *subFunctionCode* | Constant | Yes | N/A | Refer to the Sub-function Code table, below |
+| *subFunctionCode* | Constant | Yes | N/A | Refer to the ‘Sub-function Code’ table, below |
 | *data* | Blob | Yes | N/A | The data field required by Modbus request |
 
 | Sub-function Code | Value (Hex) |
 | --- | --- |
-| MODBUSRTU_SUB_FUNCTION_CODE.RETURN_QUERY_DATA                        | 0x0000 |
-| MODBUSRTU_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION             | 0x0001 |
-| MODBUSRTU_SUB_FUNCTION_CODE.RETURN_DIAGNOSTICS_REGISTER              | 0x0002 |
-| MODBUSRTU_SUB_FUNCTION_CODE.CHANGE_ASCII_INPUT_DELIMITER             | 0x0003 |
-| MODBUSRTU_SUB_FUNCTION_CODE.FORCE_LISTEN_ONLY_MODE                   | 0x0004 |
-| MODBUSRTU_SUB_FUNCTION_CODE.CLEAR_COUNTERS_AND_DIAGNOSTICS_REGISTER  | 0x000A |
-| MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_MESSAGE_COUNT                 | 0x000B |
-| MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_COMMUNICATION_ERROR_COUNT     | 0x000C |
-| MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_EXCEPTION_ERROR_COUNT         | 0x000D |
-| MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_MESSAGE_COUNT               | 0x000E |
-| MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_NO_RESPONSE_COUNT           | 0x000F |
-| MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_NAK_COUNT                   | 0x0010 |
-| MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_BUSY_COUNT                  | 0x0011 |
-| MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_CHARACTER_OVERRUN_COUNT       | 0x0012 |
-| MODBUSRTU_SUB_FUNCTION_CODE.CLEAR_OVERRUN_COUNTER_AND_FLAG           | 0x0014 |
+| *MODBUSRTU_SUB_FUNCTION_CODE.RETURN_QUERY_DATA*                        | 0x0000 |
+| *MODBUSRTU_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION*             | 0x0001 |
+| *MODBUSRTU_SUB_FUNCTION_CODE.RETURN_DIAGNOSTICS_REGISTER*              | 0x0002 |
+| *MODBUSRTU_SUB_FUNCTION_CODE.CHANGE_ASCII_INPUT_DELIMITER*             | 0x0003 |
+| *MODBUSRTU_SUB_FUNCTION_CODE.FORCE_LISTEN_ONLY_MODE*                   | 0x0004 |
+| *MODBUSRTU_SUB_FUNCTION_CODE.CLEAR_COUNTERS_AND_DIAGNOSTICS_REGISTER*  | 0x000A |
+| *MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_MESSAGE_COUNT*                 | 0x000B |
+| *MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_COMMUNICATION_ERROR_COUNT*     | 0x000C |
+| *MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_EXCEPTION_ERROR_COUNT*         | 0x000D |
+| *MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_MESSAGE_COUNT*               | 0x000E |
+| *MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_NO_RESPONSE_COUNT*           | 0x000F |
+| *MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_NAK_COUNT*                   | 0x0010 |
+| *MODBUSRTU_SUB_FUNCTION_CODE.RETURN_SLAVE_BUSY_COUNT*                  | 0x0011 |
+| *MODBUSRTU_SUB_FUNCTION_CODE.RETURN_BUS_CHARACTER_OVERRUN_COUNT *      | 0x0012 |
+| *MODBUSRTU_SUB_FUNCTION_CODE.CLEAR_OVERRUN_COUNTER_AND_FLAG*           | 0x0014 |
 
 #### Example
 
@@ -168,8 +175,8 @@ This method creates a PDU for *readDeviceIdentificationPDU* operations. It takes
 
 | Key | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
-| *readDeviceIdCode* | Constant | Yes | N/A | Refer to the Read Device ID Code table, below |
-| *objectId* | Constant | Yes | N/A | Refer to the Object ID Code table, below |
+| *readDeviceIdCode* | Constant | Yes | N/A | Refer to the ‘Read Device ID Code’ table, below |
+| *objectId* | Constant | Yes | N/A | Refer to the ‘Object ID’ Code table, below |
 
 | Read Device ID Code | Description |
 | --- | --- |

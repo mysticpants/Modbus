@@ -13,13 +13,13 @@ This library allows an imp to communicate with other devices via TCP/IP. It requ
 
 **to the top of your device code.**
 
-The following instructions are applicable to Electric Imp’s [impAccelerator&trade; Fieldbus Gateway](/docs/hardware/resources/reference-designs/fieldbusgateway/).
+The following instructions are applicable to Electric Imp’s [impAccelerator&trade; Fieldbus Gateway](https://electricimp.com/docs/hardware/resources/reference-designs/fieldbusgateway/).
 
 1. Connect the antenna to the Fieldbus Gateway
 2. Wire RS485 A on the Fieldbus Gateway to port A / positive(+) on the other device
 3. Wire RS485 B on the Fieldbus Gateway to port B / negative(-) on the other device
 4. Wire both devices’ ground ports together
-5. Fit [jumper J2](/docs/hardware/resources/reference-designs/fieldbusgateway/#rs-485) on the Fieldbus Gateway motherboard to enable RS485
+5. Fit [jumper J2](https://electricimp.com/docs/hardware/resources/reference-designs/fieldbusgateway/#rs-485) on the Fieldbus Gateway motherboard to enable RS485
 6. Power up the Fieldbus Gateway
 7. Configure the Fieldbus Gateway for Internet access using BlinkUp&trade;
 

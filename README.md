@@ -1,21 +1,21 @@
+Electric Imp’s Modbus support is delivered through the following four libraries:
 
-# [ModbusRTU](./ModbusRTU/)
+### [ModbusRTU](./ModbusRTU/)
 
-This library creates and parses Modbus Protocol Data Unit (PDU). This library is a prerequisite to Modbus485Master and ModbusTCPMaster.
+This library creates and parses Modbus Protocol Data Unit (PDU). This library is a prerequisite for the Modbus485Master and ModbusTCPMaster libraries.
 
+### [Modbus485Master](./Modbus485Master/)
 
-# [Modbus485Master](./Modbus485Master/)
+This library allows an imp to communicate with other Modbus devices via the Modbus-RS485 protocol.
 
-This library allows an imp to communicate with other devices via the Modbus-RS485 protocol.
+### [Modbus485Slave](./Modbus485Slave/)
 
-# [ModbusTCPMaster](./ModbusTCPMaster/)
+This library empowers an imp to communicate with a Modbus Master via the RS485 protocol.
 
-This library enables an imp to communicate with other devices via TCP/IP .
+### [ModbusTCPMaster](./ModbusTCPMaster/)
 
-# [Modbus485Slave](./Modbus485Slave/)
+This library enables an imp to communicate with other Modbus devices via TCP/IP.
 
-This library empowers an imp to communicate the Modbus Master via the RS485 protocol.
+## License
 
-# License
-
-The ModbusRTUMaster library is licensed under the [MIT License](https://github.com/electricimp/thethingsapi/tree/master/LICENSE).
+The Modbus libraries are licensed under the [MIT License](https://github.com/electricimp/Modbus/tree/master/LICENSE).

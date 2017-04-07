@@ -1,4 +1,4 @@
-#require "W5500.class.nut:1.0.0"
+#require "W5500.device.nut:1.0.0"
 #require "ModbusRTU.class.nut:1.0.0"
 #require "ModbusMaster.class.nut:1.0.0"
 #require "ModbusTCPMaster.class.nut:1.0.0"

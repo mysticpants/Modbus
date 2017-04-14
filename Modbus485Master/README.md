@@ -2,15 +2,14 @@
 
 This library allows an imp to communicate with other devices via the Modbus-RS485 protocol.
 
-**To use this library, add the following statements**
+**To use this library, add the following statements to the top of your device code:**
 
-```#require "CRC16.class.nut:1.0.0"
+```
+#require "CRC16.class.nut:1.0.0"
 #require "ModbusRTU.class.nut:1.0.0"
 #require "ModbusMaster.class.nut:1.0.0"
 #require "Modbus485Master.class.nut:1.0.0"
 ```
-
-**to the top of your device code.**
 
 ## Hardware Setup
 
@@ -209,7 +208,7 @@ modbus.diagnostics(0x01, MODBUSRTU_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTIO
 
 Function Code : 17
 
-This method reads the description of the type, the current status and other information specific to a remote device whose address is specified in the method’s first parameter. The second, optional parameter is a function that will be fired when a response regarding this request is received. It takes two parameters, *error* and *result*.  
+This method reads the description of the type, the current status and other information specific to a remote device whose address is specified in the method’s first parameter. The second, optional parameter is a function that will be fired when a response regarding this request is received. It takes two parameters, *error* and *result*.
 
 #### Example
 
@@ -220,7 +219,7 @@ modbus.reportSlaveID(0x01, function(error, result) {
     } else {
         server.log("Run indicator : " + result.runIndicator);
         server.log(result.slaveId);
-    }        
+    }
 }.bindenv(this));
 ```
 
@@ -232,7 +231,7 @@ This method modifies the contents of a specified holding register using a combin
 
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
-| *deviceAddress* | Integer | Yes | N/A | The unique address that identifies a device |   
+| *deviceAddress* | Integer | Yes | N/A | The unique address that identifies a device |
 | *referenceAddress* | Integer | Yes | N/A | The address of the holding register the value is written into |
 | *AND_mask* | Integer | Yes | N/A | The AND mask |
 | *OR_mask* | Integer | Yes | N/A | The OR mask |
@@ -246,7 +245,7 @@ modbus.maskWriteRegister(0x01, 0x10, 0xFFFF, 0x0000, function(error, result) {
         server.error(error);
     } else {
         server.log(result);
-    }        
+    }
 }.bindenv(this));
 ```
 
@@ -274,7 +273,7 @@ modbus.readWriteMultipleRegisters(0x01, 0x10, 0xFFFF, 0x0000, function(error, re
         server.error(error);
     } else {
         server.log(result);
-    }        
+    }
 }.bindenv(this));
 ```
 

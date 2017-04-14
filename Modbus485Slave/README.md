@@ -2,15 +2,13 @@
 
 This library empowers an imp to communicate with the Modbus Master via the RS485 protocol.
 
-**To use this library, add**
+**To use this library, add the following statements to the top of your device code:**
 
 ```squirrel
 #require "CRC16.class.nut:1.0.0"
 #require "ModbusSlave.class.nut:1.0.0"
 #require "Modbus485Slave.class.nut:1.0.0"
 ```
-
-**to the top of your device code.**
 
 ## Hardware Setup
 

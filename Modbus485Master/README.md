@@ -48,7 +48,7 @@ modbus <- Modbus485Master(hardware.uart2, hardware.pinL);
 
 ## Modbus485Master Class Methods
 
-### read(*deviceAddress, targetType, startingAddress, quantity, values[, callback]*)
+### read(*deviceAddress, targetType, startingAddress, quantity[, callback]*)
 
 Function Code : 01, 02, 03, 04
 

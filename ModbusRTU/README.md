@@ -1,15 +1,13 @@
 # ModbusRTU
 
-This library creates and parses Modbus Protocol Data Units (PDU).
+This library creates and parses Modbus Protocol Data Units (PDU). It depends on Electric Imp's [CRC16 library](https://github.com/electricimp/CRC16) to calculate the [CRC-16](https://en.wikipedia.org/wiki/Cyclic_redundancy_check) value of a string or blob.
 
-**To use this library, add**
+**To use this library, add the following statements to the top of your device code:**
 
 ```
 #require "CRC16.class.nut:1.0.0"
 #require "ModbusRTU.class.nut:1.0.0"
 ```
-
-**to the top of your device code.**
 
 ## ModbusRTU Class Usage
 

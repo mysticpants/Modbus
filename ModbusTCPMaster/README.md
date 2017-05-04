@@ -2,7 +2,7 @@
 
 This library allows an imp to communicate with other devices via TCP/IP. It requires the use of [Wiznet](https://github.com/electricimp/Wiznet_5500) to transmit the packets between devices via Ethernet.
 
-**To use this library, add**
+**To use this library, add the following statements to the top of your device code:**
 
 ```
 #require "ModbusRTU.class.nut:1.0.0"
@@ -10,8 +10,6 @@ This library allows an imp to communicate with other devices via TCP/IP. It requ
 #require "ModbusTCPMaster.class.nut:1.0.0"
 #require "W5500.device.nut:1.0.0"
 ```
-
-**to the top of your device code.**
 
 The following instructions are applicable to Electric Imp’s [impAccelerator&trade; Fieldbus Gateway](https://electricimp.com/docs/hardware/resources/reference-designs/fieldbusgateway/).
 
@@ -53,7 +51,7 @@ This method configures the network and opens a TCP connection with the device. I
 
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
-| *connectionSettings* | Table | Yes | N/A | The connection settings. It entails the device IP and port |
+| *connectionSettings* | Table | Yes | N/A | The device IP address and port. The device IP address can either be a string or an array of four bytes, for example: `[192, 168, 1, 37]` or `"192.168.1.37"`. The port can either be an integer or array of two bytes (the high and low bytes of an unsigned two-byte integer value), for example: `[0x10, 0x92]` or `4242` |
 | *onConnectCallback* | Function | No | Null | The function to be fired when the connection is established |
 | *onReconnectCallback* | Function | No | Null| The function to be fired when the connection is re-established |
 
@@ -64,8 +62,8 @@ This method configures the network and opens a TCP connection with the device. I
 ```squirrel
 // The device address and port
 local connectionSettings = {
-    "destIP"     : [192, 168, 1, 90],
-    "destPort"   : [0x01, 0xF6]
+    "destIP"     : "192.168.1.90",
+    "destPort"   : 502
 };
 
 // Open the connection
@@ -255,7 +253,7 @@ modbus.reportSlaveID(function(error, result) {
     } else {
         server.log("Run indicator : " + result.runIndicator);
         server.log(result.slaveId);
-    }        
+    }
 }.bindenv(this));
 ```
 
@@ -280,7 +278,7 @@ modbus.maskWriteRegister(0x10, 0xFFFF, 0x0000, function(error, result) {
         server.error(error);
     } else {
         server.log(result);
-    }        
+    }
 }.bindenv(this));
 ```
 
@@ -307,7 +305,7 @@ modbus.readWriteMultipleRegisters(0x10, 0xFFFF, 0x0000, function(error, result) 
         server.error(error);
     } else {
         server.log(result);
-    }        
+    }
 }.bindenv(this));
 ```
 

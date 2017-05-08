@@ -27,7 +27,7 @@ The following instructions are applicable to Electric Imp’s [impAccelerator&tr
 
 This is the main library class. It implements most of the functions listed in the [Modbus specification](http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf).
 
-### Constructor: Modbus485Master(*uart, rts, params*)
+### Constructor: Modbus485Master(*uart, rts[, params]*)
 
 Instantiate a new Modbus485Master object and set the configuration of the UART bus over which it operates. The parameters *uart* and *rts* are, respectively, the imp UART in use and an imp GPIO pin which will be used to control flow. The *params* parameter is optional and takes a table containing the following keys:
 
@@ -268,13 +268,6 @@ This method performs a combination of one read operation and one write operation
 #### Example
 
 ```squirrel
-modbus.readWriteMultipleRegisters(0x01, 0x10, 0xFFFF, 0x0000, function(error, result) {
-    if (error) {
-        server.error(error);
-    } else {
-        server.log(result);
-    }
-}.bindenv(this));
 ```
 
 ### readDeviceIdentification(*deviceAddress, readDeviceIdCode, objectId[, callback]*)

@@ -25,9 +25,9 @@ The following instructions are applicable to Electric Imp’s [impAccelerator&tr
 
 This is the main library class. It implements most of the functions listed in the [Modbus specification](http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf).
 
-### Constructor: ModbusTCPMaster(*wiz, debug*)
+### Constructor: ModbusTCPMaster(*wiz[, debug]*)
 
-Instantiate a new ModbusTCPMaster object. It takes two parameters: *wiz*, the Wiznet W5500 object that is driving the Ethernet link, and *debug* which, if enabled, prints the outgoing and incoming ADU for debugging purposes.
+Instantiate a new ModbusTCPMaster object. It takes one required parameter: *wiz*, the [Wiznet W5500](https://github.com/electricimp/Wiznet_5500) object that is driving the Ethernet link, and one optional boolean parameter: *debug* which, if enabled, prints the outgoing and incoming ADU for debugging purposes. The defualt value of *debug* is `false`.
 
 #### Example
 
@@ -55,7 +55,7 @@ This method configures the network and opens a TCP connection with the device. I
 | *onConnectCallback* | Function | No | Null | The function to be fired when the connection is established |
 | *onReconnectCallback* | Function | No | Null| The function to be fired when the connection is re-established |
 
-**Note** If an *onReconnectCallback* is not supplied, when the connection is re-established, the *onConnectCallback* will be fired.
+**Note:** If an *onReconnectCallback* is not supplied, when the connection is re-established, the *onConnectCallback* will be fired.
 
 #### Example
 
@@ -76,9 +76,9 @@ modbus.connect(connectionSettings, function(error, conn){
 });
 ```
 
-### disconnect(*callback*)
+### disconnect(*[callback]*)
 
-This method closes the existing TCP connection.
+This method closes the existing TCP connection. It takes one optional parameter: *callback*, a function that will be executed when the connection has been closed.
 
 #### Example
 
@@ -86,7 +86,7 @@ This method closes the existing TCP connection.
 modbus.disconnect();
 ```
 
-### read(*targetType, startingAddress, quantity, values[, callback]*)
+### read(*targetType, startingAddress, quantity[, callback]*)
 
 Function Code : 01, 02, 03, 04
 
@@ -144,7 +144,7 @@ This is a generic method used to write values into coils or registers. It has th
 | *values* | Integer, array, bool, blob | Yes | N/A | The values written into Coils or Registers. Please view ‘Notes’, below |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
 
-#### Notes
+#### Notes:
 
 1. Integer, blob and array[integer] are applicable to *MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER*. Use array[integer] only when *quantity* is greater than one.
 
@@ -300,13 +300,6 @@ This method performs a combination of one read operation and one write operation
 #### Example
 
 ```squirrel
-modbus.readWriteMultipleRegisters(0x10, 0xFFFF, 0x0000, function(error, result) {
-    if (error) {
-        server.error(error);
-    } else {
-        server.log(result);
-    }
-}.bindenv(this));
 ```
 
 ### readDeviceIdentification(*readDeviceIdCode, objectId, [callback]*)

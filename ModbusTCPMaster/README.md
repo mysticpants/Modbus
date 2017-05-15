@@ -57,7 +57,10 @@ This method configures the network and opens a TCP connection with the device. I
 | *onConnectCallback* | Function | No | Null | The function to be fired when the connection is established |
 | *onReconnectCallback* | Function | No | Null| The function to be fired when the connection is re-established |
 
-**Note** If an *onReconnectCallback* is not supplied, when the connection is re-established, the *onConnectCallback* will be fired.
+**Note**
+
+1. If an *onReconnectCallback* is not supplied, when the connection is re-established, the *onConnectCallback* will be fired.
+2. Depending on the configuration of the device, the connection will be severed after a certain amount of time and try to re-establish itself. Users of concern are advised to pass in a *onReconnectCallback* to handle this situation. Please refer to the device spec for more information on how to configure the default idle time.
 
 #### Example
 
@@ -288,7 +291,7 @@ modbus.maskWriteRegister(0x10, 0xFFFF, 0x0000, function(error, result) {
 
 Function Code : 23
 
-This method performs a combination of one read operation and one write operation in a single Modbus transaction. The write operation is performed before the read. It takes the following parameters:
+This method performs a combination of one read operation and one write operation in a single Modbus transaction. The write operation is performed before the read ^. It takes the following parameters:
 
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
@@ -298,6 +301,8 @@ This method performs a combination of one read operation and one write operation
 | *writeQuantity* | Integer | Yes | N/A | The number of consecutive addresses values are written into |
 | *writeValue* | Blob | Yes | N/A | The value written into the holding register  |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
+
+**Note** The actual order of operation is determined by the implementation of user's device.
 
 #### Example
 

@@ -390,6 +390,30 @@ class DeviceTestCase extends ImpTestCase {
         }.bindenv(this));
     }
 
+    // this test will timeout when it fails
+    function testSendRequestsInSuccession() {
+        return Promise(function(resolve, reject) {
+            _connection.then(function(value) {
+                local address = 0x0A;
+                local value = false;
+                local quantity = 1;
+                local isSuccess = false;
+                _modbus.write(MODBUSRTU_TARGET_TYPE.COIL, address, quantity, value, function(error, result) {
+                    if (isSuccess) {
+                        resolve(PASS_MESSAGE);
+                    }
+                    isSuccess = true;
+                }.bindenv(this));
+                _modbus.write(MODBUSRTU_TARGET_TYPE.COIL, address, quantity, value, function(error, result) {
+                    if (isSuccess) {
+                        resolve(PASS_MESSAGE);
+                    }
+                    isSuccess = true;
+                }.bindenv(this));
+            }.bindenv(this));
+        }.bindenv(this));
+    }
+
     function tearDown() {
         _modbus.disconnect();
         return "Connection closed";

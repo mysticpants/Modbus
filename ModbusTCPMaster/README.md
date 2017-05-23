@@ -52,8 +52,8 @@ This method configures the network and opens a TCP connection with the device. I
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
 | *connectionSettings* | Table | Yes | N/A | The device IP address and port. The device IP address can either be a string or an array of four bytes, for example: `[192, 168, 1, 37]` or `"192.168.1.37"`. The port can either be an integer or array of two bytes (the high and low bytes of an unsigned two-byte integer value), for example: `[0x10, 0x92]` or `4242` |
-| *onConnectCallback* | Function | No | Null | The function to be fired when the connection is established |
-| *onReconnectCallback* | Function | No | Null| The function to be fired when the connection is re-established |
+| *onConnectCallback* | Function | No | Null | The function to be fired when the connection is established. The callback takes `error` and `conn` as parameters |
+| *onReconnectCallback* | Function | No | Null| The function to be fired when the connection is re-established. The callback takes `error` and `conn` as parameters |
 
 **Note**
 
@@ -305,6 +305,16 @@ This method performs a combination of one read operation and one write operation
 #### Example
 
 ```squirrel
+modbus.readWriteMultipleRegisters(0x0A, 2, 0x0A, 2, [28, 88], function(error, result) {
+    if (error) {
+        server.error(error);
+    } else {
+        foreach (index, value in result) {
+            server.log(format("Index : %d, value : %d", index, value));
+        }
+    }
+});
+
 ```
 
 ### readDeviceIdentification(*readDeviceIdCode, objectId, [callback]*)

@@ -1,5 +1,6 @@
 #require "CRC16.class.nut:1.0.0"
 #require "ModbusRTU.class.nut:1.0.0"
+#require "ModbusMaster.class.nut:1.0.0"
 #require "Modbus485Master.class.nut:1.0.0"
 
 // this example demonstrates how to write and read values into/from holding registers

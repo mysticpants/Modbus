@@ -2,16 +2,14 @@
 
 This library allows an imp to communicate with other devices via TCP/IP. It requires the use of [Wiznet](https://github.com/electricimp/Wiznet_5500) to transmit the packets between devices via Ethernet.
 
-**To use this library, add**
+**To use this library, add the following statements to the top of your device code:**
 
 ```
 #require "ModbusRTU.class.nut:1.0.0"
 #require "ModbusMaster.class.nut:1.0.0"
 #require "ModbusTCPMaster.class.nut:1.0.0"
-#require "W5500.class.nut"
+#require "W5500.device.nut:1.0.0"
 ```
-
-**to the top of your device code.**
 
 The following instructions are applicable to Electric Imp’s [impAccelerator&trade; Fieldbus Gateway](https://electricimp.com/docs/hardware/resources/reference-designs/fieldbusgateway/).
 
@@ -27,9 +25,9 @@ The following instructions are applicable to Electric Imp’s [impAccelerator&tr
 
 This is the main library class. It implements most of the functions listed in the [Modbus specification](http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf).
 
-### Constructor: ModbusTCPMaster(*wiz, debug*)
+### Constructor: ModbusTCPMaster(*wiz[, debug]*)
 
-Instantiate a new ModbusTCPMaster object. It takes two parameters: *wiz*, the Wiznet W5500 object that is driving the Ethernet link, and *debug* which, if enabled, prints the outgoing and incoming ADU for debugging purposes.
+Instantiate a new ModbusTCPMaster object. It takes one required parameter: *wiz*, the [Wiznet W5500](https://github.com/electricimp/Wiznet_5500) object that is driving the Ethernet link, and one optional boolean parameter: *debug* which, if enabled, prints the outgoing and incoming ADU for debugging purposes. The defualt value of *debug* is `false`.
 
 #### Example
 
@@ -53,7 +51,7 @@ This method configures the network and opens a TCP connection with the device. I
 
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
-| *connectionSettings* | Table | Yes | N/A | The connection settings. It entails the device IP and port |
+| *connectionSettings* | Table | Yes | N/A | The device IP address and port. The device IP address can either be a string or an array of four bytes, for example: `[192, 168, 1, 37]` or `"192.168.1.37"`. The port can either be an integer or array of two bytes (the high and low bytes of an unsigned two-byte integer value), for example: `[0x10, 0x92]` or `4242` |
 | *onConnectCallback* | Function | No | Null | The function to be fired when the connection is established |
 | *onReconnectCallback* | Function | No | Null| The function to be fired when the connection is re-established |
 
@@ -67,8 +65,8 @@ This method configures the network and opens a TCP connection with the device. I
 ```squirrel
 // The device address and port
 local connectionSettings = {
-    "destIP"     : [192, 168, 1, 90],
-    "destPort"   : [0x01, 0xF6]
+    "destIP"     : "192.168.1.90",
+    "destPort"   : 502
 };
 
 // Open the connection
@@ -81,9 +79,9 @@ modbus.connect(connectionSettings, function(error, conn){
 });
 ```
 
-### disconnect(*callback*)
+### disconnect(*[callback]*)
 
-This method closes the existing TCP connection.
+This method closes the existing TCP connection. It takes one optional parameter: *callback*, a function that will be executed when the connection has been closed.
 
 #### Example
 
@@ -91,7 +89,7 @@ This method closes the existing TCP connection.
 modbus.disconnect();
 ```
 
-### read(*targetType, startingAddress, quantity, values[, callback]*)
+### read(*targetType, startingAddress, quantity[, callback]*)
 
 Function Code : 01, 02, 03, 04
 
@@ -149,7 +147,7 @@ This is a generic method used to write values into coils or registers. It has th
 | *values* | Integer, array, bool, blob | Yes | N/A | The values written into Coils or Registers. Please view ‘Notes’, below |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
 
-#### Notes
+#### Notes:
 
 1. Integer, blob and array[integer] are applicable to *MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER*. Use array[integer] only when *quantity* is greater than one.
 
@@ -258,7 +256,7 @@ modbus.reportSlaveID(function(error, result) {
     } else {
         server.log("Run indicator : " + result.runIndicator);
         server.log(result.slaveId);
-    }        
+    }
 }.bindenv(this));
 ```
 
@@ -283,7 +281,7 @@ modbus.maskWriteRegister(0x10, 0xFFFF, 0x0000, function(error, result) {
         server.error(error);
     } else {
         server.log(result);
-    }        
+    }
 }.bindenv(this));
 ```
 
@@ -307,13 +305,6 @@ This method performs a combination of one read operation and one write operation
 #### Example
 
 ```squirrel
-modbus.readWriteMultipleRegisters(0x10, 0xFFFF, 0x0000, function(error, result) {
-    if (error) {
-        server.error(error);
-    } else {
-        server.log(result);
-    }        
-}.bindenv(this));
 ```
 
 ### readDeviceIdentification(*readDeviceIdCode, objectId, [callback]*)

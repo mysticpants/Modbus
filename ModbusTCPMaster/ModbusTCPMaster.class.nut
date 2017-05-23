@@ -130,11 +130,12 @@ class ModbusTCPMaster extends ModbusMaster {
     function _send(PDU, properties) {
         _transactions[_transactionCount] <- properties;
         local ADU = _createADU(PDU);
+        // with or without success in transmission of data, the transaction count would be advanced
+        _transactionCount = (_transactionCount + 1) % MAX_TRANSACTION_COUNT;
         _connection.transmit(ADU, function(error) {
             if (error) {
                 _callbackHandler(error, null, properties.callback);
             } else {
-                _transactionCount = (_transactionCount + 1) % MAX_TRANSACTION_COUNT;
                 _log(ADU, "Outgoing ADU: ");
             }
         }.bindenv(this));

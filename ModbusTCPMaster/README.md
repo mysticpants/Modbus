@@ -81,7 +81,7 @@ modbus.connect(connectionSettings, function(error, conn){
 
 ### disconnect(*[callback]*)
 
-This method closes the existing TCP connection. It takes one optional parameter: *callback*, a function that will be executed when the connection has been closed.
+This method closes the existing TCP connection.
 
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |

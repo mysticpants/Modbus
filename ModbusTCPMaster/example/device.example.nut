@@ -23,9 +23,9 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 #require "W5500.device.nut:1.0.0"
-#require "ModbusRTU.device.lib.nut:1.0.0"
-#require "ModbusMaster.device.lib.nut:1.0.0"
-#require "ModbusTCPMaster.device.lib.nut:1.0.0"
+#require "ModbusRTU.device.lib.nut:1.0.1"
+#require "ModbusMaster.device.lib.nut:1.0.1"
+#require "ModbusTCPMaster.device.lib.nut:1.0.1"
 
 // this example shows how to use readWriteMultipleRegisters
 

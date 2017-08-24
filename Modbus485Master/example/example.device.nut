@@ -23,9 +23,9 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 #require "CRC16.class.nut:1.0.0"
-#require "ModbusRTU.device.lib.nut:1.0.0"
-#require "ModbusMaster.device.lib.nut:1.0.0"
-#require "Modbus485Master.device.lib.nut:1.0.0"
+#require "ModbusRTU.device.lib.nut:1.0.1"
+#require "ModbusMaster.device.lib.nut:1.0.1"
+#require "Modbus485Master.device.lib.nut:1.0.1"
 
 // this example demonstrates how to write and read values into/from holding registers
 const DEVICE_ADDRESS = 0x01;

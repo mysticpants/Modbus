@@ -84,7 +84,7 @@ enum MODBUSRTU_OBJECT_ID {
 }
 
 class ModbusRTU {
-    static VERSION = "1.0.0";
+    static VERSION = "1.0.1";
      // resLen and reqLen are the length of the PDU
     static FUNCTION_CODES = {
         readCoils = {

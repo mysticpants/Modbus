@@ -6,7 +6,7 @@ This library creates and parses Modbus Protocol Data Units (PDU). It depends on 
 
 ```
 #require "CRC16.class.nut:1.0.0"
-#require "ModbusRTU.device.lib.nut:1.0.0"
+#require "ModbusRTU.device.lib.nut:1.0.1"
 ```
 
 ## ModbusRTU Class Usage

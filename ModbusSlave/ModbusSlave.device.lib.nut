@@ -41,7 +41,7 @@ enum MODBUSSLAVE_EXCEPTION {
 }
 
 class ModbusSlave {
-    static VERSION = "1.0.0";
+    static VERSION = "1.0.1";
     static FUNCTION_CODES = {
         readCoil = {
             fcode = 0x01,

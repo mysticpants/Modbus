@@ -23,7 +23,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 class ModbusMaster {
-    static VERSION = "1.0.0";
+    static VERSION = "1.0.1";
     _debug = null;
 
     //

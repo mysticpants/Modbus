@@ -23,7 +23,7 @@ local connectionSettings = {
 };
 
 // open the connection
-modbus.connect(networkSettings, connectionSettings, function(error, conn) {
+modbus.connect(connectionSettings, function(error, conn) {
     if (error) {
         server.log(error);
     } else {

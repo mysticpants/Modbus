@@ -253,7 +253,7 @@ modbus.maskWriteRegister(0x01, 0x10, 0xFFFF, 0x0000, function(error, result) {
 
 Function Code : 23
 
-This method performs a combination of one read operation and one write operation in a single Modbus transaction. The write operation is performed before the read ^. It takes the following parameters:
+This method performs a combination of one read operation and one write operation in a single Modbus transaction. The write operation is performed before the read. It takes the following parameters:
 
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |

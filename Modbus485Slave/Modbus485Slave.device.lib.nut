@@ -23,6 +23,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 class Modbus485Slave extends ModbusSlave {
+    static VERSION = "1.0.1";
     static MIN_REQUEST_LENGTH = 4;
     _slaveID = null;
     _uart = null;

@@ -23,6 +23,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 class ModbusTCPMaster extends ModbusMaster {
+    static VERSION = "1.0.1";
     static MAX_TRANSACTION_COUNT = 65535;
     _transactions = null;
     _wiz = null;

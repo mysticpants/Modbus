@@ -23,6 +23,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 class Modbus485Master extends ModbusMaster {
+    static VERSION = "1.0.1";
     static MINIMUM_RESPONSE_LENGTH = 5;
     _uart = null;
     _rts = null;

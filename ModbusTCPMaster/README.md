@@ -386,4 +386,4 @@ The table below enumerates all the exception codes that can be possibly encounte
 
 ## License
 
-The ModbusTCPMaster library is licensed under the [MIT License](https://github.com/electricimp/Modbus/tree/master/LICENSE).
+The ModbusTCPMaster library is licensed under the [MIT License](../LICENSE).

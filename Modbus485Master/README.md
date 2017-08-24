@@ -343,4 +343,4 @@ The table below enumerates all the exception codes that can be possibly encounte
 
 ## License
 
-The Modbus485Master library is licensed under the [MIT License](https://github.com/electricimp/Modbus/tree/master/LICENSE).
+The Modbus485Master library is licensed under the [MIT License](../LICENSE).

@@ -11,4 +11,4 @@ This library empowers an imp to communicate the Modbus Master via the RS485 prot
 
 # License
 
-The ModbusRTUMaster library is licensed under the [MIT License](https://github.com/electricimp/thethingsapi/tree/master/LICENSE).
+The ModbusRTUMaster library is licensed under the [MIT License](../LICENSE).

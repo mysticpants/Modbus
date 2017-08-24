@@ -1,6 +1,6 @@
 #require "CRC16.class.nut:1.0.0"
-#require "ModbusSlave.class.nut:1.0.0"
-#require "Modbus485Slave.class.nut:1.0.0"
+#require "ModbusSlave.device.lib.nut:1.0.0"
+#require "Modbus485Slave.device.lib.nut:1.0.0"
 
 modbus <- Modbus485Slave(hardware.uart2, hardware.pinL, 1, { debug = true });
 

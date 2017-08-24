@@ -5,9 +5,9 @@ This library allows an imp to communicate with other devices via TCP/IP. It requ
 **To use this library, add the following statements to the top of your device code:**
 
 ```
-#require "ModbusRTU.class.nut:1.0.0"
-#require "ModbusMaster.class.nut:1.0.0"
-#require "ModbusTCPMaster.class.nut:1.0.0"
+#require "ModbusRTU.device.lib.nut:1.0.0"
+#require "ModbusMaster.device.lib.nut:1.0.0"
+#require "ModbusTCPMaster.device.lib.nut:1.0.0"
 #require "W5500.device.nut:1.0.0"
 ```
 

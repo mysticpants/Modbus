@@ -6,9 +6,9 @@ This library allows an imp to communicate with other devices via the Modbus-RS48
 
 ```
 #require "CRC16.class.nut:1.0.0"
-#require "ModbusRTU.class.nut:1.0.0"
-#require "ModbusMaster.class.nut:1.0.0"
-#require "Modbus485Master.class.nut:1.0.0"
+#require "ModbusRTU.device.lib.nut:1.0.0"
+#require "ModbusMaster.device.lib.nut:1.0.0"
+#require "Modbus485Master.device.lib.nut:1.0.0"
 ```
 
 ## Hardware Setup

@@ -6,8 +6,8 @@ This library empowers an imp to communicate with the Modbus Master via the RS485
 
 ```squirrel
 #require "CRC16.class.nut:1.0.0"
-#require "ModbusSlave.class.nut:1.0.0"
-#require "Modbus485Slave.class.nut:1.0.0"
+#require "ModbusSlave.device.lib.nut:1.0.0"
+#require "Modbus485Slave.device.lib.nut:1.0.0"
 ```
 
 ## Hardware Setup

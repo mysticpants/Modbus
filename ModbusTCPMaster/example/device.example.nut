@@ -1,7 +1,7 @@
 #require "W5500.device.nut:1.0.0"
-#require "ModbusRTU.class.nut:1.0.0"
-#require "ModbusMaster.class.nut:1.0.0"
-#require "ModbusTCPMaster.class.nut:1.0.0"
+#require "ModbusRTU.device.lib.nut:1.0.0"
+#require "ModbusMaster.device.lib.nut:1.0.0"
+#require "ModbusTCPMaster.device.lib.nut:1.0.0"
 
 // this example shows how to use readWriteMultipleRegisters
 

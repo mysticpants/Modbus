@@ -6,9 +6,9 @@ This library allows an imp to communicate with other devices via the Modbus-RS48
 
 ```
 #require "CRC16.class.nut:1.0.0"
-#require "ModbusRTU.class.nut:1.0.0"
-#require "ModbusMaster.class.nut:1.0.0"
-#require "Modbus485Master.class.nut:1.0.0"
+#require "ModbusRTU.device.lib.nut:1.0.1"
+#require "ModbusMaster.device.lib.nut:1.0.1"
+#require "Modbus485Master.device.lib.nut:1.0.1"
 ```
 
 ## Hardware Setup
@@ -27,7 +27,7 @@ The following instructions are applicable to Electric Imp’s [impAccelerator&tr
 
 This is the main library class. It implements most of the functions listed in the [Modbus specification](http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf).
 
-### Constructor: Modbus485Master(*uart, rts, params*)
+### Constructor: Modbus485Master(*uart, rts[, params]*)
 
 Instantiate a new Modbus485Master object and set the configuration of the UART bus over which it operates. The parameters *uart* and *rts* are, respectively, the imp UART in use and an imp GPIO pin which will be used to control flow. The *params* parameter is optional and takes a table containing the following keys:
 
@@ -265,16 +265,12 @@ This method performs a combination of one read operation and one write operation
 | *writeValue* | Blob | Yes | N/A | The value written into the holding register |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
 
+**Note** The actual order of operation is determined by the implementation of user's device.
+
+
 #### Example
 
 ```squirrel
-modbus.readWriteMultipleRegisters(0x01, 0x10, 0xFFFF, 0x0000, function(error, result) {
-    if (error) {
-        server.error(error);
-    } else {
-        server.log(result);
-    }
-}.bindenv(this));
 ```
 
 ### readDeviceIdentification(*deviceAddress, readDeviceIdCode, objectId[, callback]*)
@@ -347,4 +343,4 @@ The table below enumerates all the exception codes that can be possibly encounte
 
 ## License
 
-The Modbus485Master library is licensed under the [MIT License](https://github.com/electricimp/Modbus/tree/master/LICENSE).
+The Modbus485Master library is licensed under the [MIT License](../LICENSE).

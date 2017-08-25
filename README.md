@@ -18,4 +18,4 @@ This library enables an imp to communicate with other Modbus devices via TCP/IP.
 
 ## License
 
-The Modbus libraries are licensed under the [MIT License](https://github.com/electricimp/Modbus/tree/master/LICENSE).
+The Modbus libraries are licensed under the [MIT License](./LICENSE).

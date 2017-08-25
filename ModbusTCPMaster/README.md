@@ -5,9 +5,9 @@ This library allows an imp to communicate with other devices via TCP/IP. It requ
 **To use this library, add the following statements to the top of your device code:**
 
 ```
-#require "ModbusRTU.class.nut:1.0.0"
-#require "ModbusMaster.class.nut:1.0.0"
-#require "ModbusTCPMaster.class.nut:1.0.0"
+#require "ModbusRTU.device.lib.nut:1.0.1"
+#require "ModbusMaster.device.lib.nut:1.0.1"
+#require "ModbusTCPMaster.device.lib.nut:1.0.1"
 #require "W5500.device.nut:1.0.0"
 ```
 
@@ -25,9 +25,9 @@ The following instructions are applicable to Electric Imp’s [impAccelerator&tr
 
 This is the main library class. It implements most of the functions listed in the [Modbus specification](http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf).
 
-### Constructor: ModbusTCPMaster(*wiz, debug*)
+### Constructor: ModbusTCPMaster(*wiz[, debug]*)
 
-Instantiate a new ModbusTCPMaster object. It takes two parameters: *wiz*, the Wiznet W5500 object that is driving the Ethernet link, and *debug* which, if enabled, prints the outgoing and incoming ADU for debugging purposes.
+Instantiate a new ModbusTCPMaster object. It takes one required parameter: *wiz*, the [Wiznet W5500](https://github.com/electricimp/Wiznet_5500) object that is driving the Ethernet link, and one optional boolean parameter: *debug* which, if enabled, prints the outgoing and incoming ADU for debugging purposes. The default value of *debug* is `false`.
 
 #### Example
 
@@ -52,10 +52,13 @@ This method configures the network and opens a TCP connection with the device. I
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
 | *connectionSettings* | Table | Yes | N/A | The device IP address and port. The device IP address can either be a string or an array of four bytes, for example: `[192, 168, 1, 37]` or `"192.168.1.37"`. The port can either be an integer or array of two bytes (the high and low bytes of an unsigned two-byte integer value), for example: `[0x10, 0x92]` or `4242` |
-| *onConnectCallback* | Function | No | Null | The function to be fired when the connection is established |
-| *onReconnectCallback* | Function | No | Null| The function to be fired when the connection is re-established |
+| *onConnectCallback* | Function | No | Null | The function to be fired when the connection is established. The callback takes `error` and `conn` as parameters |
+| *onReconnectCallback* | Function | No | Null| The function to be fired when the connection is re-established. The callback takes `error` and `conn` as parameters |
 
-**Note** If an *onReconnectCallback* is not supplied, when the connection is re-established, the *onConnectCallback* will be fired.
+**Note**
+
+1. If an *onReconnectCallback* is not supplied, when the connection is re-established, the *onConnectCallback* will be fired.
+2. Depending on the configuration of the device, the connection will be severed after a certain amount of time and try to re-establish itself. Users of concern are advised to pass in a *onReconnectCallback* to handle this situation. Please refer to the device spec for more information on how to configure the default idle time.
 
 #### Example
 
@@ -76,9 +79,9 @@ modbus.connect(connectionSettings, function(error, conn){
 });
 ```
 
-### disconnect(*callback*)
+### disconnect(*[callback]*)
 
-This method closes the existing TCP connection.
+This method closes the existing TCP connection. It takes one optional parameter: *callback*, a function that will be executed when the connection has been closed.
 
 #### Example
 
@@ -86,7 +89,7 @@ This method closes the existing TCP connection.
 modbus.disconnect();
 ```
 
-### read(*targetType, startingAddress, quantity, values[, callback]*)
+### read(*targetType, startingAddress, quantity[, callback]*)
 
 Function Code : 01, 02, 03, 04
 
@@ -144,7 +147,7 @@ This is a generic method used to write values into coils or registers. It has th
 | *values* | Integer, array, bool, blob | Yes | N/A | The values written into Coils or Registers. Please view ‘Notes’, below |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
 
-#### Notes
+#### Notes:
 
 1. Integer, blob and array[integer] are applicable to *MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER*. Use array[integer] only when *quantity* is greater than one.
 
@@ -297,16 +300,21 @@ This method performs a combination of one read operation and one write operation
 | *writeValue* | Blob | Yes | N/A | The value written into the holding register  |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
 
+**Note** The actual order of operation is determined by the implementation of user's device.
+
 #### Example
 
 ```squirrel
-modbus.readWriteMultipleRegisters(0x10, 0xFFFF, 0x0000, function(error, result) {
+modbus.readWriteMultipleRegisters(0x0A, 2, 0x0A, 2, [28, 88], function(error, result) {
     if (error) {
         server.error(error);
     } else {
-        server.log(result);
+        foreach (index, value in result) {
+            server.log(format("Index : %d, value : %d", index, value));
+        }
     }
-}.bindenv(this));
+});
+
 ```
 
 ### readDeviceIdentification(*readDeviceIdCode, objectId, [callback]*)
@@ -378,4 +386,4 @@ The table below enumerates all the exception codes that can be possibly encounte
 
 ## License
 
-The ModbusTCPMaster library is licensed under the [MIT License](https://github.com/electricimp/Modbus/tree/master/LICENSE).
+The ModbusTCPMaster library is licensed under the [MIT License](../LICENSE).

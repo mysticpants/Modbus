@@ -1,8 +1,29 @@
-// Copyright (c) 2017 Electric Imp
-// This file is licensed under the MIT License
-// http://opensource.org/licenses/MIT
+// MIT License
+//
+// Copyright 2017 Electric Imp
+//
+// SPDX-License-Identifier: MIT
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+// EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+// OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
 
 class ModbusTCPMaster extends ModbusMaster {
+    static VERSION = "1.0.1";
     static MAX_TRANSACTION_COUNT = 65535;
     _transactions = null;
     _wiz = null;
@@ -130,11 +151,12 @@ class ModbusTCPMaster extends ModbusMaster {
     function _send(PDU, properties) {
         _transactions[_transactionCount] <- properties;
         local ADU = _createADU(PDU);
+        // with or without success in transmission of data, the transaction count would be advanced
+        _transactionCount = (_transactionCount + 1) % MAX_TRANSACTION_COUNT;
         _connection.transmit(ADU, function(error) {
             if (error) {
                 _callbackHandler(error, null, properties.callback);
             } else {
-                _transactionCount = (_transactionCount + 1) % MAX_TRANSACTION_COUNT;
                 _log(ADU, "Outgoing ADU: ");
             }
         }.bindenv(this));

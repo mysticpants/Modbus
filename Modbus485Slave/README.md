@@ -6,8 +6,8 @@ This library empowers an imp to communicate with the Modbus Master via the RS485
 
 ```squirrel
 #require "CRC16.class.nut:1.0.0"
-#require "ModbusSlave.class.nut:1.0.0"
-#require "Modbus485Slave.class.nut:1.0.0"
+#require "ModbusSlave.device.lib.nut:1.0.1"
+#require "Modbus485Slave.device.lib.nut:1.0.1"
 ```
 
 ## Hardware Setup
@@ -195,4 +195,4 @@ The table below enumerates all the exception codes that can be possibly encounte
 
 # License
 
-The Modbus485Slave library is licensed under the [MIT License](https://github.com/electricimp/Mdobus/tree/master/LICENSE).
+The Modbus485Slave library is licensed under the [MIT License](../LICENSE).

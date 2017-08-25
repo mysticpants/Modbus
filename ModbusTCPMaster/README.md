@@ -27,7 +27,7 @@ This is the main library class. It implements most of the functions listed in th
 
 ### Constructor: ModbusTCPMaster(*wiz[, debug]*)
 
-Instantiate a new ModbusTCPMaster object. It takes one required parameter: *wiz*, the [Wiznet W5500](https://github.com/electricimp/Wiznet_5500) object that is driving the Ethernet link, and one optional boolean parameter: *debug* which, if enabled, prints the outgoing and incoming ADU for debugging purposes. The defualt value of *debug* is `false`.
+Instantiate a new ModbusTCPMaster object. It takes one required parameter: *wiz*, the [Wiznet W5500](https://github.com/electricimp/Wiznet_5500) object that is driving the Ethernet link, and one optional boolean parameter: *debug* which, if enabled, prints the outgoing and incoming ADU for debugging purposes. The default value of *debug* is `false`.
 
 #### Example
 

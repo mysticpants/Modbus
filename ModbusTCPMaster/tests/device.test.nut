@@ -25,6 +25,11 @@
 
 const PASS_MESSAGE = "Pass";
 
+@include "https://raw.githubusercontent.com/electricimp/Wiznet_5500/master/W5500.device.lib.nut";
+@include __PATH__ + "/../../ModbusRTU/ModbusRTU.device.lib.nut";
+@include __PATH__ + "/../../ModbusMaster/ModbusMaster.device.lib.nut";
+@include __PATH__ + "/../ModbusTCPMaster.device.lib.nut";
+
 function errorMessage(error, resolve, reject) {
     switch(error) {
         case MODBUSRTU_EXCEPTION.ILLEGAL_FUNCTION:
@@ -47,8 +52,10 @@ class DeviceTestCase extends ImpTestCase {
     function setUp() {
         local spi = hardware.spi0;
         spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
+        
         local wiz = W5500(hardware.pinXC, spi, null, hardware.pinXA);
         wiz.configureNetworkSettings("192.168.1.30", "255.255.255.0", "192.168.1.1");
+
         _modbus = ModbusTCPMaster(wiz);
         _connection = Promise(function(resolve, reject) {
             _modbus.connect({

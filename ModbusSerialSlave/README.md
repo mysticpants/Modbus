@@ -1,13 +1,13 @@
-# Modbus485Slave
+# ModbusSerialSlave
 
-This library empowers an imp to communicate with the Modbus Master via the RS485 protocol.
+This library empowers an imp to communicate with the Modbus Master via the RS485 or RS232 protocol.
 
 **To use this library, add the following statements to the top of your device code:**
 
 ```squirrel
 #require "CRC16.class.nut:1.0.0"
 #require "ModbusSlave.device.lib.nut:1.0.1"
-#require "Modbus485Slave.device.lib.nut:1.0.1"
+#require "ModbusSerialSlave.device.lib.nut:2.0.0"
 ```
 
 ## Hardware Setup
@@ -22,13 +22,13 @@ The following instructions are applicable to Electric Imp’s [impAccelerator&tr
 6. Power up the Fieldbus Gateway
 7. Configure the Fieldbus Gateway for Internet access using BlinkUp&trade;
 
-## Modbus485Slave Class Usage
+## ModbusSerialSlave Class Usage
 
 This is the main library class.
 
-### Constructor: Modbus485Slave(*uart, rts, slaveID[, params]*)
+### Constructor: ModbusSerialSlave(*slaveID, uart[, rts][, params]*)
 
-Instantiate a new Modbus485Slave object and set the configuration of the UART bus over which it operates. The parameters *uart* and *rts* are, respectively, the imp UART in use and an imp GPIO pin which will be used to control flow. The *slaveID* parameter takes an ID by which the master identifies this slave. The *params* parameter is optional and takes a table containing the following keys:
+Instantiate a new ModbusSerialSlave object and set the configuration of the UART bus over which it operates. The *slaveID* parameter takes an ID by which the master identifies this slave. The *uart* parameter is an imp UART object.  The optional *rts* parameter should be used for RS485 coms when using an imp GPIO pin for control flow. The *params* parameter is optional and takes a table containing the following keys:
 
 | Key | Default | Notes |
 | --- | --- | --- |
@@ -41,7 +41,7 @@ Instantiate a new Modbus485Slave object and set the configuration of the UART bu
 #### Example
 
 ```squirrel
-modbus <- Modbus485Slave(hardware.uart2, hardware.pinL, 1);
+modbus <- Modbus485Slave(1, hardware.uart2, hardware.pinL);
 ```
 
 ### setSlaveID(*slaveID*)
@@ -195,4 +195,4 @@ The table below enumerates all the exception codes that can be possibly encounte
 
 # License
 
-The Modbus485Slave library is licensed under the [MIT License](../LICENSE).
+The ModbusSerialSlave library is licensed under the [MIT License](../LICENSE).

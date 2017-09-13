@@ -1,7 +1,0 @@
-**/.build_api_key.json
-build/*
-builds/*
-**/.imptest
-agent.nut
-device.nut
-settings.wrench

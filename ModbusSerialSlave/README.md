@@ -28,7 +28,7 @@ This is the main library class.
 
 ### Constructor: ModbusSerialSlave(*slaveID, uart[, rts][, params]*)
 
-Instantiate a new ModbusSerialSlave object and set the configuration of the UART bus over which it operates. The *slaveID* parameter takes an ID by which the master identifies this slave. The *uart* parameter is an imp UART object.  The optional *rts* parameter should be used for RS485 coms when using an imp GPIO pin for control flow. The *params* parameter is optional and takes a table containing the following keys:
+Instantiates a new ModbusSerialSlave object and configures the UART bus over which it operates. The *slaveID* parameter takes an ID by which the master identifies this slave. The *uart* parameter is an imp UART object. The optional *rts* parameter should be used for RS485 communications when you are using an imp GPIO pin for control flow. The *params* parameter is optional and takes a table containing the following keys:
 
 | Key | Default | Notes |
 | --- | --- | --- |

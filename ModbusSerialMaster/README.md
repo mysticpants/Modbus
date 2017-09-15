@@ -29,13 +29,13 @@ This is the main library class. It implements most of the functions listed in th
 
 ### Constructor: ModbusSerialMaster(*uart[, rts][, params]*)
 
-Instantiate a new ModbusSerialMaster object and set the configuration of the UART bus over which it operates. The *uart* parameter is an imp UART object. The optional *rts* parameter should be used for RS485 coms when using an imp GPIO pin for control flow. The *params* parameter is optional and takes a table containing the following keys:
+Instantiates a new ModbusSerialMaster object and configures the UART bus over which it operates. The *uart* parameter is an imp UART object. The optional *rts* parameter should be used for RS485 communications when you are using an imp GPIO pin for control flow. The *params* parameter is optional and takes a table containing the following keys:
 
 | Key      | Default     | Notes                                                                           |
 | ------   | ----------- | ------------------------------------------------------------------------------- |
 | baudRate | 19200       | The baud rate of the UART connection                                            |
 | dataBits | 8           | The word size on the UART connection in bits (7 or 8 bits)                      |
-| parity   | *PARITY_NONE* | Parity configuration of the UART connection                                     |
+| parity   | *PARITY_NONE* | Parity configuration of the UART connection                                   |
 | stopBits | 1           | Number of stop bits (1 or 2) on the UART connection                             |
 | timeout  | 1.0         | The maximum time allowed for one request                                        |
 | debug    | `false`     | If enabled, the outgoing and incoming ADU will be printed for debugging purpose |
@@ -50,7 +50,7 @@ modbus <- ModbusSerialMaster(hardware.uart2, hardware.pinL);
 
 ### read(*deviceAddress, targetType, startingAddress, quantity[, callback]*)
 
-Function Code : 01, 02, 03, 04
+Function Codes: 01, 02, 03, 04
 
 This is a generic method used to read values from a single coil, register, or multiple coils and registers. It takes the following parameters:
 
@@ -95,7 +95,7 @@ modbus.read(0x01, MODBUSRTU_TARGET_TYPE.INPUT_REGISTER, 0x7000 , 2, function(err
 
 ### write(*deviceAddress, targetType, startingAddress, quantity, values[, callback]*)
 
-Function Code : 05, 06, 15, 16
+Function Codes: 05, 06, 15, 16
 
 This is a generic method used to write values to multiple coils and registers. It takes the following parameters:
 
@@ -139,7 +139,7 @@ modbus.write(0x01, MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER, 9, 3, [188, 80, 18], 
 
 ### readExceptionStatus(*deviceAddress[, callback]*)
 
-Function Code : 07
+Function Code: 07
 
 This method reads the contents of eight Exception Status outputs in a remote device (address passed into the first parameter. If a callback is supplied, it will be triggered when a response regarding this request is received. The callback takes two parameters: *error* and *result*.
 
@@ -157,7 +157,7 @@ modbus.readExceptionStatus(0x01, function(error, result) {
 
 ### diagnostics(*deviceAddress, subFunctionCode, data[, callback]*)
 
-Function Code : 08
+Function Code: 08
 
 This method provides a series of tests for checking the communication system between a client (Master) device and a server (Slave), or for checking various internal error conditions within a server. It takes the following parameters:
 
@@ -204,7 +204,7 @@ modbus.diagnostics(0x01, MODBUSRTU_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTIO
 
 ### reportSlaveID(*deviceAddress[, callback]*)
 
-Function Code : 17
+Function Code: 17
 
 This method reads the description of the type, the current status and other information specific to a remote device whose address is specified in the method’s first parameter. The second, optional parameter is a function that will be fired when a response regarding this request is received. It takes two parameters, *error* and *result*.
 
@@ -223,7 +223,7 @@ modbus.reportSlaveID(0x01, function(error, result) {
 
 ### maskWriteRegister(*deviceAddress, referenceAddress, AND_Mask, OR_Mask[, callback]*)
 
-Function Code : 22
+Function Code: 22
 
 This method modifies the contents of a specified holding register using a combination of an AND mask, an OR mask and the register’s current contents. The function can be used to set or clear individual bits in the register. It takes the following parameters:
 
@@ -249,7 +249,7 @@ modbus.maskWriteRegister(0x01, 0x10, 0xFFFF, 0x0000, function(error, result) {
 
 ### readWriteMultipleRegisters(*deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue[, callback]*)
 
-Function Code : 23
+Function Code: 23
 
 This method performs a combination of one read operation and one write operation in a single Modbus transaction. The write operation is performed before the read. It takes the following parameters:
 
@@ -282,7 +282,7 @@ modbus.readWriteMultipleRegisters(0x01, 9, 3, 9, 3, [188, 80, 18], function(erro
 
 ### readDeviceIdentification(*deviceAddress, readDeviceIdCode, objectId[, callback]*)
 
-Function Code : 43/14
+Function Code: 43/14
 
 This method lets you read the identification and additional information relative to the physical and functional description of a remote device. It takes the following parameters:
 

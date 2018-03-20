@@ -1,0 +1,14 @@
+{
+    "modelId": "KB2yibqKCKCh" /* I */,
+    "devices": [
+        "5000d8c46a56cdae" /* I */
+    ],
+    "agentFile": false,
+    "deviceFile": "ModbusRTU.device.lib.nut",
+    "stopOnFailure": false,
+    "timeout": 10,
+    "tests": [
+        "*.test.nut",
+        "tests/**/*.test.nut"
+    ]
+}

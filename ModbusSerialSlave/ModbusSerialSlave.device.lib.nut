@@ -22,8 +22,8 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-class Modbus485Slave extends ModbusSlave {
-    static VERSION = "1.0.1";
+class ModbusSerialSlave extends ModbusSlave {
+    static VERSION = "2.0.0";
     static MIN_REQUEST_LENGTH = 4;
     _slaveID = null;
     _uart = null;
@@ -35,6 +35,7 @@ class Modbus485Slave extends ModbusSlave {
     //
     // Constructor for Modbus485Slave
     //
+    // @param  {integer} slaveID - The slave id
     // @param  {object} uart - The UART object
     // @param  {object} rts - The pin used as RTS
     // @param  {table} params - The table contains all the arugments the constructor expects
@@ -44,7 +45,7 @@ class Modbus485Slave extends ModbusSlave {
     // @item  {integer} stopBits - 1 bit by default
     // @item  {bool} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
     //
-    constructor(uart, rts, slaveID, params = {}) {
+    constructor(slaveID, uart, rts = null, params = {}) {
         if (!("CRC16" in getroottable())) {
             throw "Must include CRC16 library v1.0.0+";
         }
@@ -64,7 +65,7 @@ class Modbus485Slave extends ModbusSlave {
         // 4.5 characters time in microseconds
         _minInterval = 45000000.0 / baudRate;
         _uart.configure(baudRate, dataBits, parity, stopBits, TIMING_ENABLED, _onReceive.bindenv(this));
-        _rts.configure(DIGITAL_OUT, 0);
+        if (_rts != null) _rts.configure(DIGITAL_OUT, 0);
     }
 
     //
@@ -165,13 +166,18 @@ class Modbus485Slave extends ModbusSlave {
     // the concrete function to send a packet via RS485
     //
     function _send(ADU) {
-        local rw = _rts.write.bindenv(_rts);
         local uw = _uart.write.bindenv(_uart);
         local uf = _uart.flush.bindenv(_uart);
-        rw(1);
-        uw(ADU);
-        uf();
-        rw(0);
+        if (_rts != null) {
+            local rw = _rts.write.bindenv(_rts);
+            rw(1);
+            uw(ADU);
+            uf();
+            rw(0);
+        } else {
+            uw(ADU);
+            uf();
+        }
         _log(ADU, "Outgoing ADU : ");
         // return ADU to help with testing
         return ADU;

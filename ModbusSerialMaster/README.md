@@ -1,6 +1,6 @@
-# Modbus485Master
+# ModbusSerialMaster
 
-This library allows an imp to communicate with other devices via the Modbus-RS485 protocol.
+This library allows an imp to communicate with other devices via the Modbus-RS485 or Modbus-RS232 protocol.
 
 **To use this library, add the following statements to the top of your device code:**
 
@@ -8,7 +8,7 @@ This library allows an imp to communicate with other devices via the Modbus-RS48
 #require "CRC16.class.nut:1.0.0"
 #require "ModbusRTU.device.lib.nut:1.0.1"
 #require "ModbusMaster.device.lib.nut:1.0.1"
-#require "Modbus485Master.device.lib.nut:1.0.1"
+#require "ModbusSerialMaster.device.lib.nut:2.0.0"
 ```
 
 ## Hardware Setup
@@ -23,19 +23,19 @@ The following instructions are applicable to Electric Imp’s [impAccelerator&tr
 6. Power up the Fieldbus Gateway
 7. Configure the Fieldbus Gateway for Internet access using BlinkUp&trade;
 
-## Modbus485Master Class Usage
+## ModbusSerialMaster Class Usage
 
 This is the main library class. It implements most of the functions listed in the [Modbus specification](http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf).
 
-### Constructor: Modbus485Master(*uart, rts[, params]*)
+### Constructor: ModbusSerialMaster(*uart[, rts][, params]*)
 
-Instantiate a new Modbus485Master object and set the configuration of the UART bus over which it operates. The parameters *uart* and *rts* are, respectively, the imp UART in use and an imp GPIO pin which will be used to control flow. The *params* parameter is optional and takes a table containing the following keys:
+Instantiates a new ModbusSerialMaster object and configures the UART bus over which it operates. The *uart* parameter is an imp UART object. The optional *rts* parameter should be used for RS485 communications when you are using an imp GPIO pin for control flow. The *params* parameter is optional and takes a table containing the following keys:
 
 | Key      | Default     | Notes                                                                           |
 | ------   | ----------- | ------------------------------------------------------------------------------- |
 | baudRate | 19200       | The baud rate of the UART connection                                            |
 | dataBits | 8           | The word size on the UART connection in bits (7 or 8 bits)                      |
-| parity   | *PARITY_NONE* | Parity configuration of the UART connection                                     |
+| parity   | *PARITY_NONE* | Parity configuration of the UART connection                                   |
 | stopBits | 1           | Number of stop bits (1 or 2) on the UART connection                             |
 | timeout  | 1.0         | The maximum time allowed for one request                                        |
 | debug    | `false`     | If enabled, the outgoing and incoming ADU will be printed for debugging purpose |
@@ -43,14 +43,14 @@ Instantiate a new Modbus485Master object and set the configuration of the UART b
 #### Example
 
 ```squirrel
-modbus <- Modbus485Master(hardware.uart2, hardware.pinL);
+modbus <- ModbusSerialMaster(hardware.uart2, hardware.pinL);
 ```
 
-## Modbus485Master Class Methods
+## ModbusSerialMaster Class Methods
 
 ### read(*deviceAddress, targetType, startingAddress, quantity[, callback]*)
 
-Function Code : 01, 02, 03, 04
+Function Codes: 01, 02, 03, 04
 
 This is a generic method used to read values from a single coil, register, or multiple coils and registers. It takes the following parameters:
 
@@ -73,7 +73,7 @@ This is a generic method used to read values from a single coil, register, or mu
 
 ```squirrel
 // Read from a single coil
-modbus.read(0x01, MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT, 0x01, 1, function(error, result) {
+modbus.read(0x01, MODBUSRTU_TARGET_TYPE.COIL, 0x0001, 1, function(error, result) {
     if (error) {
         server.error(error);
     } else {
@@ -82,7 +82,7 @@ modbus.read(0x01, MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT, 0x01, 1, function(error,
 }.bindenv(this));
 
 // Read from multiple registers
-modbus.read(0x01, MODBUSRTU_TARGET_TYPE.INPUT_REGISTER, 0x01 , 5, function(error, results) {
+modbus.read(0x01, MODBUSRTU_TARGET_TYPE.INPUT_REGISTER, 0x7000 , 2, function(error, results) {
     if (error) {
         server.error(error);
     } else {
@@ -95,7 +95,7 @@ modbus.read(0x01, MODBUSRTU_TARGET_TYPE.INPUT_REGISTER, 0x01 , 5, function(error
 
 ### write(*deviceAddress, targetType, startingAddress, quantity, values[, callback]*)
 
-Function Code : 05, 06, 15, 16
+Function Codes: 05, 06, 15, 16
 
 This is a generic method used to write values to multiple coils and registers. It takes the following parameters:
 
@@ -119,7 +119,7 @@ This is a generic method used to write values to multiple coils and registers. I
 
 ```squirrel
 // Write to a single coil
-modbus.write(0x01, MODBUSRTU_TARGET_TYPE.COIL, 0x01, 1, true, function(error, result) {
+modbus.write(0x01, MODBUSRTU_TARGET_TYPE.COIL, 8192, 1, true, function(error, result) {
     if (error) {
         server.error(error);
     } else {
@@ -128,20 +128,18 @@ modbus.write(0x01, MODBUSRTU_TARGET_TYPE.COIL, 0x01, 1, true, function(error, re
 }.bindenv(this));
 
 // Write to multiple registers
-modbus.write(0x01, MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER, 0x01, 5, [false, true, false, true, true], function(error, results) {
+modbus.write(0x01, MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER, 9, 3, [188, 80, 18], function(error, result) {
     if (error) {
         server.error(error);
     } else {
-        foreach(key, value in results) {
-            server.log(key + " : " + value);
-        }
+        server.log(result);
     }
 }.bindenv(this));
 ```
 
 ### readExceptionStatus(*deviceAddress[, callback]*)
 
-Function Code : 07
+Function Code: 07
 
 This method reads the contents of eight Exception Status outputs in a remote device (address passed into the first parameter. If a callback is supplied, it will be triggered when a response regarding this request is received. The callback takes two parameters: *error* and *result*.
 
@@ -159,7 +157,7 @@ modbus.readExceptionStatus(0x01, function(error, result) {
 
 ### diagnostics(*deviceAddress, subFunctionCode, data[, callback]*)
 
-Function Code : 08
+Function Code: 08
 
 This method provides a series of tests for checking the communication system between a client (Master) device and a server (Slave), or for checking various internal error conditions within a server. It takes the following parameters:
 
@@ -206,7 +204,7 @@ modbus.diagnostics(0x01, MODBUSRTU_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTIO
 
 ### reportSlaveID(*deviceAddress[, callback]*)
 
-Function Code : 17
+Function Code: 17
 
 This method reads the description of the type, the current status and other information specific to a remote device whose address is specified in the method’s first parameter. The second, optional parameter is a function that will be fired when a response regarding this request is received. It takes two parameters, *error* and *result*.
 
@@ -225,7 +223,7 @@ modbus.reportSlaveID(0x01, function(error, result) {
 
 ### maskWriteRegister(*deviceAddress, referenceAddress, AND_Mask, OR_Mask[, callback]*)
 
-Function Code : 22
+Function Code: 22
 
 This method modifies the contents of a specified holding register using a combination of an AND mask, an OR mask and the register’s current contents. The function can be used to set or clear individual bits in the register. It takes the following parameters:
 
@@ -251,7 +249,7 @@ modbus.maskWriteRegister(0x01, 0x10, 0xFFFF, 0x0000, function(error, result) {
 
 ### readWriteMultipleRegisters(*deviceAddress, readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue[, callback]*)
 
-Function Code : 23
+Function Code: 23
 
 This method performs a combination of one read operation and one write operation in a single Modbus transaction. The write operation is performed before the read. It takes the following parameters:
 
@@ -271,11 +269,20 @@ This method performs a combination of one read operation and one write operation
 #### Example
 
 ```squirrel
+modbus.readWriteMultipleRegisters(0x01, 9, 3, 9, 3, [188, 80, 18], function(error, result) {
+    if (error) {
+        errorMessage(error, resolve, reject);
+    } else {
+        foreach(key, value in results) {
+            server.log(key + " : " + value);
+        }
+    }
+}.bindenv(this));
 ```
 
 ### readDeviceIdentification(*deviceAddress, readDeviceIdCode, objectId[, callback]*)
 
-Function Code : 43/14
+Function Code: 43/14
 
 This method lets you read the identification and additional information relative to the physical and functional description of a remote device. It takes the following parameters:
 
@@ -343,4 +350,4 @@ The table below enumerates all the exception codes that can be possibly encounte
 
 ## License
 
-The Modbus485Master library is licensed under the [MIT License](../LICENSE).
+The ModbusSerialMaster library is licensed under the [MIT License](../LICENSE).

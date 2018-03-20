@@ -2,15 +2,15 @@ Electric Imp’s Modbus support is delivered through the following four librarie
 
 ### [ModbusRTU](./ModbusRTU/)
 
-This library creates and parses Modbus Protocol Data Unit (PDU). This library is a prerequisite for the Modbus485Master and ModbusTCPMaster libraries.
+This library creates and parses Modbus Protocol Data Unit (PDU). This library is a prerequisite for the ModbusSerialMaster and ModbusTCPMaster libraries.
 
-### [Modbus485Master](./Modbus485Master/)
+### [ModbusSerialMaster](./ModbusSerialMaster/)
 
-This library allows an imp to communicate with other Modbus devices via the Modbus-RS485 protocol.
+This library allows an imp to communicate with other devices via Modbus-RS485 or Modbus-RS232 protocol.
 
-### [Modbus485Slave](./Modbus485Slave/)
+### [ModbusSerialSlave](./ModbusSerialSlave/)
 
-This library empowers an imp to communicate with a Modbus Master via the RS485 protocol.
+This library empowers an imp to communicate with a Modbus Master via the RS485 or RS232 protocol.
 
 ### [ModbusTCPMaster](./ModbusTCPMaster/)
 

@@ -22,9 +22,17 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
+// ----------------------------------------------------------------------------------
 
-// it is a bit hard to write test cases if the hardware is involved,
-// so the idea is to create a fake buffer and simulate the parsing requests and creating responses
+// It is a bit hard to write test cases if the hardware is involved,
+// so the idea is to create a fake buffer and simulate the parsing 
+// requests and creating responses.
+
+// Hardware used: Fieldbus Gateway
+
+@include "github:electricimp/CRC16/CRC16.class.nut";
+@include __PATH__ + "/../../ModbusSlave/ModbusSlave.device.lib.nut";
+@include __PATH__ + "/../ModbusSerialSlave.device.lib.nut";
 
 const SLAVE_ID = 1;
 const MIN_REQUEST_LENGTH = 4;
@@ -45,8 +53,8 @@ class DeviceTestCase extends ImpTestCase {
     _modbus = null;
 
     function setUp() {
-        _modbus = Modbus485Slave(hardware.uart2, hardware.pinL, SLAVE_ID);
-        return "Modbus485Slave";
+        _modbus = ModbusSerialSlave(SLAVE_ID, hardware.uart2, hardware.pinL);
+        return "ModbusSerialSlave";
     }
 
     function testSetSlaveID() {

@@ -22,9 +22,14 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
+// -----------------------------------------------------------------------------
+
+// This test can run on any Imp.
+
+@include "github:electricimp/CRC16/CRC16.class.nut";
+
 const MINIMUM_RESPONSE_LENGTH = 5;
 const DEVICE_ADDRESS = 0x01;
-
 
 function parse (fakeBuffer, params){
     local length = fakeBuffer.len();
@@ -39,7 +44,6 @@ function parse (fakeBuffer, params){
     }
     return result;
 }
-
 
 class DeviceTestCase extends ImpTestCase {
 

@@ -5,9 +5,9 @@ This class is the abstract class for the following classes, it should NOT be ins
 **Please proceed to one of the following libraries**
 
 
-# [Modbus485Master](../Modbus485Master/)
+# [ModbusSerialMaster](../ModbusSerialMaster/)
 
-This library allows an imp to communicate with other devices via the Modbus-RS485 protocol.
+This library allows an imp to communicate with other devices via Modbus-RS485 or Modbus-RS232 protocol.
 
 # [ModbusTCPMaster](../ModbusTCPMaster/)
 

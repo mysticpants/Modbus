@@ -22,8 +22,21 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-const DEVICE_ADDRESS = 1;
+// -----------------------------------------------------------------------------
 
+// Hardware setup:
+//  * Fieldbus Gateway
+//  * Koyo Click PLC C0-02DR-D
+//  * Connected via RS485 ports
+
+@include "github:electricimp/CRC16/CRC16.class.nut";
+@include __PATH__ + "/../../ModbusRTU/ModbusRTU.device.lib.nut";
+@include __PATH__ + "/../../ModbusMaster/ModbusMaster.device.lib.nut";
+@include __PATH__ + "/../ModbusSerialMaster.device.lib.nut";
+
+// Function to allow tests with expected error messages to pass
+// With the hardware setup above it is expected that only **testReportSlaveID** 
+// will need this helper to pass testing
 function errorMessage(error, resolve, reject) {
     switch (error) {
         case MODBUSRTU_EXCEPTION.ILLEGAL_FUNCTION:
@@ -37,13 +50,17 @@ function errorMessage(error, resolve, reject) {
     }
 }
 
+const DEVICE_ADDRESS = 0x01;
+
 class DeviceTestCase extends ImpTestCase {
     _PASS_MESSAGE = "Pass";
     _modbus = null;
 
     function setUp() {
-        _modbus = Modbus485Master(hardware.uart2, hardware.pinL);
-        return "Modbus485Master";
+        // These are the default settings for the Koyo Click PLC C0-02DR-D
+        local params = {"baudRate" : 38400, "parity" : PARITY_ODD};
+        _modbus = ModbusSerialMaster(hardware.uart2, hardware.pinL, params);
+        return "ModbusSerialMaster";
     }
 
     function testReadCoils() {

@@ -5,9 +5,9 @@ This is the base class for the following classes, and it should NOT be instantia
 
 **Please proceed to one of the following libraries**
 
-# [Modbus485Slave](../Modbus485Slave/)
+# [ModbusSerialSlave](../ModbusSerialSlave/)
 
-This library empowers an imp to communicate the Modbus Master via the RS485 protocol.
+This library empowers an imp to communicate the Modbus Master via the RS485 or RS232 protocol.
 
 # License
 

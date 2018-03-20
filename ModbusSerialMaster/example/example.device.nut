@@ -25,12 +25,18 @@
 #require "CRC16.class.nut:1.0.0"
 #require "ModbusRTU.device.lib.nut:1.0.1"
 #require "ModbusMaster.device.lib.nut:1.0.1"
-#require "Modbus485Master.device.lib.nut:1.0.1"
+#require "ModbusSerialMaster.device.lib.nut:2.0.0"
 
-// this example demonstrates how to write and read values into/from holding registers
+// Hardware used: Fieldbus Gateway and Kojo 
+// Click PLC C0-02DR-D connectied via RS485 ports
+
+// This example demonstrates how to write and read values 
+// into/from holding registers. 
+
 const DEVICE_ADDRESS = 0x01;
 // instantiate the the Modbus485Master object
-modbus <- Modbus485Master(hardware.uart2, hardware.pinL);
+local params = {"baudRate" : 38400, "parity" : PARITY_ODD};
+modbus <- ModbusSerialMaster(hardware.uart2, hardware.pinL, params);
 
 // write values into 3 holding registers starting at address 9
 modbus.write(DEVICE_ADDRESS, MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER, 9, 3, [188, 80, 18], function(error, res) {

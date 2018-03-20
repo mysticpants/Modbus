@@ -24,15 +24,22 @@
 
 #require "CRC16.class.nut:1.0.0"
 #require "ModbusSlave.device.lib.nut:1.0.1"
-#require "Modbus485Slave.device.lib.nut:1.0.1"
+#require "ModbusSerialSlave.device.lib.nut:2.0.0"
 
-modbus <- Modbus485Slave(hardware.uart2, hardware.pinL, 1, { debug = true });
+// Hardware used: Fieldbus Gateway and Kojo 
+// Click PLC C0-02DR-D connectied via RS485 ports
+
+// This example demonstrates a holding register read. 
+
+const SLAVE_ID = 0x01;
+
+local params = {"baudRate" : 38400, "parity" : PARITY_ODD, "debug" : true};
+modbus <- ModbusSerialSlave(SLAVE_ID, hardware.uart2, hardware.pinL, params);
 
 modbus.onError(function(error) {
     server.error(error);
 });
 
-// a holding register read example
 modbus.onRead(function(slaveID, functionCode, startingAddress, quantity) {
     server.log("slaveID : " + slaveID);
     server.log("functionCode : " + functionCode);

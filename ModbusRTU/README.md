@@ -6,7 +6,7 @@ This library creates and parses Modbus Protocol Data Units (PDU). It depends on 
 
 ```
 #require "CRC16.class.nut:1.0.0"
-#require "ModbusRTU.class.nut:1.0.0"
+#require "ModbusRTU.device.lib.nut:1.0.1"
 ```
 
 ## ModbusRTU Class Usage
@@ -230,4 +230,4 @@ local result = parse({
 
 ## License
 
-The ModbusRTU library is licensed under the [MIT License](https://github.com/electricimp/Modbus/tree/master/LICENSE).
+The ModbusRTU library is licensed under the [MIT License](../LICENSE).

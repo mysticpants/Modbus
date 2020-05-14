@@ -22,43 +22,38 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-#require "W5500.device.nut:1.0.0"
+#require "CRC16.class.nut:1.0.0"
 #require "ModbusRTU.device.lib.nut:1.0.1"
 #require "ModbusMaster.device.lib.nut:1.0.1"
-#require "ModbusTCPMaster.device.lib.nut:1.0.1"
+#require "ModbusSerialMaster.device.lib.nut:2.0.0"
 
-// this example shows how to use readWriteMultipleRegisters
+// Hardware used: Fieldbus Gateway and Kojo 
+// Click PLC C0-02DR-D connectied via RS485 ports
 
-// configure spi
-local spi = hardware.spi0;
-spi.configure(CLOCK_IDLE_LOW | MSB_FIRST | USE_CS_L, 1000);
+// This example demonstrates how to write and read values 
+// into/from holding registers. 
 
-local wiz = W5500(hardware.pinXC, spi, null, hardware.pinXA);
-wiz.configureNetworkSettings("192.168.1.30", "255.255.255.0", "192.168.1.1");
+const DEVICE_ADDRESS = 0x01;
+// instantiate the the Modbus485Master object
+local params = {"baudRate" : 38400, "parity" : PARITY_ODD};
+modbus <- ModbusSerialMaster(hardware.uart2, hardware.pinL, params);
 
-// instantiate a modbus object
-local modbus = ModbusTCPMaster(wiz);
-
-
-// the device address and port
-local connectionSettings = {
-    "destIP"     : "192.168.1.90",
-    "destPort"   : 502
-};
-
-// open the connection
-modbus.connect(connectionSettings, function(error, conn) {
+// write values into 3 holding registers starting at address 9
+modbus.write(DEVICE_ADDRESS, MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER, 9, 3, [188, 80, 18], function(error, res) {
     if (error) {
-        server.log(error);
+        server.error(error);
     } else {
-        // read and write multiple registers in one go , with read run before write
-        modbus.readWriteMultipleRegisters(0x0A, 2, 0x0A, 2, [28, 88], function(error, result) {
+        // read values from 3 holding registers starting at address 9
+        modbus.read(DEVICE_ADDRESS, MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER, 9, 3, function(error, res) {
             if (error) {
                 server.error(error);
             } else {
-                foreach (index, value in result) {
-                    server.log(format("Index : %d, value : %d", index, value));
-                }
+                // 188
+                server.log(res[0]);
+                // 80
+                server.log(res[1]);
+                // 18
+                server.log(res[2]);
             }
         });
     }

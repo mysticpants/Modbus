@@ -1,34 +1,34 @@
-# Modbus485Slave
+# ModbusSerialSlave #
 
-This library empowers an imp to communicate with the Modbus Master via the RS485 protocol.
+This library empowers an imp to communicate with the Modbus Master via the  Modbus-RS485 or  Modbus-RS232 protocol.
 
 **To use this library, add the following statements to the top of your device code:**
 
 ```squirrel
 #require "CRC16.class.nut:1.0.0"
-#require "ModbusSlave.class.nut:1.0.0"
-#require "Modbus485Slave.class.nut:1.0.0"
+#require "ModbusSlave.device.lib.nut:1.0.1"
+#require "ModbusSerialSlave.device.lib.nut:2.0.0"
 ```
 
-## Hardware Setup
+## Hardware Setup ##
 
-The following instructions are applicable to Electric Imp’s [impAccelerator&trade; Fieldbus Gateway](https://electricimp.com/docs/hardware/resources/reference-designs/fieldbusgateway/).
+The following instructions are applicable to Electric Imp’s [impAccelerator&trade; Fieldbus Gateway](https://developer.electricimp.com/hardware/resources/reference-designs/fieldbusgateway).
 
 1. Connect the antenna to the Fieldbus Gateway
 2. Wire RS485 A on the Fieldbus Gateway to port A / positive(+) on the other device
 3. Wire RS485 B on the Fieldbus Gateway to port B / negative(-) on the other device
 4. Wire both devices’ ground ports together
-5. Fit [jumper J2](https://electricimp.com/docs/hardware/resources/reference-designs/fieldbusgateway/#rs-485) on the Fieldbus Gateway motherboard to enable RS485
+5. Fit [jumper J2](https://developer.electricimp.com/hardware/resources/reference-designs/fieldbusgateway#rs-485) on the Fieldbus Gateway motherboard to enable RS485
 6. Power up the Fieldbus Gateway
 7. Configure the Fieldbus Gateway for Internet access using BlinkUp&trade;
 
-## Modbus485Slave Class Usage
+## ModbusSerialSlave Class Usage ##
 
 This is the main library class.
 
-### Constructor: Modbus485Slave(*uart, rts, slaveID[, params]*)
+### Constructor: ModbusSerialSlave(*slaveID, uart[, rts][, params]*) ###
 
-Instantiate a new Modbus485Slave object and set the configuration of the UART bus over which it operates. The parameters *uart* and *rts* are, respectively, the imp UART in use and an imp GPIO pin which will be used to control flow. The *slaveID* parameter takes an ID by which the master identifies this slave. The *params* parameter is optional and takes a table containing the following keys:
+Instantiates a new ModbusSerialSlave object and configures the UART bus over which it operates. The *slaveID* parameter takes an ID by which the master identifies this slave. The *uart* parameter is an imp UART object. The optional *rts* parameter should be used for RS485 communications when you are using an imp GPIO pin for control flow. The *params* parameter is optional and takes a table containing the following keys:
 
 | Key | Default | Notes |
 | --- | --- | --- |
@@ -38,23 +38,23 @@ Instantiate a new Modbus485Slave object and set the configuration of the UART bu
 | stopBits | 1 | Number of stop bits (1 or 2) on the UART connection |
 | debug | `false` | If enabled, the outgoing and incoming ADU will be printed for debugging purpose |
 
-#### Example
+#### Example ####
 
 ```squirrel
-modbus <- Modbus485Slave(hardware.uart2, hardware.pinL, 1);
+modbus <- Modbus485Slave(1, hardware.uart2, hardware.pinL);
 ```
 
-### setSlaveID(*slaveID*)
+### setSlaveID(*slaveID*) ###
 
 This method changes the slave ID. Its single parameter takes the new slave ID.
 
-#### Example
+#### Example ####
 
 ```squirrel
 modbus.setSlaveID(2);
 ```
 
-### onWrite(*callback*)
+### onWrite(*callback*) ###
 
 This method sets the callback function that will be triggered when there is a write request. The callback takes the following parameters:
 
@@ -66,7 +66,7 @@ This method sets the callback function that will be triggered when there is a wr
 | *quantity* | Integer | The quantity of the values |
 | *values* | Integer, bool, array | The values to be written |
 
-#### Accepted Return Value Types
+#### Accepted Return Value Types ####
 
 The callback function can return a value, which will be processed and sent back to the Master as a response.
 
@@ -76,38 +76,38 @@ The callback function can return a value, which will be processed and sent back 
 | `null` | If `null` is returned, it is the same as returning `true` |
 | Integer | Any acceptable Modbus Exception Code can be returned |
 
-#### Example
+#### Example ####
 
 ```squirrel
 // Accept this write request
 modbus.onWrite(function(slaveID, functionCode, startingAddress, quantity, values) {
-    server.log("slaveID : " + slaveID);
-    server.log("functionCode : " + functionCode);
-    server.log("startingAddress : " + startingAddress);
-    server.log("Quantity : " + quantity);
-    server.log("Values : \n");
-    foreach (index, value in values) {
-    	server.log("\t" + index + " : " + value);
-    }
-    return true;
+  server.log("slaveID : " + slaveID);
+  server.log("functionCode : " + functionCode);
+  server.log("startingAddress : " + startingAddress);
+  server.log("Quantity : " + quantity);
+  server.log("Values : \n");
+  foreach (index, value in values) {
+    server.log("\t" + index + " : " + value);
+  }
+  return true;
 }.bindenv(this));
 
 // Decline this write request
 modbus.onWrite(function(slaveID, functionCode, startingAddress, quantity, values) {
-    server.log("slaveID : " + slaveID);
-    server.log("functionCode : " + functionCode);
-    server.log("startingAddress : " + startingAddress);
-    server.log("Quantity : " + quantity);
-    server.log("Values : \n");
-    foreach (index, value in values) {
-    	server.log("\t" + index + " : " + value);
-    }
-    // reject this request with the exception code of 2
-    return 2;
+  server.log("slaveID : " + slaveID);
+  server.log("functionCode : " + functionCode);
+  server.log("startingAddress : " + startingAddress);
+  server.log("Quantity : " + quantity);
+  server.log("Values : \n");
+  foreach (index, value in values) {
+    server.log("\t" + index + " : " + value);
+  }
+  // reject this request with the exception code of 2
+  return 2;
 }.bindenv(this));
 ```
 
-### onRead(*callback*)
+### onRead(*callback*) ###
 
 This method sets the callback function that will be called when there is a read request. The callback takes the following parameters:
 
@@ -118,7 +118,7 @@ This method sets the callback function that will be called when there is a read 
 | *startingAddress* | Integer | The address at which it starts writing values |
 | *quantity* | Integer | The quantity of the values |
 
-#### Accepted Return Value Type
+#### Accepted Return Value Type ####
 
 The callback function can return a value, which will be processed and sent back to the Master as a response.
 
@@ -129,37 +129,37 @@ The callback function can return a value, which will be processed and sent back 
 | Integer | 1 or 0 when it is a coil or discrete input read. Any number when it is a holding register or input register read |
 | Array | Array of 1, 0, `true`, `false` when it is a coil or discrete input read. Array of integers when it is a holding register or input register read |
 
-#### Example
+#### Example ####
 
 ```squirrel
 // A coil read example
 modbus.onRead(function(slaveID, functionCode, startingAddress, quantity){
-    server.log("slaveID : " + slaveID);
-    server.log("functionCode : " + functionCode);
-    server.log("startingAddress : " + startingAddress);
-    server.log("Quantity : " + quantity);
-	return [true,false,false,true,true];
+  server.log("slaveID : " + slaveID);
+  server.log("functionCode : " + functionCode);
+  server.log("startingAddress : " + startingAddress);
+  server.log("Quantity : " + quantity);
+  return [true,false,false,true,true];
 }.bindenv(this));
 
 // A holding register read example
 modbus.onRead(function(slaveID, functionCode, startingAddress, quantity){
-    server.log("slaveID : " + slaveID);
-    server.log("functionCode : " + functionCode);
-    server.log("startingAddress : " + startingAddress);
-    server.log("Quantity : " + quantity);
-	return [18,29,30, 59, 47];
+  server.log("slaveID : " + slaveID);
+  server.log("functionCode : " + functionCode);
+  server.log("startingAddress : " + startingAddress);
+  server.log("Quantity : " + quantity);
+  return [18,29,30, 59, 47];
 }.bindenv(this));
 ```
 
-### onError(*callback*)
+### onError(*callback*) ###
 
 This method sets the callback function that will be called when there is an error. The callback takes a single parameter into which a description of the error is passed.
 
-#### Example
+#### Example ####
 
 ```squirrel
 modbus.onError(function(error){
-    server.error(error);
+  server.error(error);
 }.bindenv(this));
 ```
 
@@ -178,7 +178,7 @@ The following table lists the function codes that the slave can support and proc
 | 0x0F | Write Multiple Coils |
 | 0x10 | Write Multiple Registers |
 
-## Exception Codes
+## Exception Codes ##
 
 The table below enumerates all the exception codes that can be possibly encountered. Refer to the [Modbus specification](http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf) for more detailed description on Modbus-specific exceptions.
 
@@ -193,6 +193,6 @@ The table below enumerates all the exception codes that can be possibly encounte
 | 7 | Negative Acknowledge |
 | 8 | Memory Parity Error |
 
-# License
+# License ##
 
-The Modbus485Slave library is licensed under the [MIT License](https://github.com/electricimp/Mdobus/tree/master/LICENSE).
+The ModbusSerialSlave library is licensed under the [MIT License](../LICENSE).

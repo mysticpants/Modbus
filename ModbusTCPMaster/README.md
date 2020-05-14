@@ -5,19 +5,19 @@ This library allows an imp to communicate with other devices via TCP/IP. It requ
 **To use this library, add the following statements to the top of your device code:**
 
 ```
-#require "ModbusRTU.class.nut:1.0.0"
-#require "ModbusMaster.class.nut:1.0.0"
-#require "ModbusTCPMaster.class.nut:1.0.0"
+#require "ModbusRTU.device.lib.nut:1.0.1"
+#require "ModbusMaster.device.lib.nut:1.0.1"
+#require "ModbusTCPMaster.device.lib.nut:1.0.1"
 #require "W5500.device.nut:1.0.0"
 ```
 
-The following instructions are applicable to Electric Imp’s [impAccelerator&trade; Fieldbus Gateway](https://electricimp.com/docs/hardware/resources/reference-designs/fieldbusgateway/).
+The following instructions are applicable to Electric Imp’s [impAccelerator&trade; Fieldbus Gateway](https://developer.electricimp.com/hardware/resources/reference-designs/fieldbusgateway).
 
 1. Connect the antenna to the Fieldbus Gateway
 2. Wire RS485 A on the Fieldbus Gateway to port A / positive(+) on the other device
 3. Wire RS485 B on the Fieldbus Gateway to port B / negative(-) on the other device
 4. Wire both devices’ ground ports together
-5. Fit [jumper J2](https://electricimp.com/docs/hardware/resources/reference-designs/fieldbusgateway/#rs-485) on the Fieldbus Gateway motherboard to enable RS485
+5. Fit [jumper J2](https://developer.electricimp.com/hardware/resources/reference-designs/fieldbusgateway#rs-485) on the Fieldbus Gateway motherboard to enable RS485
 6. Power up the Fieldbus Gateway
 7. Configure the Fieldbus Gateway for Internet access using BlinkUp&trade;
 
@@ -27,7 +27,7 @@ This is the main library class. It implements most of the functions listed in th
 
 ### Constructor: ModbusTCPMaster(*wiz[, debug]*)
 
-Instantiate a new ModbusTCPMaster object. It takes one required parameter: *wiz*, the [Wiznet W5500](https://github.com/electricimp/Wiznet_5500) object that is driving the Ethernet link, and one optional boolean parameter: *debug* which, if enabled, prints the outgoing and incoming ADU for debugging purposes. The defualt value of *debug* is `false`.
+Instantiate a new ModbusTCPMaster object. It takes one required parameter: *wiz*, the [Wiznet W5500](https://github.com/electricimp/Wiznet_5500) object that is driving the Ethernet link, and one optional boolean parameter: *debug* which, if enabled, prints the outgoing and incoming ADU for debugging purposes. The default value of *debug* is `false`.
 
 #### Example
 
@@ -289,7 +289,7 @@ modbus.maskWriteRegister(0x10, 0xFFFF, 0x0000, function(error, result) {
 
 Function Code : 23
 
-This method performs a combination of one read operation and one write operation in a single Modbus transaction. The write operation is performed before the read ^. It takes the following parameters:
+This method performs a combination of one read operation and one write operation in a single Modbus transaction. The write operation is performed before the read. It takes the following parameters:
 
 | Parameter | Data Type | Required | Default Value | Description |
 | --- | --- | --- | --- | --- |
@@ -386,4 +386,4 @@ The table below enumerates all the exception codes that can be possibly encounte
 
 ## License
 
-The ModbusTCPMaster library is licensed under the [MIT License](https://github.com/electricimp/Modbus/tree/master/LICENSE).
+The ModbusTCPMaster library is licensed under the [MIT License](../LICENSE).

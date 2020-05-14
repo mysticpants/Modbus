@@ -5,10 +5,10 @@ This is the base class for the following classes, and it should NOT be instantia
 
 **Please proceed to one of the following libraries**
 
-# [Modbus485Slave](../Modbus485Slave/)
+# [ModbusSerialSlave](../ModbusSerialSlave/)
 
-This library empowers an imp to communicate the Modbus Master via the RS485 protocol.
+This library empowers an imp to communicate the Modbus Master via the RS485 or RS232 protocol.
 
 # License
 
-The ModbusRTUMaster library is licensed under the [MIT License](https://github.com/electricimp/thethingsapi/tree/master/LICENSE).
+The ModbusRTUMaster library is licensed under the [MIT License](../LICENSE).

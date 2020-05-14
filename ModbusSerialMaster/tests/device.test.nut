@@ -1,5 +1,42 @@
-const DEVICE_ADDRESS = 1;
+// MIT License
+//
+// Copyright 2017 Electric Imp
+//
+// SPDX-License-Identifier: MIT
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+// EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+// OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
 
+// -----------------------------------------------------------------------------
+
+// Hardware setup:
+//  * Fieldbus Gateway
+//  * Koyo Click PLC C0-02DR-D
+//  * Connected via RS485 ports
+
+@include "github:electricimp/CRC16/CRC16.class.nut";
+@include __PATH__ + "/../../ModbusRTU/ModbusRTU.device.lib.nut";
+@include __PATH__ + "/../../ModbusMaster/ModbusMaster.device.lib.nut";
+@include __PATH__ + "/../ModbusSerialMaster.device.lib.nut";
+
+// Function to allow tests with expected error messages to pass
+// With the hardware setup above it is expected that only **testReportSlaveID** 
+// will need this helper to pass testing
 function errorMessage(error, resolve, reject) {
     switch (error) {
         case MODBUSRTU_EXCEPTION.ILLEGAL_FUNCTION:
@@ -13,13 +50,17 @@ function errorMessage(error, resolve, reject) {
     }
 }
 
+const DEVICE_ADDRESS = 0x01;
+
 class DeviceTestCase extends ImpTestCase {
     _PASS_MESSAGE = "Pass";
     _modbus = null;
 
     function setUp() {
-        _modbus = Modbus485Master(hardware.uart2, hardware.pinL);
-        return "Modbus485Master";
+        // These are the default settings for the Koyo Click PLC C0-02DR-D
+        local params = {"baudRate" : 38400, "parity" : PARITY_ODD};
+        _modbus = ModbusSerialMaster(hardware.uart2, hardware.pinL, params);
+        return "ModbusSerialMaster";
     }
 
     function testReadCoils() {

@@ -1,5 +1,38 @@
-// it is a bit hard to write test cases if the hardware is involved,
-// so the idea is to create a fake buffer and simulate the parsing requests and creating responses
+// MIT License
+//
+// Copyright 2017 Electric Imp
+//
+// SPDX-License-Identifier: MIT
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+// EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+// OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+
+// ----------------------------------------------------------------------------------
+
+// It is a bit hard to write test cases if the hardware is involved,
+// so the idea is to create a fake buffer and simulate the parsing 
+// requests and creating responses.
+
+// Hardware used: Fieldbus Gateway
+
+@include "github:electricimp/CRC16/CRC16.class.nut";
+@include __PATH__ + "/../../ModbusSlave/ModbusSlave.device.lib.nut";
+@include __PATH__ + "/../ModbusSerialSlave.device.lib.nut";
 
 const SLAVE_ID = 1;
 const MIN_REQUEST_LENGTH = 4;
@@ -20,8 +53,8 @@ class DeviceTestCase extends ImpTestCase {
     _modbus = null;
 
     function setUp() {
-        _modbus = Modbus485Slave(hardware.uart2, hardware.pinL, SLAVE_ID);
-        return "Modbus485Slave";
+        _modbus = ModbusSerialSlave(SLAVE_ID, hardware.uart2, hardware.pinL);
+        return "ModbusSerialSlave";
     }
 
     function testSetSlaveID() {

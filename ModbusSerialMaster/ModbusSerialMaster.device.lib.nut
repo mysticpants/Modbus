@@ -1,9 +1,32 @@
-// Copyright (c) 2017 Electric Imp
-// This file is licensed under the MIT License
-// http://opensource.org/licenses/MIT
+// MIT License
+//
+// Copyright 2017 Electric Imp
+//
+// SPDX-License-Identifier: MIT
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+// EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+// OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
 
-class Modbus485Master extends ModbusMaster {
+class ModbusSerialMaster extends ModbusMaster {
+
+    static VERSION = "2.0.0";
     static MINIMUM_RESPONSE_LENGTH = 5;
+    
     _uart = null;
     _rts = null;
     _timeout = null;
@@ -29,7 +52,7 @@ class Modbus485Master extends ModbusMaster {
     // @item  {float} timeout - 1.0 second by default
     // @item  {bool} debug - false by default. If enabled, the outgoing and incoming ADU will be printed for debugging purpose
     //
-    constructor(uart, rts, params = {}) {
+    constructor(uart, rts = null, params = {}) {
         base.constructor(("debug" in params) ? params.debug : false);
         if (!("CRC16" in getroottable())) {
             throw "Must include CRC16 library v1.0.0+";
@@ -44,10 +67,14 @@ class Modbus485Master extends ModbusMaster {
         _timeout = ("timeout" in params) ? params.timeout : 1.0;
         _receiveBuffer = blob();
         _uart = uart;
-        _rts = rts;
         _queue = [];
-        _uart.configure(baudRate, dataBits, parity, stopBits, NO_CTSRTS, _uartCallback.bindenv(this));
-        _rts.configure(DIGITAL_OUT, 0);
+        if (rts != null) {
+            _rts = rts;
+            _uart.configure(baudRate, dataBits, parity, stopBits, NO_CTSRTS, _uartCallback.bindenv(this));
+            _rts.configure(DIGITAL_OUT, 0);
+        } else {
+            _uart.configure(baudRate, dataBits, parity, stopBits, 0x00, _uartCallback.bindenv(this));
+        }
     }
 
     //
@@ -314,13 +341,18 @@ class Modbus485Master extends ModbusMaster {
         }
         _callback = properties.callback;
         local frame = _createADU(PDU);
-        local rw = _rts.write.bindenv(_rts);
         local uw = _uart.write.bindenv(_uart);
         local uf = _uart.flush.bindenv(_uart);
-        rw(1);
-        uw(frame);
-        uf();
-        rw(0);
+        if (_rts != null) {
+            local rw = _rts.write.bindenv(_rts);
+            rw(1);
+            uw(frame);
+            uf();
+            rw(0);
+        } else {
+            uw(frame);
+            uf();
+        }
         _log(frame, "Outgoing ADU : ");
         _responseTimer = _responseTimeoutFactory(_timeout);
     }

@@ -7,7 +7,7 @@ This library allows an imp to communicate with other devices via TCP/IP. It requ
 ```
 #require "ModbusRTU.device.lib.nut:1.0.1"
 #require "ModbusMaster.device.lib.nut:1.0.1"
-#require "ModbusTCPMaster.device.lib.nut:1.0.1"
+#require "ModbusTCPMaster.device.lib.nut:1.0.2"
 #require "W5500.device.nut:1.0.0"
 ```
 
@@ -89,7 +89,7 @@ This method closes the existing TCP connection. It takes one optional parameter:
 modbus.disconnect();
 ```
 
-### read(*targetType, startingAddress, quantity[, callback]*)
+### read(*targetType, startingAddress, quantity[, callback][, deviceAddress]*)
 
 Function Code : 01, 02, 03, 04
 
@@ -101,6 +101,7 @@ This is a generic method used to read values from a single coil, register, or mu
 | *startingAddress* | Integer | Yes | N/A | The address from which it begins reading values |
 | *quantity* | Integer | Yes | N/A  | The number of consecutive addresses the values are read from |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
+| *deviceAddress* | Integer | No | 0x00 | The unique address that identifies a device |
 
 | Target Type | Value | Access |
 | --- | --- | --- |
@@ -133,7 +134,7 @@ modbus.read(MODBUSRTU_TARGET_TYPE.INPUT_REGISTER, 0x01 , 5, function(error, resu
 }.bindenv(this));
 ```
 
-### write(*targetType, startingAddress, quantity, values[, callback]*)
+### write(*targetType, startingAddress, quantity, values[, callback][, deviceAddress]*)
 
 Function Code : 05, 06, 15, 16
 
@@ -146,6 +147,7 @@ This is a generic method used to write values into coils or registers. It has th
 | *quantity* | Integer | Yes | N/A | The number of consecutive addresses the values are written into |
 | *values* | Integer, array, bool, blob | Yes | N/A | The values written into Coils or Registers. Please view ‘Notes’, below |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
+| *deviceAddress* | Integer | No | 0x00 | The unique address that identifies a device |
 
 #### Notes:
 
@@ -177,7 +179,7 @@ modbus.write(MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER, 0x01, 5, [false, true, fals
 }.bindenv(this));
 ```
 
-### readExceptionStatus(*[callback]*)
+### readExceptionStatus(*[callback][, deviceAddress]*)
 
 Function Code : 07
 
@@ -195,7 +197,7 @@ modbus.readExceptionStatus(function(error, result) {
 }.bindenv(this));
 ```
 
-### diagnostics(*subFunctionCode, data[, callback]*)
+### diagnostics(*subFunctionCode, data[, callback][, deviceAddress]*)
 
 Function Code : 08
 
@@ -206,6 +208,7 @@ This method provides a series of tests for checking the communication system bet
 | *subFunctionCode* | Constant | Yes | N/A | Refer to the ‘Sub-function Code’ table, below |
 | *data* | Blob | Yes | N/A | The data field required by Modbus request |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
+| *deviceAddress* | Integer | No | 0x00 | The unique address that identifies a device |
 
 | Sub-function Code | Value (Hex) |
 | --- | --- |
@@ -241,11 +244,11 @@ modbus.diagnostics(MODBUSRTU_SUB_FUNCTION_CODE.RESTART_COMMUNICATION_OPTION, dat
 }.bindenv(this));
 ```
 
-### reportSlaveID(*[callback]*)
+### reportSlaveID(*[callback][, deviceAddress]*)
 
 Function Code : 17
 
-This method reads the description of the type, the current status, and other information specific to a remote device. The optional callback function will, if supplied, be fired when a response regarding this request is received. The callback takes two parameters, *error* and *result*.
+This method reads the description of the type, the current status, and other information specific to a remote device whose address is specified in the method’s last parameter. The optional callback function will, if supplied, be fired when a response regarding this request is received. The callback takes two parameters, *error* and *result*.
 
 #### Example
 
@@ -260,7 +263,7 @@ modbus.reportSlaveID(function(error, result) {
 }.bindenv(this));
 ```
 
-### maskWriteRegister(*referenceAddress, AND_Mask, OR_Mask[, callback]*)
+### maskWriteRegister(*referenceAddress, AND_Mask, OR_Mask[, callback][, deviceAddress]*)
 
 Function Code : 22
 
@@ -272,6 +275,7 @@ This method modifies the contents of a specified holding register using a combin
 | *AND_mask* | Integer | Yes | N/A | The AND mask |
 | *OR_mask* | Integer | Yes | N/A | The OR mask |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
+| *deviceAddress* | Integer | No | 0x00 | The unique address that identifies a device |
 
 #### Example
 
@@ -285,7 +289,7 @@ modbus.maskWriteRegister(0x10, 0xFFFF, 0x0000, function(error, result) {
 }.bindenv(this));
 ```
 
-### readWriteMultipleRegisters(*readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, [callback]*)
+### readWriteMultipleRegisters(*readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue[, callback][, deviceAddress]*)
 
 Function Code : 23
 
@@ -299,6 +303,7 @@ This method performs a combination of one read operation and one write operation
 | *writeQuantity* | Integer | Yes | N/A | The number of consecutive addresses values are written into |
 | *writeValue* | Blob | Yes | N/A | The value written into the holding register  |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
+| *deviceAddress* | Integer | No | 0x00 | The unique address that identifies a device |
 
 **Note** The actual order of operation is determined by the implementation of user's device.
 
@@ -317,7 +322,7 @@ modbus.readWriteMultipleRegisters(0x0A, 2, 0x0A, 2, [28, 88], function(error, re
 
 ```
 
-### readDeviceIdentification(*readDeviceIdCode, objectId, [callback]*)
+### readDeviceIdentification(*readDeviceIdCode, objectId[, callback][, deviceAddress]*)
 
 Function Code : 43/14
 
@@ -328,6 +333,7 @@ This method lets you read the identification and additional information relative
 | *readDeviceIdCode* | Constant| Yes | N/A | Refer to the ‘Read Device ID’ table, below |
 | *objectId* | Constant | Yes | N/A | Refer to the ‘Object ID’ table, below |
 | *callback* | Function | No | Null | The function to be fired when it receives response regarding this request. It takes two parameters, *error* and *result* |
+| *deviceAddress* | Integer | No | 0x00 | The unique address that identifies a device |
 
 | Read Device ID Code | Description |
 | --- | --- |

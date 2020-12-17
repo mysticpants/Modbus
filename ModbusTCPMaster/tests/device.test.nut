@@ -43,6 +43,8 @@ function errorMessage(error, resolve, reject) {
     }
 }
 
+const DEVICE_ADDRESS = 0x00;
+
 class DeviceTestCase extends ImpTestCase {
 
     _wiz = null;
@@ -82,7 +84,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(result.len() == 2);
                         resolve(PASS_MESSAGE);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -97,7 +99,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue((result == 0 || result == 0xFF) ? true : false);
                         resolve(PASS_MESSAGE);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -114,7 +116,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(data.tostring() == result.tostring());
                         resolve(PASS_MESSAGE);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -129,7 +131,7 @@ class DeviceTestCase extends ImpTestCase {
                       this.assertTrue(result);
                       resolve(PASS_MESSAGE);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -151,7 +153,7 @@ class DeviceTestCase extends ImpTestCase {
                         }
                         resolve(message);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -170,7 +172,7 @@ class DeviceTestCase extends ImpTestCase {
                         }
                       resolve(message);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -188,7 +190,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(result);
                         resolve(PASS_MESSAGE);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -206,7 +208,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(result);
                         resolve(PASS_MESSAGE);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -224,7 +226,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(result);
                         resolve(PASS_MESSAGE);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -242,7 +244,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(result);
                         resolve(PASS_MESSAGE);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -260,7 +262,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(result);
                         resolve(PASS_MESSAGE);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -278,7 +280,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(result);
                         resolve(PASS_MESSAGE);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -296,7 +298,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(result);
                         resolve(PASS_MESSAGE);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -316,7 +318,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(result);
                         resolve(PASS_MESSAGE);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -337,7 +339,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(result.len() == quantity);
                         resolve(message);
                   }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -358,7 +360,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(result.len() == quantity);
                         resolve(message);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -379,7 +381,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(result.len() == quantity);
                         resolve(message);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -400,7 +402,7 @@ class DeviceTestCase extends ImpTestCase {
                         this.assertTrue(result.len() == quantity);
                         resolve(message);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -417,7 +419,7 @@ class DeviceTestCase extends ImpTestCase {
                     } else {
                         reject(error);
                     }
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }
@@ -435,13 +437,13 @@ class DeviceTestCase extends ImpTestCase {
                         resolve(PASS_MESSAGE);
                     }
                     isSuccess = true;
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
                 _modbus.write(MODBUSRTU_TARGET_TYPE.COIL, address, quantity, value, function(error, result) {
                     if (isSuccess) {
                         resolve(PASS_MESSAGE);
                     }
                     isSuccess = true;
-                }.bindenv(this));
+                }.bindenv(this), DEVICE_ADDRESS);
             }.bindenv(this));
         }.bindenv(this));
     }

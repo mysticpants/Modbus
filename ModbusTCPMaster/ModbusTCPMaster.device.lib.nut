@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright 2017 Electric Imp
+// Copyright 2017-2020 Electric Imp
 //
 // SPDX-License-Identifier: MIT
 //
@@ -79,7 +79,8 @@ class ModbusTCPMaster extends ModbusMaster {
     }
 
     //
-    // This function performs a combination of one read operation and one write operation in a single MODBUS transaction. The write operation is performed before the read.
+    // This function performs a combination of one read operation and one write operation in a single MODBUS transaction.
+    // The write operation is performed before the read.
     //
     // @param {integer} readingStartAddress - The address from which it begins reading values
     // @param {integer} readQuantity - The number of consecutive addresses values are read from
@@ -95,7 +96,9 @@ class ModbusTCPMaster extends ModbusMaster {
     }
 
     //
-    // This function modifies the contents of a specified holding register using a combination of an AND mask, an OR mask, and the register's current contents. The function can be used to set or clear individual bits in the register.
+    // This function modifies the contents of a specified holding register using a combination of an AND mask,
+    // an OR mask, and the register's current contents.
+    // The function can be used to set or clear individual bits in the register.
     //
     // @param {integer} referenceAddress - The address of the holding register the value is written into
     // @param {integer} AND_mask - The AND mask
@@ -120,7 +123,8 @@ class ModbusTCPMaster extends ModbusMaster {
     }
 
     //
-    // This function allows reading the identification and additional information relative to the physical and functional description of a remote device, only.
+    // This function allows reading the identification and additional information relative to the physical
+    // and functional description of a remote device.
     //
     // @param {enum} readDeviceIdCode - read device id code
     // @param {enum} objectId - object id
@@ -133,9 +137,10 @@ class ModbusTCPMaster extends ModbusMaster {
     }
 
     //
-    // This function provides a series of tests for checking the communication system between a client ( Master) device and a server ( Slave), or for checking various internal error conditions within a server.
+    // This function provides a series of tests for checking the communication system between a client (Master) device
+    // and a server (Slave), or for checking various internal error conditions within a server.
     //
-    // @param {integer} subFunctionCode - The address from which it begins reading values
+    // @param {integer} subFunctionCode - The Sub-function Code
     // @param {blob} data - The data field required by Modbus request
     // @param {function} callback - The function to be fired when it receives response regarding this request
     // @param {integer} deviceAddress - The unique address that identifies a device
@@ -157,9 +162,9 @@ class ModbusTCPMaster extends ModbusMaster {
     }
 
     //
-    // This is the generic function to read values from a single coil ,register or multiple coils , registers .
+    // This is the generic function to read values from a single coil register or multiple coils registers.
     //
-    // @param {enum} targetType - The address from which it begins reading values
+    // @param {enum} targetType - The Target Type
     // @param {integer} startingAddress - The address from which it begins reading values
     // @param {integer} quantity - The number of consecutive addresses the values are read from
     // @param {function} callback - The function to be fired when it receives response regarding this request
@@ -171,9 +176,9 @@ class ModbusTCPMaster extends ModbusMaster {
     }
 
     //
-    // This is the generic function to write values into coils or holding registers .
+    // This is the generic function to write values into coils or holding registers.
     //
-    // @param {enum} targetType - The address from which it begins reading values
+    // @param {enum} targetType - The Target Type
     // @param {integer} startingAddress - The address from which it begins writing values
     // @param {integer} quantity - The number of consecutive addresses the values are written into
     // @param {integer, Array[integer,Bool], Bool, blob} values - The values written into Coils or Registers

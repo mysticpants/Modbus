@@ -7,7 +7,7 @@ This library allows an imp to communicate with other devices via TCP/IP. It requ
 ```
 #require "ModbusRTU.device.lib.nut:1.0.1"
 #require "ModbusMaster.device.lib.nut:1.0.1"
-#require "ModbusTCPMaster.device.lib.nut:1.0.2"
+#require "ModbusTCPMaster.device.lib.nut:1.1.0"
 #require "W5500.device.nut:1.0.0"
 ```
 

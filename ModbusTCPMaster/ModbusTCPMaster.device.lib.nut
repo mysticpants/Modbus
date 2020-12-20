@@ -23,7 +23,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 class ModbusTCPMaster extends ModbusMaster {
-    static VERSION = "1.0.2";
+    static VERSION = "1.1.0";
     static MAX_TRANSACTION_COUNT = 65535;
     _transactions = null;
     _wiz = null;
@@ -33,6 +33,8 @@ class ModbusTCPMaster extends ModbusMaster {
     _shouldRetry = null;
     _connectCallback = null;
     _reconnectCallback = null;
+    //TODO Passing methods' parameters via class fields is not a good pattern.
+    //TODO But the base class ModbusMaster must be redesigned to get rid of this pattern.
     _deviceAddress = null;
 
     //

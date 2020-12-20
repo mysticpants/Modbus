@@ -33,8 +33,8 @@ class ModbusTCPMaster extends ModbusMaster {
     _shouldRetry = null;
     _connectCallback = null;
     _reconnectCallback = null;
-    //TODO Passing methods' parameters via class fields is not a good pattern.
-    //TODO But the base class ModbusMaster must be redesigned to get rid of this pattern.
+    // NOTE: Passing methods' parameters via class fields is not a good pattern.
+    // But the base class ModbusMaster must be redesigned to get rid of this pattern.
     _deviceAddress = null;
 
     //

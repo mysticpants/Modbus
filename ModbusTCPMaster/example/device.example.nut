@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright 2017 Electric Imp
+// Copyright 2017-2020 Electric Imp
 //
 // SPDX-License-Identifier: MIT
 //
@@ -25,7 +25,7 @@
 #require "W5500.device.nut:1.0.0"
 #require "ModbusRTU.device.lib.nut:1.0.1"
 #require "ModbusMaster.device.lib.nut:1.0.1"
-#require "ModbusTCPMaster.device.lib.nut:1.0.1"
+#require "ModbusTCPMaster.device.lib.nut:1.1.0"
 
 // this example shows how to use readWriteMultipleRegisters
 

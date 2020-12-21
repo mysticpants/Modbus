@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright 2017 Electric Imp
+// Copyright 2017-2020 Electric Imp
 //
 // SPDX-License-Identifier: MIT
 //
@@ -23,7 +23,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 class ModbusTCPMaster extends ModbusMaster {
-    static VERSION = "1.0.1";
+    static VERSION = "1.1.0";
     static MAX_TRANSACTION_COUNT = 65535;
     _transactions = null;
     _wiz = null;
@@ -33,6 +33,9 @@ class ModbusTCPMaster extends ModbusMaster {
     _shouldRetry = null;
     _connectCallback = null;
     _reconnectCallback = null;
+    // NOTE: Passing methods' parameters via class fields is not a good pattern.
+    // But the base class ModbusMaster must be redesigned to get rid of this pattern.
+    _deviceAddress = null;
 
     //
     // Constructor for ModbusTCPMaster
@@ -75,6 +78,118 @@ class ModbusTCPMaster extends ModbusMaster {
     function disconnect(callback = null) {
         _shouldRetry = false;
         _connection.close(callback);
+    }
+
+    //
+    // This function performs a combination of one read operation and one write operation in a single MODBUS transaction.
+    // The write operation is performed before the read.
+    //
+    // @param {integer} readingStartAddress - The address from which it begins reading values
+    // @param {integer} readQuantity - The number of consecutive addresses values are read from
+    // @param {integer} writeStartAddress - The address from which it begins writing values
+    // @param {integer} writeQuantity - The number of consecutive addresses values are written into
+    // @param {blob} writeValue - The value written into the holding register
+    // @param {function} callback - The function to be fired when it receives response regarding this request
+    // @param {integer} deviceAddress - The unique address that identifies a device
+    //
+    function readWriteMultipleRegisters(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, callback = null, deviceAddress = 0) {
+        _deviceAddress = deviceAddress;
+        base.readWriteMultipleRegisters(readingStartAddress, readQuantity, writeStartAddress, writeQuantity, writeValue, callback);
+    }
+
+    //
+    // This function modifies the contents of a specified holding register using a combination of an AND mask,
+    // an OR mask, and the register's current contents.
+    // The function can be used to set or clear individual bits in the register.
+    //
+    // @param {integer} referenceAddress - The address of the holding register the value is written into
+    // @param {integer} AND_mask - The AND mask
+    // @param {integer} OR_mask - The OR mask
+    // @param {function} callback - The function to be fired when it receives response regarding this request
+    // @param {integer} deviceAddress - The unique address that identifies a device
+    //
+    function maskWriteRegister(referenceAddress, AND_Mask, OR_Mask, callback = null, deviceAddress = 0) {
+        _deviceAddress = deviceAddress;
+        base.maskWriteRegister(referenceAddress, AND_Mask, OR_Mask, callback);
+    }
+
+    //
+    // This function reads the description of the type, the current status, and other information specific to a remote device.
+    //
+    // @param {function} callback - The function to be fired when it receives response regarding this request
+    // @param {integer} deviceAddress - The unique address that identifies a device
+    //
+    function reportSlaveID(callback = null, deviceAddress = 0) {
+        _deviceAddress = deviceAddress;
+        base.reportSlaveID(callback);
+    }
+
+    //
+    // This function allows reading the identification and additional information relative to the physical
+    // and functional description of a remote device.
+    //
+    // @param {enum} readDeviceIdCode - read device id code
+    // @param {enum} objectId - object id
+    // @param {function} callback - The function to be fired when it receives response regarding this request
+    // @param {integer} deviceAddress - The unique address that identifies a device
+    //
+    function readDeviceIdentification(readDeviceIdCode, objectId, callback = null, deviceAddress = 0) {
+        _deviceAddress = deviceAddress;
+        base.readDeviceIdentification(readDeviceIdCode, objectId, callback);
+    }
+
+    //
+    // This function provides a series of tests for checking the communication system between a client (Master) device
+    // and a server (Slave), or for checking various internal error conditions within a server.
+    //
+    // @param {integer} subFunctionCode - The Sub-function Code
+    // @param {blob} data - The data field required by Modbus request
+    // @param {function} callback - The function to be fired when it receives response regarding this request
+    // @param {integer} deviceAddress - The unique address that identifies a device
+    //
+    function diagnostics(subFunctionCode, data, callback = null, deviceAddress = 0) {
+        _deviceAddress = deviceAddress;
+        base.diagnostics(subFunctionCode, data, callback);
+    }
+
+    //
+    // This function reads the contents of eight Exception Status outputs in a remote device
+    //
+    // @param {function} callback - The function to be fired when it receives response regarding this request
+    // @param {integer} deviceAddress - The unique address that identifies a device
+    //
+    function readExceptionStatus(callback = null, deviceAddress = 0) {
+        _deviceAddress = deviceAddress;
+        base.readExceptionStatus(callback);
+    }
+
+    //
+    // This is the generic function to read values from a single coil register or multiple coils registers.
+    //
+    // @param {enum} targetType - The Target Type
+    // @param {integer} startingAddress - The address from which it begins reading values
+    // @param {integer} quantity - The number of consecutive addresses the values are read from
+    // @param {function} callback - The function to be fired when it receives response regarding this request
+    // @param {integer} deviceAddress - The unique address that identifies a device
+    //
+    function read(targetType, startingAddress, quantity, callback, deviceAddress = 0) {
+        _deviceAddress = deviceAddress;
+        base.read(targetType, startingAddress, quantity, callback);
+    }
+
+    //
+    // This is the generic function to write values into coils or holding registers.
+    //
+    // @param {enum} targetType - The Target Type
+    // @param {integer} startingAddress - The address from which it begins writing values
+    // @param {integer} quantity - The number of consecutive addresses the values are written into
+    // @param {integer, Array[integer,Bool], Bool, blob} values - The values written into Coils or Registers
+    // @param {function} callback - The function to be fired when it receives response regarding this request
+    // @param {integer} deviceAddress - The unique address that identifies a device
+    //
+    function write(targetType, startingAddress, quantity, values, callback = null, deviceAddress = 0) {
+        _deviceAddress = deviceAddress;
+        base.write(targetType, startingAddress, quantity, values, callback);
     }
 
     //
@@ -140,7 +255,7 @@ class ModbusTCPMaster extends ModbusMaster {
         ADU.writen(swap2(_transactionCount), 'w');
         ADU.writen(swap2(0x0000), 'w');
         ADU.writen(swap2(PDU.len() + 1), 'w');
-        ADU.writen(0x00, 'b');
+        ADU.writen(_deviceAddress, 'b');
         ADU.writeblob(PDU);
         return ADU;
     }

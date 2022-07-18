@@ -7,6 +7,8 @@ This library creates and parses Modbus Protocol Data Units (PDU). It depends on 
 * [ModbusSerialMaster](../ModbusMaster)
 * [ModbusTCPMaster](../ModbusSerialMaster)
 
+We recommend you work with one of these libraries unless your use case very specifically needs to perform PDU operations not provided by them. 
+
 **To use this library, add the following statements to the top of your device code:**
 
 ```

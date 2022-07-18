@@ -2,6 +2,11 @@
 
 This library creates and parses Modbus Protocol Data Units (PDU). It depends on Electric Imp's [CRC16 library](https://github.com/electricimp/CRC16) to calculate the [CRC-16](https://en.wikipedia.org/wiki/Cyclic_redundancy_check) value of a string or blob.
 
+**Note** You will not usually work with this library directly, but load it as a dependency for one of our other Modbus libraries:
+
+* [ModbusSerialMaster](../ModbusMaster)
+* [ModbusTCPMaster](../ModbusSerialMaster)
+
 **To use this library, add the following statements to the top of your device code:**
 
 ```

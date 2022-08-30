@@ -30,12 +30,12 @@ This method creates a PDU for *readData* operations. It takes the following para
 | *startingAddress* | Integer | Yes | N/A | The address from which it begins reading values |
 | *quantity* | Integer | Yes | N/A | The number of consecutive addresses the values are read from |
 
-| Type | Value | Access |
-| --- | --- | --- |
-| Coil | *MODBUSRTU_TARGET_TYPE.COIL* | Read-Write |
-| Discrete Input | *MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT* | Read Only |
-| Input Register | *MODBUSRTU_TARGET_TYPE.INPUT_REGISTER* | Read Only |
-| Holding Register | *MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER* | Read-Write |
+| Type | Value |
+| --- | --- |
+| Coil | *MODBUSRTU_TARGET_TYPE.COIL* |
+| Discrete Input | *MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT* |
+| Input Register | *MODBUSRTU_TARGET_TYPE.INPUT_REGISTER* |
+| Holding Register | *MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER* |
 
 #### Example
 
@@ -59,10 +59,10 @@ This method creates a PDU for *writeData* operations. It takes the following par
 | *quantity* | Integer | Yes | N/A | The number of consecutive addresses the values are written into |
 | *values* | Integer, array ([integer, boolean]), boolean, blob | Yes | N/A | The values written into Coils or Registers |
 
-| Type | Value | Access |
-| --- | --- | --- |
-| Coil | *MODBUSRTU_TARGET_TYPE.COIL* | Read-Write |
-| Holding Register | *MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER* | Read-Write |
+| Type | Value |
+| --- | --- |
+| Coil | *MODBUSRTU_TARGET_TYPE.COIL* |
+| Holding Register | *MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER* |
 
 #### Example
 

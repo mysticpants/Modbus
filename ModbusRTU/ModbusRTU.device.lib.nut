@@ -265,8 +265,26 @@ class ModbusRTU {
     // function to create PDU for read
     //
     static function createReadPDU(targetType, startingAddress, quantity) {
-        local PDU = blob(targetType.reqLen);
-        PDU.writen(targetType.fcode, 'b');
+        local pduType;
+        switch() {
+            case MODBUSRTU_TARGET_TYPE.COIL:
+                pduType = FUNCTION_CODES.read_coils;
+                break;
+            case MODBUSRTU_TARGET_TYPE.DISCRETE_INPUT:
+                pduType = FUNCTION_CODES.readInputs;
+                break;
+            case MODBUSRTU_TARGET_TYPE.INPUT_REGISTER:
+                pduType = FUNCTION_CODES.readInputRegs;
+                break;
+            case MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER:
+                pduType = FUNCTION_CODES.readHoldingRegs;
+                break;
+            default:
+                throw "Incorrect targetType specified";
+        }
+        
+        local PDU = blob(pduType.reqLen);
+        PDU.writen(pduType.fcode, 'b');
         PDU.writen(swap2(startingAddress), 'w');
         PDU.writen(swap2(quantity), 'w');
         return PDU;
@@ -276,8 +294,20 @@ class ModbusRTU {
     // function to create PDU for write
     //
     static function createWritePDU(targetType, startingAddress, numBytes, quantity, values) {
+        local pduType;
+        switch() {
+            case MODBUSRTU_TARGET_TYPE.COIL:
+                pduType = FUNCTION_CODES.writeSingleCoil;
+                break;
+            case MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER:
+                pduType = FUNCTION_CODES.writeSingleReg;
+                break;
+            default:
+                throw "Incorrect targetType specified";
+        }
+        
         local PDU = blob();
-        PDU.writen(targetType.fcode, 'b');
+        PDU.writen(pduType.fcode, 'b');
         PDU.writen(swap2(startingAddress), 'w');
         if (quantity > 1) {
             PDU.writen(swap2(quantity), 'w');

@@ -266,7 +266,7 @@ class ModbusRTU {
     //
     static function createReadPDU(targetType, startingAddress, quantity) {
         local pduType;
-        switch() {
+        switch(targetType) {
             case MODBUSRTU_TARGET_TYPE.COIL:
                 pduType = FUNCTION_CODES.read_coils;
                 break;
@@ -295,7 +295,7 @@ class ModbusRTU {
     //
     static function createWritePDU(targetType, startingAddress, numBytes, quantity, values) {
         local pduType;
-        switch() {
+        switch(targetType) {
             case MODBUSRTU_TARGET_TYPE.COIL:
                 pduType = FUNCTION_CODES.writeSingleCoil;
                 break;

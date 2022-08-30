@@ -59,6 +59,11 @@ This method creates a PDU for *writeData* operations. It takes the following par
 | *quantity* | Integer | Yes | N/A | The number of consecutive addresses the values are written into |
 | *values* | Integer, array ([integer, boolean]), boolean, blob | Yes | N/A | The values written into Coils or Registers |
 
+| Type | Value | Access |
+| --- | --- | --- |
+| Coil | *MODBUSRTU_TARGET_TYPE.COIL* | Read-Write |
+| Holding Register | *MODBUSRTU_TARGET_TYPE.HOLDING_REGISTER* | Read-Write |
+
 #### Example
 
 ```squirrel

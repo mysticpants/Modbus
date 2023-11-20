@@ -1,6 +1,7 @@
 // MIT License
 //
-// Copyright 2017 Electric Imp
+// Copyright 2017-19 Electric Imp
+// Copyright 2020-23 KORE Wireless
 //
 // SPDX-License-Identifier: MIT
 //
@@ -23,15 +24,15 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 #require "CRC16.class.nut:1.0.0"
-#require "ModbusRTU.device.lib.nut:1.0.1"
-#require "ModbusMaster.device.lib.nut:1.0.1"
-#require "ModbusSerialMaster.device.lib.nut:2.0.0"
+#require "ModbusRTU.device.lib.nut:1.0.2"
+#require "ModbusMaster.device.lib.nut:1.0.2"
+#require "ModbusSerialMaster.device.lib.nut:2.0.1"
 
-// Hardware used: Fieldbus Gateway and Kojo 
+// Hardware used: Fieldbus Gateway and Kojo
 // Click PLC C0-02DR-D connectied via RS485 ports
 
-// This example demonstrates how to write and read values 
-// into/from holding registers. 
+// This example demonstrates how to write and read values
+// into/from holding registers.
 
 const DEVICE_ADDRESS = 0x01;
 // instantiate the the Modbus485Master object

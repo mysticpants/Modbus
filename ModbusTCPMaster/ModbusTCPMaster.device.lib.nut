@@ -1,6 +1,7 @@
 // MIT License
 //
-// Copyright 2017-2020 Electric Imp
+// Copyright 2017-19 Electric Imp
+// Copyright 2020-23 KORE Wireless
 //
 // SPDX-License-Identifier: MIT
 //
@@ -23,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 class ModbusTCPMaster extends ModbusMaster {
-    static VERSION = "1.1.0";
+    static VERSION = "1.1.1";
     static MAX_TRANSACTION_COUNT = 65535;
     _transactions = null;
     _wiz = null;

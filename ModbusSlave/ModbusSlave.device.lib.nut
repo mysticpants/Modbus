@@ -1,6 +1,7 @@
 // MIT License
 //
-// Copyright 2017 Electric Imp
+// Copyright 2017-19 Electric Imp
+// Copyright 2020-23 KORE Wireless
 //
 // SPDX-License-Identifier: MIT
 //
@@ -41,7 +42,7 @@ enum MODBUSSLAVE_EXCEPTION {
 }
 
 class ModbusSlave {
-    static VERSION = "1.0.1";
+    static VERSION = "1.0.2";
     static FUNCTION_CODES = {
         readCoil = {
             fcode = 0x01,

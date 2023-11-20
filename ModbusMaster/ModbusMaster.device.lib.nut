@@ -1,6 +1,7 @@
 // MIT License
 //
-// Copyright 2017 Electric Imp
+// Copyright 2017-19 Electric Imp
+// Copyright 2020-23 KORE Wireless
 //
 // SPDX-License-Identifier: MIT
 //
@@ -23,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 class ModbusMaster {
-    static VERSION = "1.0.1";
+    static VERSION = "1.0.2";
     _debug = null;
 
     //

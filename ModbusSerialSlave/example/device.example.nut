@@ -1,6 +1,7 @@
 // MIT License
 //
-// Copyright 2017 Electric Imp
+// Copyright 2017-19 Electric Imp
+// Copyright 2020-23 KORE Wireless
 //
 // SPDX-License-Identifier: MIT
 //
@@ -23,13 +24,13 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 #require "CRC16.class.nut:1.0.0"
-#require "ModbusSlave.device.lib.nut:1.0.1"
-#require "ModbusSerialSlave.device.lib.nut:2.0.0"
+#require "ModbusSlave.device.lib.nut:1.0.2"
+#require "ModbusSerialSlave.device.lib.nut:2.0.1"
 
-// Hardware used: Fieldbus Gateway and Kojo 
+// Hardware used: Fieldbus Gateway and Kojo
 // Click PLC C0-02DR-D connectied via RS485 ports
 
-// This example demonstrates a holding register read. 
+// This example demonstrates a holding register read.
 
 const SLAVE_ID = 0x01;
 

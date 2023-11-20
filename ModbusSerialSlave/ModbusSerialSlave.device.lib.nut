@@ -1,6 +1,7 @@
 // MIT License
 //
-// Copyright 2017 Electric Imp
+// Copyright 2017-19 Electric Imp
+// Copyright 2020-23 KORE Wireless
 //
 // SPDX-License-Identifier: MIT
 //
@@ -23,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 class ModbusSerialSlave extends ModbusSlave {
-    static VERSION = "2.0.0";
+    static VERSION = "2.0.1";
     static MIN_REQUEST_LENGTH = 4;
     _slaveID = null;
     _uart = null;

@@ -1,6 +1,7 @@
 // MIT License
 //
-// Copyright 2017 Electric Imp
+// Copyright 2017-19 Electric Imp
+// Copyright 2020-23 KORE Wireless
 //
 // SPDX-License-Identifier: MIT
 //
@@ -84,7 +85,7 @@ enum MODBUSRTU_OBJECT_ID {
 }
 
 class ModbusRTU {
-    static VERSION = "1.0.1";
+    static VERSION = "1.0.2";
      // resLen and reqLen are the length of the PDU
     static FUNCTION_CODES = {
         readCoils = {
@@ -282,7 +283,7 @@ class ModbusRTU {
             default:
                 throw "Incorrect targetType specified";
         }
-        
+
         local PDU = blob(pduType.reqLen);
         PDU.writen(pduType.fcode, 'b');
         PDU.writen(swap2(startingAddress), 'w');
@@ -305,7 +306,7 @@ class ModbusRTU {
             default:
                 throw "Incorrect targetType specified";
         }
-        
+
         local PDU = blob();
         PDU.writen(pduType.fcode, 'b');
         PDU.writen(swap2(startingAddress), 'w');
